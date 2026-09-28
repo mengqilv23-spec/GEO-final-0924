@@ -4528,11 +4528,6 @@ button[disabled]{
         </div>
 
         
-<div class="audit-route-guide-v36" aria-label="官网异常的处理方式">
-  <span class="audit-route-guide-title-v36">按问题性质决定处理方式</span>
-  <span><b>官网技术 · 直接处理</b>：缺失项和修复位置明确，按规则修改并验证，创建 Task 交 AI 建站执行。</span>
-  <span><b>官网内容 · 需要审核</b>：涉及业务事实、对外表达或内容方案，先由运营审核策略，再交付执行。</span>
-</div>
 <div class="geo-alert-block geo-findings-block">
   <div class="geo-alert-title geo-findings-head">
     <div class="findings-head-left">
@@ -10759,7 +10754,7 @@ function openFindingDetailV26(id){
   const canReview=serviceMode==="agent"?currentRole==="client":currentRole==="ops";
   const canDecide=canReview&&!t&&s?.status!=="strategy_created"&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(id));
   const strategyNext=serviceMode==="agent"?"生成候选策略 → Agent 合并 / 去重 / 编排 → Task 草稿 → 客户确认 Brief":"生成候选策略 → 运营审核内容方案与业务事实 → Agent 编排 Task → 客户确认 Brief";
-  drawerBody.innerHTML=`<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 ${route}">${escHtml(findingProcessingMetaV37(f).label)}</span></div><div class="detail-body"><div class="kv"><div class="k">异常说明</div><div class="v">${escHtml(f.desc)}</div><div class="k">为什么这样处理</div><div class="v">${escHtml(findingProcessingMetaV37(f).reason)}</div><div class="k">后续流程</div><div class="v">${route==="repair"?"创建修复 Task → 确认修复范围及相关事实 → AI 建站执行 → 发布 → Re-check":strategyNext}</div><div class="k">完成条件</div><div class="v">执行并通过 Re-check；仅生成 Task 或策略不会让异常恢复</div></div></div></div>${t?`<div class="readonly-note">已关联 ${t.uid} · ${escHtml(t.name)}，当前状态：${escHtml(workspaceStatus(t,ensureOutput(t))[0])}</div>`:""}${isFindingDeferredV21(id)?'<div class="readonly-note">已选择忽略，本条异常不能恢复处理；诊断记录仍保留并持续监测。</div>':""}`;
+  drawerBody.innerHTML=`<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 ${route}">${escHtml(findingProcessingMetaV37(f).label)}</span></div><div class="detail-body"><div class="kv"><div class="k">异常说明</div><div class="v">${escHtml(f.desc)}</div><div class="k">为什么这样处理</div><div class="v">${escHtml(findingProcessingMetaV37(f).reason)}</div><div class="k">后续流程</div><div class="v">${route==="repair"?"创建修复 Task → 确认修复范围及相关事实 → AI 建站执行 → 发布 → Re-check":strategyNext}</div></div></div></div>${t?`<div class="readonly-note">已关联 ${t.uid} · ${escHtml(t.name)}，当前状态：${escHtml(workspaceStatus(t,ensureOutput(t))[0])}</div>`:""}${isFindingDeferredV21(id)?'<div class="readonly-note">已选择忽略，本条异常不能恢复处理；诊断记录仍保留并持续监测。</div>':""}`;
   drawerFoot.innerHTML=`<button class="btn" onclick="drawer.classList.remove('open')">关闭</button>${t?`<button class="btn primary" id="detailTaskV26">进入任务</button>`:s.status==="strategy_created"?`<button class="btn primary" id="detailStrategyV44">进入策略</button>`:canDecide?`<button class="btn" id="detailDeferV26">忽略</button><button class="btn primary" id="detailRouteV26">${route==="repair"?"创建修复任务":serviceMode==="agent"?"生成策略并交给 Agent 编排":"生成策略并提交审核"}</button>`:""}`;drawer.classList.add("open");
   document.getElementById("detailTaskV26")?.addEventListener("click",()=>{drawer.classList.remove("open");goOptimization();setTimeout(()=>openReviewWorkspace(t.uid),80)});
   document.getElementById("detailStrategyV44")?.addEventListener("click",()=>{drawer.classList.remove("open");openStrategyDetailV18(f.strategy)});
