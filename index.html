@@ -145,7 +145,7 @@ h1{font-size:20px;line-height:28px;margin:0 0 4px;font-weight:600;color:var(--te
 /* Header data cards */
 .summary{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr)) minmax(260px,1.55fr);
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:16px;
   margin-top:24px;
 }
@@ -372,7 +372,7 @@ h1{font-size:20px;line-height:28px;margin:0 0 4px;font-weight:600;color:var(--te
 .small-btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 
 /* Optimization action board */
-.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:20px}
+.action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:20px}
 .action-card{
   border:1px solid var(--border);
   background:var(--surface);
@@ -1568,6 +1568,8 @@ button[disabled]{
   border:0;background:transparent;padding:0;color:var(--brand);font:inherit;font-size:12px;line-height:20px;
   cursor:pointer
 }
+.queue-summary .status-pill{border:0;cursor:pointer;font:inherit}
+.queue-summary .status-pill.active-filter{box-shadow:0 0 0 2px rgba(65,82,246,.2)}
 .queue-clear-gap:hover{text-decoration:underline}
 
 .gap.v12-clickable{
@@ -2270,7 +2272,7 @@ button[disabled]{
 #mergeHub{display:none!important}
 
 .strategy-queue-head h2::after{
-  content:" · 运营专业审核";
+  content:none;
   color:var(--text-3);
   font-size:12px;
   line-height:20px;
@@ -3238,6 +3240,8 @@ button[disabled]{
 .finding-state-pill.defer{background:var(--fill);color:var(--text-2)}
 .finding-state-pill.reject{background:var(--danger-soft);color:var(--danger)}
 .finding-state-pill.review{background:var(--warning-soft);color:var(--warning)}
+.finding-state-pill.pending{background:#edf3ff;color:#3155c6}
+.finding-state-pill.done{background:var(--success-soft);color:var(--success)}
 .finding-reopen-btn{
   border:0;
   background:transparent;
@@ -4490,7 +4494,7 @@ button[disabled]{
           <div class="geo-audit-title-wrap">
             <h2>① 官网 GEO 体检</h2>
             <span class="geo-audit-help" tabindex="0" aria-label="说明">?
-              <span class="geo-audit-help-tip">异常会关联到下方候选策略，不直接生成执行任务。</span>
+              <span class="geo-audit-help-tip">官网技术诊断不需要用户审核，确定性问题会直接生成任务，并进入官网运营处理。</span>
             </span>
           </div>
           <div class="geo-audit-summary"><span class="audit-pass-count">4 通过</span><span class="audit-alert-count">3 异常</span></div>
@@ -4535,7 +4539,7 @@ button[disabled]{
         <input type="checkbox" id="auditSelectAllV20">
         <span>全选当前显示</span>
       </label>
-      <span class="findings-count" id="auditFindingCountV20">6 条异常明细</span>
+      <span class="findings-count" id="auditFindingCountV20">6 条异常</span>
     </div>
 
     <div class="findings-head-actions">
@@ -4546,7 +4550,7 @@ button[disabled]{
 
   <div class="geo-findings-columns-v25">
     <span></span>
-    <span>异常明细</span>
+    <span>异常</span>
     <span>处理方式与类型</span>
     <span>所属检查项</span>
     <span>优先级</span>
@@ -4563,10 +4567,9 @@ button[disabled]{
       </section>
 
       <section class="section">
-        <div class="section-head"><div><h2>② 买家人设 · 决策因子与认知 Gap</h2><small>人设不是另一套策略池，而是下方策略队列的优先级加权因子</small></div></div>
+        <div class="section-head"><div><h2>② 买家人设 · 决策因子与认知 Gap</h2></div></div>
         <div class="persona-wrap">
           <div class="personas" id="personaTabs"></div>
-          <span class="persona-inline-note-v38">切换人设后，下方策略自动重排</span>
         </div>
         <div class="persona-grid">
           <div class="card">
@@ -4575,8 +4578,7 @@ button[disabled]{
             <div class="legend"><span><i class="dot d1"></i>买家重视度</span><span><i class="dot d2"></i>我方覆盖</span><span><i class="dot d3"></i>竞品覆盖</span></div>
           </div>
           <div class="card">
-            <div class="card-head"><h3>当前人设的认知缺口</h3><span>按 Gap 自动排序</span></div>
-            <div class="gap-kpis"><div class="kpi"><b id="gapCount">3</b><small>高优先级 Gap</small></div><div class="kpi"><b id="maxGap">40</b><small>最大 Gap</small></div><div class="kpi"><b id="optCount">4</b><small>建议优化项</small></div></div>
+            <div class="card-head"><h3>当前人设的认知缺口</h3><span>Gap 指的是买家重视程度和我方覆盖的差距</span></div>
             <div class="gaps" id="gapList"></div>
           </div>
         </div>
@@ -4584,26 +4586,17 @@ button[disabled]{
           <div class="opt-head"><h3 id="optHead">针对「复材技术负责人」建议优化什么内容</h3><small>隐藏的兼容区</small></div>
           <div class="opt-grid" id="optGrid"></div>
         </div>
-
-        <div class="persona-strategy-bridge" id="personaStrategyBridge">
-          <div class="bridge-main">
-            <div class="bridge-eyebrow">人设分析正在影响下方策略排序</div>
-            <div class="bridge-title" id="bridgeTitle">当前排序依据：复材技术负责人</div>
-            <div class="bridge-gaps" id="bridgeGaps"></div>
-          </div>
-          <div class="bridge-result">
-            <div><b id="bridgeAffected">0</b><span>条策略受当前人设加权</span></div>
-            <button type="button" class="small-btn" id="explainRankingBtn">查看排序逻辑</button>
-          </div>
-        </div>
-
       </section>
 
       <section class="strategy-queue" id="strategyQueueSection">
         <div class="strategy-queue-head">
           <div>
-            <h2>③ 策略队列 · 五层</h2>
+            <h2>③ 候选策略</h2>
             <p>全量策略只维护一套；上方买家人设与 Gap 只影响当前查看时的优先级排序，不重复生成策略。</p>
+            <div class="candidate-guide-row-v55">
+              <p><strong>候选策略由官网检测结果和 GEO 优化规则生成。</strong> 每条策略都关联具体的检测发现，并说明判断依据和建议处理方向。候选策略无需逐条审核；如需确认业务信息或执行范围，请在后续 Brief 中处理。</p>
+              <button type="button" class="candidate-task-link-v55" id="viewCandidateTasksV55">查看任务 <span aria-hidden="true">→</span></button>
+            </div>
             <div class="queue-persona-context" id="queuePersonaContext"></div>
           </div>
           <div class="queue-summary">
@@ -4644,15 +4637,6 @@ button[disabled]{
         <div class="queue-legend">
           同一条策略可以同时关联多个人设，但只生成一个执行任务；已进入优化中心的策略不会因后续监测波动自动覆盖。
         </div>
-
-      
-        <div class="queue-to-brief-v23" id="queueToBriefV23">
-          <div>
-            <b>运营审核完成后，Agent 在后台自动合并 / 去重并创建 Task 草稿</b>
-            <span>不再生成独立“本期方案”或“Brief 对象”；客户直接进入 Task 内审核 Brief。</span>
-          </div>
-          <button type="button" class="btn primary" id="goBriefBoardV23">生成 / 查看 Task 草稿 →</button>
-        </div>
       </section>
     </div>
   </section>
@@ -4661,6 +4645,7 @@ button[disabled]{
     <div class="content">
             <h1>优化中心 · 任务工作台</h1>
 <div class="lead">运营审核通过的候选策略由 Agent 在后台自动去重与编排，直接创建 Task 草稿；Brief 是 Task 的第一个确认阶段，客户确认后任务才进入正式执行。</div>
+<div class="optimization-data-head-v60"><h2><span class="section-icon-v60 data">◔</span>数据总览</h2><button type="button" class="period-select-v60">近7天 <span>⌄</span></button></div>
 <div class="summary">
         <div class="stat"><b id="optTotal">0</b><span>项</span><small>全部任务</small></div>
         <div class="stat"><b id="optWeb">0</b><span>项</span><small>官网内容</small></div>
@@ -4808,8 +4793,8 @@ const repairDefs={
 const personas=[
 {
  name:"复材技术负责人",market:"德国 / 英语",
- factors:[["切割精度",100,88,80],["无热影响区",100,90,78],["交期与产能",60,35,70],["价格与TCO",40,52,60],["本地服务与培训",80,40,85],["认证与合规",80,45,82]],
- gaps:[["本地服务与培训",40,"买家重视80，但我方覆盖仅40","官网+第三方"],["认证与合规",35,"买家重视80，我方45，竞品82","官网"],["交期与产能",25,"交期与SLA信息不足","官网"]],
+ factors:[["切割精度",100,88,80],["无热影响区",100,90,78],["交期与产能",60,35,70],["价格与TCO",40,52,60],["本地服务与培训",80,40,85],["认证与合规",80,45,82],["其他",50,50,50]],
+ gaps:[["本地服务与培训",40,"买家重视80，但我方覆盖仅40","官网+第三方"],["认证与合规",35,"买家重视80，我方45，竞品82","官网"],["交期与产能",25,"交期与SLA信息不足","官网"],["其他",0,"","其他"]],
  opts:[
  {id:"GS1",p:"P0",type:"web",layer:"实体与信任",title:"碳纤维方案页品牌显影：对比表 + FAQ + 品牌实体加密",methods:["对比表 / 定义框 / Q&A","统计数据注入","JSON-LD sameAs / Product / FAQ"],persona:"复材技术负责人、复材初创",factor:"无热影响区 / 品牌显影",source:"F1",evidence:"页面被Perplexity引为来源，但回答只推荐Flow",dest:"官网内容"},
  {id:"GS8",p:"P1",type:"external",layer:"外部信源",title:"CompositesWorld 投稿《碳纤维切割工艺对比》",methods:["行业媒体长稿","统计数据注入","专家引语"],persona:"复材技术负责人、复材初创",factor:"无热影响区 / 第三方信任",source:"F5",evidence:"82.9%引用来自第三方；CompositesWorld高频且我方零提及",dest:"外部内容"},
@@ -4817,23 +4802,23 @@ const personas=[
  ]},
 {
  name:"航空采购",market:"欧洲 / 英语",
- factors:[["认证与合规",100,45,88],["交付稳定性",100,38,76],["供应链风险",90,35,70],["售后响应",80,42,77],["价格与TCO",60,52,62],["切割精度",70,88,92]],
- gaps:[["交付稳定性",62,"采购高度依赖稳定交付，信息明显不足","官网"],["认证与合规",55,"认证事实不集中","官网"],["供应链风险",55,"缺少服务网络与备件保障","官网+第三方"]],
+ factors:[["认证与合规",100,45,88],["交付稳定性",100,38,76],["供应链风险",90,35,70],["售后响应",80,42,77],["价格与TCO",60,52,62],["切割精度",70,88,92],["其他",50,50,50]],
+ gaps:[["交付稳定性",62,"采购高度依赖稳定交付，信息明显不足","官网"],["认证与合规",55,"认证事实不集中","官网"],["供应链风险",55,"缺少服务网络与备件保障","官网+第三方"],["其他",0,"","其他"]],
  opts:[
  {id:"GS6",p:"P0",type:"web",layer:"内容",title:"交期与产能页：标准交期区间 + 德国服务网络 SLA",methods:["40–60字胶囊答案","统计数据注入","权威语态","对比表 / Q&A"],persona:"汽车Tier-1、航空采购",factor:"交期与产能",source:"F3",evidence:"人设重视100 · 我方35 · 竞对70；负面叙事被2个引擎复述",dest:"官网内容"},
  {id:"GS7",p:"P0",type:"web",layer:"内容",title:"切割精度事实纠错：统一±0.05mm并结构化参数",methods:["事实纠错","参数结构化","事实库对齐"],persona:"航空采购",factor:"事实准确性",source:"F4",evidence:"ChatGPT错写±0.1mm",dest:"官网内容"}
  ]},
 {
  name:"日本商社",market:"日本 / 日语",
- factors:[["本地服务",100,35,80],["交期稳定",90,35,72],["代理支持",90,30,76],["认证合规",80,45,82],["品牌可信度",80,55,84],["价格与TCO",50,52,58]],
- gaps:[["本地服务",65,"日语市场对本地支持要求高","官网+第三方"],["代理支持",60,"AI无法确认代理合作机制","官网"],["交期稳定",55,"交期和备货信息不足","官网"]],
+ factors:[["本地服务",100,35,80],["交期稳定",90,35,72],["代理支持",90,30,76],["认证合规",80,45,82],["品牌可信度",80,55,84],["价格与TCO",50,52,58],["其他",50,50,50]],
+ gaps:[["本地服务",65,"日语市场对本地支持要求高","官网+第三方"],["代理支持",60,"AI无法确认代理合作机制","官网"],["交期稳定",55,"交期和备货信息不足","官网"],["其他",0,"","其他"]],
  opts:[
  {id:"GS4",p:"P0",type:"web",layer:"内容",title:"JP市场日语内容补齐：日语问答与采购决策内容",methods:["日语本地化","Q&A","市场内容覆盖"],persona:"日本商社",factor:"本地服务 / 代理支持",source:"F2",evidence:"JP市场6条日语提问全线未命中",dest:"官网内容"}
  ]},
 {
  name:"车间主管",market:"北美 / 英语",
- factors:[["操作效率",100,62,78],["维护难度",90,45,72],["切割精度",90,88,92],["培训成本",80,40,68],["停机风险",80,38,66],["价格与TCO",70,52,60]],
- gaps:[["维护难度",45,"缺少维护流程、周期和常见问题说明","官网"],["停机风险",42,"缺少稳定性和快速恢复证据","官网"],["培训成本",40,"缺少清晰培训与支持机制","官网+视频"]],
+ factors:[["操作效率",100,62,78],["维护难度",90,45,72],["切割精度",90,88,92],["培训成本",80,40,68],["停机风险",80,38,66],["价格与TCO",70,52,60],["其他",50,50,50]],
+ gaps:[["维护难度",45,"缺少维护流程、周期和常见问题说明","官网"],["停机风险",42,"缺少稳定性和快速恢复证据","官网"],["培训成本",40,"缺少清晰培训与支持机制","官网+视频"],["其他",0,"","其他"]],
  opts:[
  {id:"GS5",p:"P1",type:"web",layer:"结构",title:"产品页结构优化：胶囊答案 + 提问式H2 + 800 token切片",methods:["胶囊答案","提问式H2","内容切片"],persona:"车间主管",factor:"操作效率",source:"F6",evidence:"AI只能截取碎片而非整段引用",dest:"官网内容"}
  ]}
@@ -4874,6 +4859,23 @@ let highlightedStrategy=null;
 let queueLayer="全部";
 let queuePage=1;
 const QUEUE_PAGE_SIZE=5;
+let queueStatusFilterV54="all";
+let queueIgnorePersonaV54=false;
+
+function strategyIgnoredV54(s){
+  const c=getCollab(s.id);
+  return !!(c.v42Ignored||c.v21Rejected||strategyDeferredV18?.(s.id));
+}
+function bindQueueSummaryFiltersV54(){
+  const actions={queueTotal:"all",queueTransferred:"approved",queuePending:"ignored"};
+  Object.entries(actions).forEach(([id,status])=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.toggle("active-filter",queueStatusFilterV54===status);
+    el.tabIndex=0;el.setAttribute("role","button");
+    el.onclick=()=>{queueStatusFilterV54=status;queuePage=1;renderStrategyQueueV18()};
+    el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}};
+  });
+}
 
 function getPersonaStrategies(){
   const map=new Map();
@@ -5052,8 +5054,7 @@ function renderPersona(){
  s+=`<polygon points="${poly(p.factors.map(x=>x[2]),cx,cy,r)}" fill="rgba(214,154,0,.08)" stroke="#d69a00" stroke-width="3"/>`;
  s+=`<polygon points="${poly(p.factors.map(x=>x[3]),cx,cy,r)}" fill="none" stroke="#849a96" stroke-width="2.5" stroke-dasharray="6 5"/>`;
  svg.innerHTML=s;document.getElementById("radarTitle").textContent=`${p.name} · 买家决策因子对比`;
- document.getElementById("gapCount").textContent=p.gaps.length;document.getElementById("maxGap").textContent=Math.max(...p.gaps.map(g=>g[1]));document.getElementById("optCount").textContent=p.opts.length;
- document.getElementById("gapList").innerHTML=p.gaps.map((g,i)=>`<div class="gap"><div class="gap-top"><h4>${i+1}. ${g[0]}</h4><span class="gap-score">Gap ${g[1]}</span></div><p>${g[2]}</p><span class="tag">${g[3]}</span></div>`).join("");
+ document.getElementById("gapList").innerHTML=p.gaps.map((g,i)=>`<div class="gap"><div class="gap-top"><h4>${i+1}. ${g[0]}</h4><span class="gap-score">Gap ${g[1]}</span></div><span class="tag">${g[3]}</span></div>`).join("");
  document.getElementById("optHead").textContent=`针对「${p.name}」建议优化什么内容`;
  document.getElementById("optGrid").innerHTML=p.opts.map(o=>`<div class="opt ${highlightedStrategy===o.id?'highlight':''}" id="strategy_${o.id}">
   <div class="opt-top"><span class="priority ${o.p==='P1'?'p1':''}">${o.p}</span><div class="opt-main">
@@ -5271,7 +5272,7 @@ window.currentRole = window.currentRole || localStorage.getItem("geoCurrentRole"
 
 function permissionMatrixHtml(){
   return `
-  <div class="readonly-note"><strong>角色原则：</strong>Agent 负责分析与自动执行；运营负责专业审核与修正；客户负责业务事实和是否执行的最终确认。</div>
+  <div class="readonly-note"><strong>角色原则：</strong>Agent 负责分析与自动执行；运营负责审核与修正；客户负责业务事实和是否执行的最终确认。</div>
   <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
     <table class="permission-matrix">
       <thead><tr><th>能力</th><th>Agent</th><th>运营</th><th>客户</th></tr></thead>
@@ -7104,10 +7105,7 @@ renderPersona=function(){
   svg.innerHTML=s;
 
   document.getElementById("radarTitle").textContent=`${p.name} · 买家决策因子对比`;
-  document.getElementById("gapCount").textContent=p.gaps.length;
-  document.getElementById("maxGap").textContent=Math.max(...p.gaps.map(g=>g[1]));
-  document.getElementById("optCount").textContent=p.opts.length;
-  document.getElementById("gapList").innerHTML=p.gaps.map((g,i)=>`<div class="gap"><div class="gap-top"><h4>${i+1}. ${g[0]}</h4><span class="gap-score">Gap ${g[1]}</span></div><p>${g[2]}</p><span class="tag">${g[3]}</span></div>`).join("");
+  document.getElementById("gapList").innerHTML=p.gaps.map((g,i)=>`<div class="gap"><div class="gap-top"><h4>${i+1}. ${g[0]}</h4><span class="gap-score">Gap ${g[1]}</span></div><span class="tag">${g[3]}</span></div>`).join("");
 
   document.getElementById("optHead").textContent=`针对「${p.name}」建议优化什么内容`;
   const headNote=document.querySelector(".opt-head small");
@@ -7308,12 +7306,16 @@ function enrichGapListV12(){
 function renderQueueContextV12(){
   const p=currentPersonaV12();
   const el=document.getElementById("queuePersonaContext");if(!el)return;
+  if(queueIgnorePersonaV54){
+    el.innerHTML=`<span class="queue-context-chip">当前展示：全部候选策略</span>`;
+    return;
+  }
   el.innerHTML=`
-    <span class="queue-context-chip">当前排序：${p.name} · Gap 加权</span>
-    ${selectedGapV12?`<span class="queue-context-chip">聚焦：${selectedGapV12}</span><button type="button" class="queue-clear-gap" id="clearGapV12">清除聚焦</button>`:
-    `<span class="queue-context-note">切换上方人设后，这里的顺序会自动变化；策略本身不会重复生成。</span>`}`;
+    <span class="queue-context-chip">当前人设：${p.name}</span>
+    ${selectedGapV12?`<span class="queue-context-chip">聚焦：${selectedGapV12}</span>`:""}
+    <button type="button" class="queue-clear-gap" id="clearGapV12">清空筛选</button>`;
   const clear=document.getElementById("clearGapV12");
-  if(clear)clear.onclick=()=>{selectedGapV12=null;renderPersonaLinkageV12()};
+  if(clear)clear.onclick=()=>{selectedGapV12=null;queueLayer="全部";queueStatusFilterV54="all";queueIgnorePersonaV54=true;queuePage=1;renderStrategyQueueV18()};
 }
 
 function explainRankingV12(){
@@ -7444,16 +7446,6 @@ function renderPersonaLinkageV12(){
     };
   });
 
-  // KPI 3 now means "linked strategies", not another strategy pool.
-  const p=currentPersonaV12();
-  const optCount=document.getElementById("optCount");
-  if(optCount)optCount.textContent=affectedCountV12();
-  const kpis=[...document.querySelectorAll(".gap-kpis .kpi")];
-  if(kpis[2]){
-    const small=kpis[2].querySelector("small");
-    if(small)small.textContent="受人设加权策略";
-  }
-
   enrichGapListV12();
   renderBridgeV12();
   renderStrategyQueueV12();
@@ -7488,7 +7480,7 @@ function renderSideContextV13(){
   if(serviceMode==="agent"){
     note.textContent="Agent 自动执行；客户只处理关键确认与最终审核。";
   }else if(currentRole==="ops"){
-    note.textContent="Agent 先产出；运营负责专业审核与修正。";
+    note.textContent="Agent 先产出；运营负责审核与修正。";
   }else{
     note.textContent="客户负责业务事实、是否执行与最终确认。";
   }
@@ -7643,6 +7635,7 @@ refreshExecV16();
         el.onclick=()=>{
           currentPersona=+el.dataset.i;
           selectedGapV12=null;
+          queueIgnorePersonaV54=false;
           renderPersona();
           if(typeof showToast==="function"){
             showToast(`已按「${personas[currentPersona].name}」重新排序下方策略`);
@@ -7845,7 +7838,7 @@ function buildProposalV18(showToastAfter=true){
   saveProposalV18();
   renderStrategyQueueV18();
   renderWeeklyProposalV18();
-  if(showToastAfter)showToast(`Agent 已将 ${eligible.length} 条运营通过策略整理为 ${items.length} 个方案项`);
+  if(showToastAfter)showToast(`Agent 已将 ${eligible.length} 条已通过策略整理为 ${items.length} 个方案项`);
 }
 
 function proposalStatusMetaV18(){
@@ -7884,7 +7877,7 @@ function renderWeeklyProposalV18(){
   const summary=document.getElementById("proposalSummaryV18");
   if(summary){
     summary.innerHTML=`
-      <div class="proposal-summary-cell"><span>运营通过策略</span><b>${approved}</b><small>只有运营通过的 GS 才能进入方案整理</small></div>
+      <div class="proposal-summary-cell"><span>已通过策略</span><b>${approved}</b><small>只有已通过的 GS 才能进入方案整理</small></div>
       <div class="proposal-summary-cell"><span>方案执行项</span><b>${weeklyProposalV18.items.length}</b><small>Agent 按执行对象去重后的真实动作</small></div>
       <div class="proposal-summary-cell"><span>合并去重</span><b>${proposalMergedCountV18()}</b><small>保留所有 F / GS 来源关系</small></div>
       <div class="proposal-summary-cell"><span>需客户逐项确认</span><b>${proposalHighRiskFactsV18().length}</b><small>规格 / 交期 / 认证等业务事实</small></div>`;
@@ -8076,7 +8069,7 @@ function opsReviewMetaV18(s){
   const c=getCollab(s.id);
   if(strategyDeferredV18(s.id))return{text:"已忽略",cls:"defer",note:"来源诊断继续监测"};
   if(c.opsApproved)return{text:"运营已通过",cls:"approved",note:c.v18InProposal?"已进入 Agent 方案整理":"等待 Agent 整理"};
-  return{text:"待运营审核",cls:"ops",note:"Agent 候选策略，需运营专业审核"};
+  return{text:"待运营审核",cls:"ops",note:"Agent 候选策略，等待运营审核"};
 }
 
 function proposalLinkMetaV18(s){
@@ -8091,8 +8084,8 @@ function proposalLinkMetaV18(s){
 }
 
 function renderStrategyQueueV18(){
-  const all=getAllQueueStrategies();
-  const layers=["全部","内容","结构","实体与信任","技术","外部信源"];
+  const all=getAllQueueStrategies().filter(s=>s.layer!=="技术");
+  const layers=["全部","内容","结构","实体与信任","外部信源"];
   const counts=Object.fromEntries(layers.map(l=>[l,l==="全部"?all.length:all.filter(s=>s.layer===l).length]));
 
   const filterEl=document.getElementById("queueFilter");if(!filterEl)return;
@@ -8102,7 +8095,7 @@ function renderStrategyQueueV18(){
   const baseOrder=new Map(all.map((s,i)=>[s.id,i+1]));
   let shown=queueLayer==="全部"?all.slice():all.filter(s=>s.layer===queueLayer);
 
-  if(typeof personaScoreV12==="function"){
+  if(!queueIgnorePersonaV54&&typeof personaScoreV12==="function"){
     shown.sort((a,b)=>{
       const diff=personaScoreV12(b)-personaScoreV12(a);
       return diff!==0?diff:(baseOrder.get(a.id)-baseOrder.get(b.id));
@@ -8116,19 +8109,21 @@ function renderStrategyQueueV18(){
     }
   }
 
-  const approved=all.filter(s=>getCollab(s.id).opsApproved&&!strategyDeferredV18(s.id)).length;
-  const pending=serviceMode==="managed"?all.filter(s=>!getCollab(s.id).opsApproved&&!strategyDeferredV18(s.id)).length:0;
-  const deferred=all.filter(s=>strategyDeferredV18(s.id)).length;
+  if(queueStatusFilterV54==="approved")shown=shown.filter(s=>getCollab(s.id).opsApproved&&!strategyIgnoredV54(s));
+  if(queueStatusFilterV54==="ignored")shown=shown.filter(strategyIgnoredV54);
 
-  document.querySelector(".strategy-queue-head h2").textContent="③ 候选策略 · 五层";
+  const approved=all.filter(s=>getCollab(s.id).opsApproved&&!strategyIgnoredV54(s)).length;
+  const ignored=all.filter(strategyIgnoredV54).length;
+
+  document.querySelector(".strategy-queue-head h2").textContent="③ 候选策略";
   const desc=document.querySelector(".strategy-queue-head p");
   if(desc)desc.textContent=serviceMode==="managed"
-    ?"Agent 生成候选策略，运营逐条做专业审核；客户不在这里逐条审批，审核通过后由 Agent 整理成本期优化方案。"
+    ?"Agent 生成候选策略并进入运营审核；客户不在这里逐条审批，审核通过后由 Agent 整理成本期优化方案。"
     :"Agent 生成候选策略并整理成本期优化方案；客户在方案层统一确认。";
 
   document.getElementById("queueTotal").textContent=`候选 ${all.length}`;
-  document.getElementById("queueTransferred").textContent=serviceMode==="managed"?`运营通过 ${approved}`:`可整理 ${all.length-deferred}`;
-  document.getElementById("queuePending").textContent=serviceMode==="managed"?`待运营审核 ${pending}`:`已忽略 ${deferred}`;
+  document.getElementById("queueTransferred").textContent=`已通过 ${approved}`;
+  document.getElementById("queuePending").textContent=`已忽略 ${ignored}`;
 
   /* 候选策略工作台每页最多展示 5 条，排序与分类计数仍按全部候选策略计算。 */
   const pageCount=Math.max(1,Math.ceil(shown.length/QUEUE_PAGE_SIZE));
@@ -8190,6 +8185,7 @@ function renderStrategyQueueV18(){
   }
 
   if(typeof renderQueueContextV12==="function")renderQueueContextV12();
+  bindQueueSummaryFiltersV54();
 
   document.querySelectorAll(".queueDetailV18").forEach(b=>b.onclick=()=>openStrategyDetailV18(b.dataset.id));
   document.querySelectorAll(".queueOpsReviewV18").forEach(b=>b.onclick=()=>openStrategyDetailV18(b.dataset.id,true));
@@ -8209,7 +8205,7 @@ function openStrategyDetailV18(id,focusReview=false){
   drawerTitle.textContent=s.title;
   drawerBody.innerHTML=`
     <div class="detail-sec">
-      <div class="detail-title"><b>候选策略</b><span>${currentConfigVersion}</span></div>
+      <div class="detail-title"><b>候选策略</b><span>诊断配置版本 ${currentConfigVersion}</span></div>
       <div class="detail-body"><div class="kv">
         <div class="k">优先级</div><div class="v">${s.p}</div>
         <div class="k">来源诊断</div><div class="v">${s.source}</div>
@@ -8513,7 +8509,7 @@ function openAuditDetailV19(id){
         <div class="audit-drawer-links">
           ${item.strategies.map(sid=>`<button type="button" class="small-btn auditStrategyV19" data-sid="${sid}">${sid} · 查看策略</button>`).join("")}
         </div>
-        <div class="readonly-note" style="margin-top:10px">这里不会直接生成执行任务。候选策略先进入运营专业审核，再由 Agent 整理进「本期优化方案」。</div>
+        <div class="readonly-note" style="margin-top:10px">这里不会直接生成执行任务。候选策略先进入运营审核，再由 Agent 整理进「本期优化方案」。</div>
       </div>
     </div>`:""}
   `;
@@ -8641,7 +8637,7 @@ function renderAuditFindingsV20(){
     return `<div class="geo-finding-row ${generated?"generated":""} ${hidden?"hidden-by-limit":""}" data-finding="${f.id}">
       <input class="finding-check" type="checkbox" data-id="${f.id}" ${selected?"checked":""} ${generated?"disabled":""} aria-label="选择 ${escHtml(f.title)}">
       <span class="finding-index">${f.check==="4"?"④":f.check==="5"?"⑤":"⑦"}</span>
-      <span class="finding-main"><b>${escHtml(f.title)}</b><small>${escHtml(f.desc)}</small></span>
+      <span class="finding-main"><b>${escHtml(f.title)}</b></span>
       <span class="finding-priority ${f.priority.toLowerCase()}">${f.priority}</span>
       <span class="finding-strategy-state ${generated?"generated":"pending"}">
         ${generated
@@ -8653,7 +8649,7 @@ function renderAuditFindingsV20(){
   }).join("");
 
   const count=document.getElementById("auditFindingCountV20");
-  if(count)count.textContent=`${auditFindingsV20.length} 条异常明细`;
+  if(count)count.textContent=`${auditFindingsV20.length} 条异常`;
 
   const selected=selectedPendingV20();
   const selectedEl=document.getElementById("auditSelectedCountV20");
@@ -8738,7 +8734,7 @@ function generateCandidatesV20(){
   drawerSub.textContent="官网 GEO 体检 · 候选策略生成";
   drawerTitle.textContent=`已从 ${ids.length} 条异常生成 ${Object.keys(grouped).length} 条候选策略`;
   drawerBody.innerHTML=`
-    <div class="readonly-note">Agent 已按相同执行目标去重；不会因为多条异常重复创建相同 GS。生成后进入「候选策略 · 五层」等待运营专业审核。</div>
+    <div class="readonly-note">Agent 已按相同执行目标去重；不会因为多条异常重复创建相同 GS。生成后进入「候选策略」等待运营审核。</div>
     <div class="detail-sec">
       <div class="detail-title"><b>生成结果</b><span>${Object.keys(grouped).length} 条候选策略</span></div>
       <div class="detail-body">
@@ -9768,10 +9764,10 @@ renderStrategyQueueV18=function(){
   renderStrategyQueueV23Base();
 
   const h=document.querySelector(".strategy-queue-head h2");
-  if(h)h.textContent="③ 候选策略 · 五层";
+  if(h)h.textContent="③ 候选策略";
   const p=document.querySelector(".strategy-queue-head p");
   if(p)p.textContent=serviceMode==="managed"
-    ?"Agent 生成候选策略，运营负责专业审核；审核通过后 Agent 在后台完成去重与编排，结果直接进入优化中心 Brief。"
+    ?"Agent 生成候选策略，审核通过后 Agent 在后台完成去重与编排，结果直接进入优化中心 Brief。"
     :"Agent 生成候选策略后，在后台整理为优化中心 Brief；客户在 Brief 中确认关键执行信息。";
 
   document.querySelectorAll("#queueList .queue-row").forEach(row=>{
@@ -9793,9 +9789,10 @@ renderStrategyQueueV18=function(){
 
   const summary=document.getElementById("queueTransferred");
   if(summary){
-    const approved=getAllQueueStrategies().filter(s=>getCollab(s.id).opsApproved&&!strategyDeferredV18(s.id)).length;
-    summary.textContent=`运营通过 ${approved}`;
+    const approved=getAllQueueStrategies().filter(s=>s.layer!=="技术"&&getCollab(s.id).opsApproved&&!strategyIgnoredV54(s)).length;
+    summary.textContent=`已通过 ${approved}`;
   }
+  bindQueueSummaryFiltersV54();
 };
 
 /* The old proposal module is gone; keep render function harmless. */
@@ -10207,7 +10204,7 @@ renderStrategyQueueV18=function(){
 
   const p=document.querySelector(".strategy-queue-head p");
   if(p)p.textContent=serviceMode==="managed"
-    ?"Agent 生成候选策略，运营负责专业审核；审核通过后 Agent 自动合并 / 去重并创建 Task 草稿，客户在 Task 内确认 Brief。"
+    ?"Agent 生成候选策略，审核通过后 Agent 自动合并 / 去重并创建 Task 草稿，客户在 Task 内确认 Brief。"
     :"候选策略由 Agent 自动合并 / 去重并创建 Task 草稿，不经过运营审核；客户在 Task 内确认 Brief 后进入执行。";
 
   document.querySelectorAll("#queueList .queue-row").forEach(row=>{
@@ -10371,7 +10368,6 @@ renderAuditFindingsV20=function(){
 
       <span class="finding-main">
         <b>${escHtml(f.title)} <span class="finding-id-v25">${f.id}</span></b>
-        <small>${escHtml(f.desc)}</small>
       </span>
 
       <span class="finding-check-item-v25" title="${escHtml(f.check_item_id||"")}">
@@ -10390,7 +10386,7 @@ renderAuditFindingsV20=function(){
   }).join("");
 
   const count=document.getElementById("auditFindingCountV20");
-  if(count)count.textContent=`${auditFindingsV20.length} 条异常明细`;
+  if(count)count.textContent=`${auditFindingsV20.length} 条异常`;
 
   const selected=selectedPendingV20();
   const selectedEl=document.getElementById("auditSelectedCountV20");
@@ -10574,6 +10570,14 @@ function taskByFindingV26(id){const s=auditRouteStateV26[id];return s?.taskId?ta
 function isRecoveredV26(f){const s=auditRouteStateV26[f.id];const t=taskByFindingV26(f.id);return s?.status==="recovered"||!!(t&&t.progressStage==="done")}
 function isActiveFindingV26(f){return !isRecoveredV26(f)}
 function routeLabelV26(route){return route==="repair"?"确定性修复 · 直接生成 Task":"策略型问题 · 生成候选策略"}
+function websiteAuditStatusV26(f){
+  const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
+  const t=taskByFindingV26(f.id);
+  if(isRecoveredV26(f))return {text:"已修复",cls:"done"};
+  if(decision?.status==="deferred"||t?.v42Ignored||t?.progressStage==="ignored")return {text:"暂不修复",cls:"defer"};
+  if(t&&["site_rejected","site_failed"].includes(t.progressStage))return {text:"拒绝",cls:"reject"};
+  return {text:"待官网运营审核",cls:"pending"};
+}
 
 pendingFindingsV20=function(){return auditFindingsV20.filter(f=>{
   const s=auditRouteStateV26[f.id]||{};
@@ -10588,6 +10592,7 @@ function normalizeDirectRepairTasksV26(){
     const t=tasks.find(x=>x.uid===uid);if(!t)return;
     t.findingIds=ids;t.routeType="direct_repair";t.source=ids.join(" + ");
     t.strategy="不经过候选策略";t.relatedStrategies=[];t.dest="AI 官网协同";
+    if(["brief","todo"].includes(t.progressStage)){t.progressStage="site_submit";t.statusLabel="待官网运营审核";t.isDraft=false}
   });
   if(typeof saveTasks==="function")saveTasks();
 }
@@ -10625,13 +10630,15 @@ function updateAuditParentStatusV26(){
 }
 
 function auditStateHtmlV26(f){
-  const route=auditRouteForV26(f),s=auditRouteStateV26[f.id]||{status:"pending"},t=taskByFindingV26(f.id);
-  if(isRecoveredV26(f))return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:var(--success-soft);color:var(--success)">Re-check 已恢复</span>${t?`<span>${t.uid} · 已关联任务</span>`:""}</div>`;
-  if(s.status==="task_created"&&t)return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#edf3ff;color:#3155c6">已创建修复任务</span><span>${t.uid} · ${t.progressStage==="recheck"?"Re-check 中":"任务执行中"}</span></div>`;
+  const route=auditRouteForV26(f),s=auditRouteStateV26[f.id]||{status:"pending"};
+  if(route==="repair"){
+    const status=websiteAuditStatusV26(f);
+    return `<div class="finding-state-stack-v26"><span class="finding-state-pill ${status.cls}">${status.text}</span></div>`;
+  }
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span><span>${f.strategy} · 已关联策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"待创建修复任务":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"待官网运营审核":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
@@ -10642,7 +10649,7 @@ renderAuditFindingsV20=function(){
   ensureAuditFilterLineV26();
   const list=document.getElementById("geoAlertListV20");if(!list)return;
   const shown=auditFindingsV20.filter(f=>auditFilterV26==="all"||f.check===auditFilterV26);
-  const limit=auditFilterV26==="all"&&!auditFindingStateV20.expanded?5:999;
+  const limit=999;
   list.innerHTML=shown.length?shown.map((f,i)=>{
     const s=auditRouteStateV26[f.id]||{status:"pending"};
     const deferred=typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id);
@@ -10650,17 +10657,17 @@ renderAuditFindingsV20=function(){
     const selected=auditFindingStateV20.selected.includes(f.id)&&!done;
     return `<div class="geo-finding-row ${isRecoveredV26(f)?"recovered":""} ${i>=limit?"hidden-by-limit":""}" data-finding="${f.id}">
       <input class="finding-check" type="checkbox" data-id="${f.id}" ${selected?"checked":""} ${done?"disabled":""} aria-label="选择 ${escHtml(f.title)}">
-      <span class="finding-main"><b>${escHtml(f.title)} <span class="finding-id-v25">${f.id}</span></b><small>${escHtml(f.desc)}</small></span>
+      <span class="finding-main"><b>${escHtml(f.title)} <span class="finding-id-v25">${f.id}</span></b></span>
       <span class="finding-route-cell-v41"><span class="finding-route-v26 ${isRecoveredV26(f)?"recovered":auditRouteForV26(f)}">${isRecoveredV26(f)?"已完成闭环":escHtml(findingProcessingMetaV37(f).label)}</span></span>
       <span class="finding-check-item-v25"><span class="finding-check-item-chip-v25"><span class="check-code-v25">${auditCheckLabelV25(f).split(" ")[0]}</span><span>${escHtml(f.check_item_name)}</span></span></span>
       <span class="finding-priority ${f.priority.toLowerCase()}">${f.priority}</span>
       <span class="finding-strategy-state">${auditStateHtmlV26(f)}</span>
       ${auditActionsHtmlV26(f)}
     </div>`;
-  }).join(""):`<div class="empty-v26"><b>当前检查项没有异常明细</b><br>该检查项当前为通过状态，或所有异常已经通过 Re-check 恢复。</div>`;
+  }).join(""):`<div class="empty-v26"><b>当前检查项没有异常</b><br>该检查项当前为通过状态，或所有异常已经通过 Re-check 恢复。</div>`;
 
   const active=auditFindingsV20.filter(isActiveFindingV26);
-  const count=document.getElementById("auditFindingCountV20");if(count)count.textContent=`${active.length} 条当前异常 · ${auditFindingsV20.length-active.length} 条已恢复`;
+  const count=document.getElementById("auditFindingCountV20");if(count)count.textContent=`${active.length} 条当前异常 · ${auditFindingsV20.length-active.length} 条已修复`;
   const filterText=document.getElementById("auditFilterTextV26");if(filterText)filterText.textContent=auditFilterV26==="all"?"全部异常":`${geoAuditChecksV19[auditFilterV26]?.no||""} ${geoAuditChecksV19[auditFilterV26]?.title||""}`;
   const currentPending=shown.slice(0,limit).filter(f=>{const s=auditRouteStateV26[f.id]||{};return !isRecoveredV26(f)&&!s.taskId&&s.status!=="strategy_created"&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id))});
   const selected=currentPending.filter(f=>auditFindingStateV20.selected.includes(f.id));
@@ -10683,7 +10690,7 @@ renderAuditFindingsV20=function(){
     selectAll.disabled=!currentPending.length;selectAll.checked=currentPending.length>0&&selected.length===currentPending.length;selectAll.indeterminate=selected.length>0&&selected.length<currentPending.length;
     selectAll.onchange=e=>{const ids=currentPending.map(f=>f.id);auditFindingStateV20.selected=e.target.checked?[...new Set([...auditFindingStateV20.selected,...ids])]:auditFindingStateV20.selected.filter(id=>!ids.includes(id));saveAuditFindingStateV20();renderAuditFindingsV20()};
   }
-  const more=document.getElementById("findingsMoreWrapV20");if(more)more.classList.toggle("hidden",auditFilterV26!=="all"||shown.length<=5);
+  const more=document.getElementById("findingsMoreWrapV20");if(more)more.classList.add("hidden");
 
   list.querySelectorAll(".finding-check").forEach(cb=>cb.onchange=()=>{auditFindingStateV20.selected=cb.checked?[...new Set([...auditFindingStateV20.selected,cb.dataset.id])]:auditFindingStateV20.selected.filter(x=>x!==cb.dataset.id);saveAuditFindingStateV20();renderAuditFindingsV20()});
   list.querySelectorAll(".findingDetailV26").forEach(b=>b.onclick=()=>openFindingDetailV26(b.dataset.id));
@@ -10698,11 +10705,11 @@ function confirmBatchRouteV36(route,ids){
   const findings=auditFindingsV20.filter(f=>ids.includes(f.id)&&auditRouteForV26(f)===route);
   if(!findings.length)return;
   const resultCount=route==="repair"?new Set(findings.map(f=>f.check)).size:new Set(findings.map(f=>f.strategy)).size;
-  const resultName=route==="repair"?"修复 Task 草稿":"候选策略";
+  const resultName=route==="repair"?"修复任务":"候选策略";
   drawerSub.textContent="官网 GEO 体检 · 批量处理";
   drawerTitle.textContent=`确认处理 ${findings.length} 条异常`;
   const strategyFlow=serviceMode==="agent"?"相同策略去重后由 Agent 直接编排 Task，不经过运营审核。":"相同策略去重后进入运营审核，通过后由 Agent 编排 Task。";
-  drawerBody.innerHTML=`<div class="readonly-note">当前选中 ${findings.length} 条${route==="repair"?"可直接修复的异常":"需要制定策略的异常"}，预计形成 ${resultCount} 个${resultName}。${route==="repair"?"按所属检查项归并，Task 将进入优化中心并提交 AI 建站执行。":strategyFlow}生成操作不会让异常自动恢复。</div><div class="flow-drawer-v28" style="margin-top:12px">${findings.map(f=>`<div class="flow-drawer-stage-v28"><span>${escHtml(f.id.replace(/\D/g,""))}</span><div><b>${escHtml(f.title)}</b><small>${escHtml(auditRouteMetaV26[f.id]?.reason||f.desc)}</small></div></div>`).join("")}</div>`;
+  drawerBody.innerHTML=`<div class="readonly-note">当前选中 ${findings.length} 条${route==="repair"?"可直接修复的异常":"需要制定策略的异常"}，预计形成 ${resultCount} 个${resultName}。${route==="repair"?"按所属检查项归并，任务将进入优化中心并提交 AI 建站执行。":strategyFlow}生成操作不会让异常自动恢复。</div><div class="flow-drawer-v28" style="margin-top:12px">${findings.map(f=>`<div class="flow-drawer-stage-v28"><span>${escHtml(f.id.replace(/\D/g,""))}</span><div><b>${escHtml(f.title)}</b></div></div>`).join("")}</div>`;
   drawerFoot.innerHTML=`<button type="button" class="btn" id="cancelBatchV36">取消</button><button type="button" class="btn primary" id="confirmBatchV36">确认生成 ${resultCount} 个${resultName}</button>`;
   document.getElementById("cancelBatchV36").onclick=()=>drawer.classList.remove("open");
   document.getElementById("confirmBatchV36").onclick=()=>{drawer.classList.remove("open");route==="repair"?createRepairTasksV26(findings.map(f=>f.id)):createStrategiesV26(findings.map(f=>f.id))};
@@ -10716,7 +10723,7 @@ function createRepairTasksV26(ids){
   Object.values(groups).forEach(group=>{
     const uid=`T${Math.max(110,...tasks.map(t=>parseInt(String(t.uid).replace(/\D/g,""),10)||0))+1}`;
     const isWebsiteStructure=group.every(f=>["GEO_CHECK_01","GEO_CHECK_02","GEO_CHECK_03"].includes(f.check_item_id));
-    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"draft",statusLabel:"待修复说明确认",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
+    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"pending",statusLabel:"待官网运营审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"site_submit",isDraft:false,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
     tasks.push(t);const out=ensureOutput(t);out.brief={
       goal:`修复 ${group.map(f=>f.title).join("、")}，恢复官网 GEO 基础检查`,
       persona:"不适用",
@@ -10725,11 +10732,11 @@ function createRepairTasksV26(ids){
       executionTarget:"AI 官网协同",
       methods:t.methods.join("、"),
       acceptance:group.some(f=>f.id==="AF-06")?"先确认正确地址口径；技术修复完成、自动验证通过并上线，GEO Re-check 确认异常消失后才算闭环":"技术修复完成、自动验证通过并上线；GEO Re-check 确认异常消失后才算闭环"
-    };out.briefStatus="ready";out.briefConfirmed=false;out.briefFactConfirmed=!group.some(f=>f.id==="AF-06");out.briefRisk=group.some(f=>f.id==="AF-06");
+    };out.briefStatus="ready";out.briefConfirmed=true;out.briefFactConfirmed=!group.some(f=>f.id==="AF-06");out.briefRisk=group.some(f=>f.id==="AF-06");
     group.forEach(f=>auditRouteStateV26[f.id]={route:"repair",status:"task_created",taskId:uid});created.push(t);
   });
   auditFindingStateV20.selected=auditFindingStateV20.selected.filter(id=>!ids.includes(id));saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();
-  showToast(`已创建 ${created.length} 个修复 Task 草稿，未经过候选策略审核`);renderAuditFindingsV20();renderOptimization();
+  showToast(`已生成 ${created.length} 个修复任务，进入待官网运营审核`);renderAuditFindingsV20();renderOptimization();
 }
 
 function createStrategiesV26(ids){
@@ -10742,10 +10749,10 @@ function createStrategiesV26(ids){
 
 function openDeferFindingsV26(selectedIds){
   const ids=selectedIds||selectedPendingV20();if(!ids.length)return;const fs=auditFindingsV20.filter(f=>ids.includes(f.id));
-  drawerSub.textContent="官网 GEO 体检 · 异常处理";drawerTitle.textContent=`忽略 ${ids.length} 条异常`;
-  drawerBody.innerHTML=`<div class="readonly-note">确认后，这些异常不再创建修复任务或候选策略，且不能恢复处理。异常记录仍保留并持续监测，所属检查项不会因此变为通过。</div><div class="reject-form" style="margin-top:12px"><div class="reject-field"><label>忽略原因 *</label><select id="deferReasonV26"><option value="">请选择忽略原因</option><option value="agent_judgment_error">Agent 判断错误 / 策略不适用</option><option value="evidence_insufficient">事实 / 证据不足</option><option value="duplicate">重复策略 / 已有其他方案</option><option value="timing_not_fit">时机不合适</option><option value="cost_too_high">执行成本过高</option><option value="business_mismatch">不符合当前业务目标</option><option value="other">其他</option></select></div><div class="reject-field"><label>忽略说明 *</label><textarea id="deferNoteV26" placeholder="例如：官网下周整体改版，本周暂不单独处理。"></textarea></div></div>`;
-  drawerFoot.innerHTML=`<button class="btn" onclick="drawer.classList.remove('open')">取消</button><button class="btn primary" id="confirmDeferV26">确认忽略</button>`;drawer.classList.add("open");
-  document.getElementById("confirmDeferV26").onclick=()=>{const reason=document.getElementById("deferReasonV26").value,note=document.getElementById("deferNoteV26").value.trim();if(!reason){showToast("请选择忽略原因");return}if(!note){showToast("请填写忽略说明");return}fs.forEach(f=>{findingDecisionsV21[f.id]={status:"deferred",reason,note,time:nowLabel()};addFeedbackEventV21({type:"strategy",objectType:"诊断异常",objectId:f.id,title:f.title,agentDecision:`Agent 建议${auditRouteForV26(f)==="repair"?"直接创建修复 Task":"生成候选策略"}`,humanDecision:`${serviceMode==="agent"?"客户":"运营"}决定忽略，保留异常继续监测`,reason,note,diagnosisImpact:"保留异常，下一轮继续检查",source:"官网 GEO 体检",learningNote:"保留本次人工决定，不重复生成同一异常的任务或策略。"})});auditFindingStateV20.selected=[];saveFindingDecisionsV21();saveAuditFindingStateV20();drawer.classList.remove("open");renderAuditFindingsV20();showToast(`已将 ${ids.length} 条异常标记为“忽略”`)};
+  drawerSub.textContent="官网 GEO 体检 · 异常处理";drawerTitle.textContent=`暂不修复 ${ids.length} 条异常`;
+  drawerBody.innerHTML=`<div class="readonly-note">确认后，这些异常不再创建修复任务或候选策略。异常记录仍保留并持续监测，所属检查项不会因此变为通过。</div><div class="reject-form" style="margin-top:12px"><div class="reject-field"><label>暂不修复原因 *</label><select id="deferReasonV26"><option value="">请选择暂不修复原因</option><option value="agent_judgment_error">Agent 判断错误 / 策略不适用</option><option value="evidence_insufficient">事实 / 证据不足</option><option value="duplicate">重复策略 / 已有其他方案</option><option value="timing_not_fit">时机不合适</option><option value="cost_too_high">执行成本过高</option><option value="business_mismatch">不符合当前业务目标</option><option value="other">其他</option></select></div><div class="reject-field"><label>暂不修复说明 *</label><textarea id="deferNoteV26" placeholder="例如：官网下周整体改版，本周暂不单独处理。"></textarea></div></div>`;
+  drawerFoot.innerHTML=`<button class="btn" onclick="drawer.classList.remove('open')">取消</button><button class="btn primary" id="confirmDeferV26">确认暂不修复</button>`;drawer.classList.add("open");
+  document.getElementById("confirmDeferV26").onclick=()=>{const reason=document.getElementById("deferReasonV26").value,note=document.getElementById("deferNoteV26").value.trim();if(!reason){showToast("请选择暂不修复原因");return}if(!note){showToast("请填写暂不修复说明");return}fs.forEach(f=>{findingDecisionsV21[f.id]={status:"deferred",reason,note,time:nowLabel()};addFeedbackEventV21({type:"strategy",objectType:"诊断异常",objectId:f.id,title:f.title,agentDecision:`Agent 建议${auditRouteForV26(f)==="repair"?"直接创建修复 Task":"生成候选策略"}`,humanDecision:`${serviceMode==="agent"?"客户":"运营"}决定暂不修复，保留异常继续监测`,reason,note,diagnosisImpact:"保留异常，下一轮继续检查",source:"官网 GEO 体检",learningNote:"保留本次人工决定，不重复生成同一异常的任务或策略。"})});auditFindingStateV20.selected=[];saveFindingDecisionsV21();saveAuditFindingStateV20();drawer.classList.remove("open");renderAuditFindingsV20();showToast(`已将 ${ids.length} 条异常标记为“暂不修复”`)};
 }
 
 function openFindingDetailV26(id){
@@ -10754,8 +10761,9 @@ function openFindingDetailV26(id){
   const canReview=serviceMode==="agent"?currentRole==="client":currentRole==="ops";
   const canDecide=canReview&&!t&&s?.status!=="strategy_created"&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(id));
   const strategyNext=serviceMode==="agent"?"生成候选策略 → Agent 合并 / 去重 / 编排 → Task 草稿 → 客户确认 Brief":"生成候选策略 → 运营审核内容方案与业务事实 → Agent 编排 Task → 客户确认 Brief";
-  drawerBody.innerHTML=`<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 ${route}">${escHtml(findingProcessingMetaV37(f).label)}</span></div><div class="detail-body"><div class="kv"><div class="k">异常说明</div><div class="v">${escHtml(f.desc)}</div><div class="k">为什么这样处理</div><div class="v">${escHtml(findingProcessingMetaV37(f).reason)}</div><div class="k">后续流程</div><div class="v">${route==="repair"?"创建修复 Task → 确认修复范围及相关事实 → AI 建站执行 → 发布 → Re-check":strategyNext}</div></div></div></div>${t?`<div class="readonly-note">已关联 ${t.uid} · ${escHtml(t.name)}，当前状态：${escHtml(workspaceStatus(t,ensureOutput(t))[0])}</div>`:""}${isFindingDeferredV21(id)?'<div class="readonly-note">已选择忽略，本条异常不能恢复处理；诊断记录仍保留并持续监测。</div>':""}`;
-  drawerFoot.innerHTML=`<button class="btn" onclick="drawer.classList.remove('open')">关闭</button>${t?`<button class="btn primary" id="detailTaskV26">进入任务</button>`:s.status==="strategy_created"?`<button class="btn primary" id="detailStrategyV44">进入策略</button>`:canDecide?`<button class="btn" id="detailDeferV26">忽略</button><button class="btn primary" id="detailRouteV26">${route==="repair"?"创建修复任务":serviceMode==="agent"?"生成策略并交给 Agent 编排":"生成策略并提交审核"}</button>`:""}`;drawer.classList.add("open");
+  const websiteStatus=route==="repair"?websiteAuditStatusV26(f):null;
+  drawerBody.innerHTML=`<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 ${route}">${escHtml(findingProcessingMetaV37(f).label)}</span></div><div class="detail-body"><div class="kv">${websiteStatus?`<div class="k">当前状态</div><div class="v"><span class="finding-state-pill ${websiteStatus.cls}">${websiteStatus.text}</span></div>`:""}<div class="k">异常说明</div><div class="v">${escHtml(f.desc)}</div><div class="k">为什么这样处理</div><div class="v">${escHtml(findingProcessingMetaV37(f).reason)}</div><div class="k">后续流程</div><div class="v">${route==="repair"?"直接生成任务 → 待官网运营审核 → AI 建站执行 → 发布 → Re-check":strategyNext}</div></div></div></div>${isFindingDeferredV21(id)?'<div class="readonly-note">已选择暂不修复，本条异常不再创建修复任务；诊断记录仍保留并持续监测。</div>':""}`;
+  drawerFoot.innerHTML=`<button class="btn" onclick="drawer.classList.remove('open')">关闭</button>${t?`<button class="btn primary" id="detailTaskV26">进入任务</button>`:s.status==="strategy_created"?`<button class="btn primary" id="detailStrategyV44">进入策略</button>`:canDecide?`<button class="btn" id="detailDeferV26">暂不修复</button><button class="btn primary" id="detailRouteV26">${route==="repair"?"生成任务":serviceMode==="agent"?"生成策略并交给 Agent 编排":"生成策略并提交审核"}</button>`:""}`;drawer.classList.add("open");
   document.getElementById("detailTaskV26")?.addEventListener("click",()=>{drawer.classList.remove("open");goOptimization();setTimeout(()=>openReviewWorkspace(t.uid),80)});
   document.getElementById("detailStrategyV44")?.addEventListener("click",()=>{drawer.classList.remove("open");openStrategyDetailV18(f.strategy)});
   document.getElementById("detailRouteV26")?.addEventListener("click",()=>{drawer.classList.remove("open");route==="repair"?createRepairTasksV26([id]):createStrategiesV26([id])});
@@ -10848,7 +10856,7 @@ ensureAuditFilterLineV26();renderAuditFindingsV20();renderStrategyQueueV18();ren
 function contextDescriptionV27(){
   if(serviceMode==="agent")return "Agent 自主执行；客户只处理业务事实、关键结果与发布确认。";
   return currentRole==="ops"
-    ?"Agent 先产出；运营负责专业审核、AI 建站提交与异常处理。"
+    ?"Agent 先产出；运营负责审核、AI 建站提交与异常处理。"
     :"客户查看最终结果，确认业务事实、重要变更与发布上线。";
 }
 
@@ -10903,7 +10911,7 @@ bindContextControlsV27();paintContextControlsV27();
 const siteStagesV27=["site_submit","site_submitted","site_rejected","site_accepted","site_running","site_returned","site_verifying","site_failed","site_publish"];
 function isWebsiteTaskV27(t){return !!t&&(t.type==="web"||t.type==="repair")}
 function siteStageLabelV27(stage){
-  return ({site_submit:"待提交 AI 建站",site_submitted:"官网审核中",site_rejected:"官网已拒绝",site_accepted:"官网审核通过",site_running:"AI 建站执行中",site_returned:"官网已完成 · 待 GEO 验证",site_verifying:"GEO 验证中",site_failed:"验证未通过",site_publish:"待发布确认",recheck:"已上线 · Re-check 中",done:"协同已完成"})[stage]||"尚未进入 AI 建站协同";
+  return ({site_submit:"待提交 AI 建站",site_submitted:"AI 建站审核中",site_rejected:"AI 建站退回",site_accepted:"AI 建站已接单",site_running:"AI 建站执行中",site_returned:"AI 建站已完成 · 待 GEO 验证",site_verifying:"GEO 验证中",site_failed:"验证未通过",site_publish:"待发布确认",recheck:"已上线 · Re-check 中",done:"协同已完成"})[stage]||"尚未进入 AI 建站协同";
 }
 function ensureSiteCollabV27(t){
   const out=ensureOutput(t);out.siteCollab=out.siteCollab||{
@@ -11515,10 +11523,6 @@ refreshPendingEntryV29();
   const renderQueueBase=renderStrategyQueueV18;
   renderStrategyQueueV18=function(){
     renderQueueBase();
-    if(serviceMode==="managed"){
-      const pending=getAllQueueStrategies().filter(s=>{const c=getCollab(s.id);return !c.opsApproved&&!c.v42Ignored&&!c.v21Rejected&&!strategyDeferredV18(s.id)}).length;
-      const count=document.getElementById("queuePending");if(count)count.textContent=`待运营审核 ${pending}`;
-    }
     document.querySelectorAll("#queueList .queue-row").forEach(row=>{
       const id=row.querySelector(".queueDetailV18")?.dataset.id;if(!id)return;
       const c=getCollab(id),actions=row.querySelector(".queue-actions-v18");
@@ -11966,7 +11970,8 @@ refreshPendingEntryV29();
     }
     if(p==="site_submit")return serviceMode==="managed"?["运营审核","human"]:["待用户审核","human"];
     if(p==="site_submitted")return ["待官网审核","human"];
-    if(p==="site_rejected"||p==="site_failed")return serviceMode==="managed"?["运营审核","human"]:["待用户审核","human"];
+    if(p==="site_rejected")return ["AI 建站退回","human"];
+    if(p==="site_failed")return ["验证未通过","human"];
     if(["site_accepted","site_running","site_returned","site_verifying","recheck"].includes(p))return ["Agent处理中","running"];
     if(p==="site_publish"||p==="publish_wait")return ["待用户审核","human"];
     return ["Agent处理中","running"];
@@ -11977,8 +11982,8 @@ refreshPendingEntryV29();
     const map={
       ignored:"任务已忽略",todo:t.type==="repair"?"准备技术修复":"等待内容生成",running:t.type==="repair"?"准备修复要求与自动验证":"Agent 生成与自动质检",
       human:t.type==="repair"?"修复结果确认":"生成结果确认",publish_wait:t.type==="external"?"等待外部发布与 URL 登记":"发布确认",
-      site_submit:"待提交 AI 建站",site_submitted:"官网审核中",site_rejected:"官网已拒绝",site_accepted:"AI 建站已接单",site_running:"AI 建站执行中",
-      site_returned:"AI 建站结果已返回",site_verifying:"GEO 验证中",site_failed:"GEO 验证未通过",site_publish:"发布门禁确认",recheck:"Re-check 中",done:"任务已完成"
+      site_submit:"待提交 AI 建站",site_submitted:"AI 建站审核中",site_rejected:"AI 建站退回",site_accepted:"AI 建站已接单",site_running:"AI 建站执行中",
+      site_returned:"AI 建站已完成 · 待 GEO 验证",site_verifying:"GEO 验证中",site_failed:"GEO 验证未通过",site_publish:"发布门禁确认",recheck:"Re-check 中",done:"任务已完成"
     };
     if(p==="brief"){
       if(out.briefStatus==="agent_reworking")return "Agent 重整 Brief";
@@ -12570,5 +12575,506 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+<style>
+/* v53: shared five-item pagination for GEO workbench lists */
+.list-pagination-v53{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:12px 0 4px;color:var(--text-3);font-size:12px}
+.list-pagination-v53[hidden]{display:none!important}
+.list-page-select-v53{height:30px;padding:0 28px 0 9px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text-2);font:inherit;font-size:12px;cursor:pointer}
+.list-page-btn-v53{height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text-2);font:inherit;font-size:12px;cursor:pointer}
+.list-page-btn-v53:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+.list-page-btn-v53:disabled{cursor:not-allowed;opacity:.45}
+@media(max-width:700px){.list-pagination-v53{justify-content:space-between;gap:6px}.list-page-select-v53{max-width:118px}.list-page-btn-v53{padding:0 8px}}
+</style>
+<script>
+/* v53: main GEO workbench lists share a five-item pager. */
+(()=>{
+  const pageSize=5;
+  const configs=[
+    {selector:"#geoAlertListV20",item:".geo-finding-row",label:"官网 GEO 异常"},
+    {selector:"#gapList",item:".gap",label:"认知缺口"},
+    {selector:"#taskBody",item:"tr",label:"优化任务"},
+    {selector:"#learningTableBodyV21",item:"tr",label:"学习台账"},
+    {selector:"#proposalItemsV18",item:".proposal-item",label:"本期方案"},
+    {selector:"#briefListV23",item:".brief-card-v23",label:"执行 Brief"}
+  ];
+  const pages={};
+
+  function itemsFor(config){
+    const list=document.querySelector(config.selector);
+    if(!list)return[];
+    return [...list.children].filter(item=>item.matches(config.item));
+  }
+
+  function apply(config){
+    const list=document.querySelector(config.selector);if(!list)return;
+    const items=itemsFor(config),key=config.selector;
+    const pageCount=Math.max(1,Math.ceil(items.length/pageSize));
+    pages[key]=Math.min(Math.max(pages[key]||1,1),pageCount);
+    const start=(pages[key]-1)*pageSize;
+    items.forEach((item,index)=>{item.hidden=index<start||index>=start+pageSize});
+
+    let controls=document.querySelector(`[data-pagination-for="${key}"]`);
+    if(!controls){
+      controls=document.createElement("div");
+      controls.className="list-pagination-v53";
+      controls.dataset.paginationFor=key;
+      controls.setAttribute("aria-label",`${config.label}分页`);
+      const anchor=list.tagName==="TBODY"?list.closest("table"):list;
+      anchor?.insertAdjacentElement("afterend",controls);
+    }
+    controls.hidden=items.length<=pageSize;
+    if(controls.hidden)return;
+    controls.innerHTML=`<span>每页 ${pageSize} 条</span><button type="button" class="list-page-btn-v53" data-step="-1" ${pages[key]===1?"disabled":""}>上一页</button><select class="list-page-select-v53" aria-label="选择${config.label}页码">${Array.from({length:pageCount},(_,i)=>`<option value="${i+1}" ${pages[key]===i+1?"selected":""}>第 ${i+1} / ${pageCount} 页</option>`).join("")}</select><button type="button" class="list-page-btn-v53" data-step="1" ${pages[key]===pageCount?"disabled":""}>下一页</button>`;
+    controls.querySelector("select").onchange=e=>{pages[key]=Number(e.target.value);apply(config)};
+    controls.querySelectorAll("button[data-step]").forEach(button=>button.onclick=()=>{pages[key]+=Number(button.dataset.step);apply(config)});
+  }
+
+  function applyAll(){configs.forEach(apply)}
+  configs.forEach(config=>{
+    const list=document.querySelector(config.selector);if(!list)return;
+    new MutationObserver(()=>requestAnimationFrame(()=>apply(config))).observe(list,{childList:true});
+  });
+  requestAnimationFrame(applyAll);
+  window.applyGeoListPaginationV53=applyAll;
+})();
+</script>
+<style>
+/* v55: explain candidate-strategy provenance and link directly to task workbench. */
+.candidate-guide-row-v55{display:flex;align-items:flex-start;gap:14px;margin-top:8px;max-width:900px}
+.candidate-guide-row-v55 p{margin:0;color:var(--text-2);font-size:12px;line-height:20px}
+.candidate-guide-row-v55 p strong{color:var(--text);font-weight:600}
+.candidate-task-link-v55{display:inline-flex;align-items:center;gap:6px;flex:none;padding:1px 0;border:0;background:transparent;color:var(--brand);font:inherit;font-size:12px;line-height:20px;white-space:nowrap;cursor:pointer}
+.candidate-task-link-v55:hover{text-decoration:underline}
+.candidate-task-link-v55:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:3px}
+@media(max-width:760px){.candidate-guide-row-v55{flex-direction:column;gap:6px}}
+</style>
+<script>
+(()=>{
+  const viewTasks=document.getElementById("viewCandidateTasksV55");
+  if(viewTasks)viewTasks.onclick=()=>goOptimization();
+})();
+</script>
+<style>
+/* v56: keep candidate rows concise and the operator review decision explicit. */
+#queueList .queue-main .queue-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#queueList .queue-desc{display:none!important}
+.strategy-audit-v56{display:grid;gap:16px}
+.strategy-audit-v56 .detail-sec{margin:0}
+.strategy-audit-v56 .detail-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px}
+.strategy-audit-v56 .kv{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px 14px;font-size:13px;line-height:1.6}
+.strategy-audit-v56 .kv .k{color:var(--text-3)}
+.strategy-audit-v56 .kv .v{color:var(--text)}
+.strategy-audit-v56 select,.strategy-audit-v56 textarea{width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:7px;background:#fff;color:var(--text);font:inherit;font-size:13px;padding:9px 10px}
+.strategy-audit-v56 textarea{min-height:76px;margin-top:8px;resize:vertical}
+.strategy-audit-v56 .review-reason-label{display:block;margin-bottom:6px;color:var(--text-2);font-size:12px}
+.strategy-audit-v56 .review-record-action{display:flex;justify-content:flex-end;margin-top:8px}
+@media(max-width:600px){.strategy-audit-v56 .kv{grid-template-columns:90px minmax(0,1fr)}}
+</style>
+<script>
+(()=>{
+  const baseRenderQueueV56=renderStrategyQueueV18;
+  renderStrategyQueueV18=function(){
+    baseRenderQueueV56();
+    document.querySelectorAll('#queueList .queue-row').forEach(row=>{
+      row.querySelector('.persona-match-top')?.remove();
+      row.querySelector('.queue-desc')?.remove();
+      row.querySelectorAll('.queue-source').forEach(source=>{
+        [...source.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>{
+          node.nodeValue=node.nodeValue.replace(/\s*[·•]\s*(?:口径\s*)?V\d+\s*$/,'');
+        });
+      });
+    });
+  };
+  renderStrategyQueue=renderStrategyQueueV18;
+
+  const baseOpenStrategyV56=openStrategyDetailV18;
+  openStrategyDetailV18=function(id,focusReview=false){
+    const s=findStrategyV18(id);if(!s)return;
+    const c=getCollab(id);
+    if(serviceMode==='managed'&&currentRole==='ops'&&window.strategyReviewRequiredV44?.(s)){
+      drawerSub.textContent=`${s.displayId||s.id} · ${s.layer}`;
+      drawerTitle.textContent=s.title;
+      drawerBody.innerHTML=`<div class="strategy-audit-v56">
+        <section class="detail-sec"><div class="detail-title"><b>候选策略</b><span>诊断配置版本 ${escHtml(currentConfigVersion)}</span></div><div class="kv">
+          <div class="k">优先级</div><div class="v">${escHtml(s.p||'-')}</div>
+          <div class="k">来源诊断</div><div class="v">${escHtml(s.source||'-')}</div>
+          <div class="k">目标人设</div><div class="v">${escHtml(s.persona||'-')}</div>
+          <div class="k">决策因子</div><div class="v">${escHtml(s.factor||'-')}</div>
+          <div class="k">触发证据</div><div class="v">${escHtml(s.evidence||'-')}</div>
+        </div></section>
+        <section class="detail-sec"><div class="detail-title"><b>审核与协作记录</b><span>记录可追溯</span></div>
+          <div id="strategyReviewTimelineV56">${reviewTimelineHtml(id)}</div>
+          <div style="margin-top:12px"><label class="review-reason-label" for="reviewReasonV56">审核意见类型</label>
+            <select id="reviewReasonV56"><option value="">请选择（忽略时必选）</option><option value="agent_judgment_error">优先级判断错误</option><option value="content_quality">标题生成不准确</option></select>
+            <textarea id="reviewNoteV56" placeholder="填写审核意见或补充说明"></textarea>
+            <div class="review-record-action"><button type="button" class="btn" id="addReviewRecordV56">添加记录</button></div>
+          </div>
+        </section>
+      </div>`;
+      drawerFoot.innerHTML='<button class="btn" id="closeReviewV56">关闭</button><button class="btn" id="ignoreReviewV56">忽略</button><button class="btn primary" id="passReviewV56">审核通过</button>';
+      drawer.classList.add('open');
+      document.getElementById('closeReviewV56').onclick=()=>drawer.classList.remove('open');
+      document.getElementById('addReviewRecordV56').onclick=()=>{
+        const reasonSelect=document.getElementById('reviewReasonV56'),reason=reasonSelect.value,reasonLabel=reasonSelect.selectedOptions[0]?.textContent||'';
+        const note=document.getElementById('reviewNoteV56').value.trim();
+        if(!reason){showToast('请选择审核意见类型');reasonSelect.focus();return}
+        if(!note){showToast('请填写审核意见');document.getElementById('reviewNoteV56').focus();return}
+        pushReview(id,'ops','运营',`${reasonLabel}：${note}`);
+        saveCollab();
+        document.getElementById('strategyReviewTimelineV56').innerHTML=reviewTimelineHtml(id);
+        reasonSelect.value='';document.getElementById('reviewNoteV56').value='';
+        showToast('审核记录已添加');
+      };
+      document.getElementById('passReviewV56').onclick=()=>{
+        const reasonSelect=document.getElementById('reviewReasonV56'),reason=reasonSelect.value,reasonLabel=reasonSelect.selectedOptions[0]?.textContent||'';
+        const note=document.getElementById('reviewNoteV56').value.trim();
+        c.opsApproved=true;c.v18Deferred=false;c.v43ReviewEdits=[];
+        pushReview(id,'ops','运营',reason?`审核通过：${reasonLabel}${note?`；${note}`:''}`:'审核通过。');
+        saveCollab();drawer.classList.remove('open');
+        renderStrategyQueueV18();renderOptimization();refreshPendingEntryV29?.();
+        showToast('候选策略已通过');
+      };
+      document.getElementById('ignoreReviewV56').onclick=()=>{
+        const reasonSelect=document.getElementById('reviewReasonV56'),reason=reasonSelect.value,reasonLabel=reasonSelect.selectedOptions[0]?.textContent||'';
+        const note=document.getElementById('reviewNoteV56').value.trim();
+        if(!reason||!note){showToast(!reason?'请选择忽略原因':'请填写忽略说明');document.getElementById(!reason?'reviewReasonV56':'reviewNoteV56').focus();return}
+        const decision={reason,label:reasonLabel,note:note||reasonLabel,time:nowLabel()};
+        c.v42Ignored=decision;c.v18Deferred=false;c.opsApproved=false;
+        pushReview(id,'ops','运营',`已忽略：${reasonLabel}${note?`；${note}`:''}`);
+        addFeedbackEventV21({type:'strategy',objectType:'候选策略',objectId:id,title:s.title,agentDecision:'Agent 已生成候选策略',humanDecision:`运营选择忽略：${reasonLabel}`,reason,note:note||reasonLabel,diagnosisImpact:'来源诊断保持原状态，异常继续监测',source:'候选策略审核',learningNote:'保留运营忽略原因，供后续策略评估。'});
+        saveCollab();drawer.classList.remove('open');
+        renderStrategyQueueV18();renderAuditFindingsV20();refreshPendingEntryV29?.();
+        showToast('候选策略已忽略，原因已记录');
+      };
+      if(focusReview)setTimeout(()=>drawerBody.querySelector('#reviewReasonV56')?.focus(),40);
+      return;
+    }
+
+    baseOpenStrategyV56(id,focusReview);
+    const section=[...drawerBody.querySelectorAll('.detail-sec')].find(sec=>sec.querySelector('.detail-title b')?.textContent.trim()==='候选策略');
+    const keys=new Set(['优先级','来源诊断','目标人设','决策因子','触发证据']);
+    section?.querySelectorAll('.kv .k').forEach(label=>{
+      if(keys.has(label.textContent.trim()))return;
+      const value=label.nextElementSibling;label.remove();value?.remove();
+    });
+  };
+  window.openStrategyDetailV18=openStrategyDetailV18;
+  openCollabStrategyDetail=(id,focusReview=false)=>openStrategyDetailV18(id,focusReview);
+  renderStrategyQueueV18();
+})();
+</script>
+<style>
+/* v57: merge task summary and current actions into one task overview module. */
+.optimization-overview-v57{margin-top:24px;border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}
+.optimization-overview-v57>.summary{margin:0;padding:20px;gap:12px;border-bottom:1px solid var(--border);background:var(--surface)}
+.optimization-overview-v57>.summary .stat{border-radius:10px;padding:14px}
+.optimization-overview-v57>.action-board{margin:0;border:0;border-radius:0;background:var(--surface)}
+.optimization-overview-v57>.action-board .action-head{padding:16px 20px}
+.optimization-overview-v57>.action-board .action-grid{padding:20px}
+@media(max-width:760px){
+  .optimization-overview-v57>.summary{padding:16px}
+  .optimization-overview-v57>.action-board .action-head{padding:16px}
+  .optimization-overview-v57>.action-board .action-grid{padding:16px}
+}
+</style>
+<script>
+/* Keep the two existing surfaces and their data bindings, but present them as one module. */
+(()=>{
+  const summary=document.querySelector('#optimizationPage .summary');
+  const actions=document.querySelector('#optimizationPage .action-board');
+  if(!summary||!actions||summary.parentElement.classList.contains('optimization-overview-v57'))return;
+  const overview=document.createElement('div');
+  overview.className='optimization-overview-v57';
+  summary.parentNode.insertBefore(overview,summary);
+  overview.append(summary,actions);
+})();
+</script>
+<style>
+/* v58: one task list with type and lifecycle filters. */
+.optimization-overview-v57{display:block!important}
+.task-filter-group-v58{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border);background:#fff}
+.tabs.task-filter-group-v58{height:auto}
+.task-filter-label-v58{margin-right:2px;color:var(--text-3);font-size:12px;line-height:30px}
+.task-status-tabs-v58{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border);background:#fff}
+.task-filter-btn-v58{height:30px;padding:0 10px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text-2);font:inherit;font-size:12px;cursor:pointer}
+.task-filter-btn-v58:hover{border-color:var(--brand);color:var(--brand)}
+.task-filter-btn-v58.active{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:600}
+.workbench-v58 .tabs{border-top:0}
+@media(max-width:760px){.task-filter-group-v58,.task-status-tabs-v58{padding:10px 16px}}
+</style>
+<script>
+/* Replace the two card groups with a single filterable task workbench. */
+(()=>{
+  let statusFilterV58='all';
+  const statusOptionsV58=[
+    ['all','全部状态'],['brief','待确认 Brief'],['brief_changes','Brief 待调整'],
+    ['execution','执行中'],['review','待结果审核'],['website','官网协同中'],['done','已完成']
+  ];
+  const statusKeyV58=t=>{
+    const out=ensureOutput(t),p=t.progressStage;
+    if(p==='done')return'done';
+    if(p==='brief')return out.briefStatus==='changes_requested'?'brief_changes':'brief';
+    if(['site_submit','site_submitted','site_accepted','site_running','site_returned','site_verifying','site_publish','publish_wait','recheck'].includes(p))return'website';
+    if(p==='human')return'review';
+    return'execution';
+  };
+  const statusLabelV58=key=>statusOptionsV58.find(x=>x[0]===key)?.[1]||'全部状态';
+  function installV58(){
+    const page=document.getElementById('optimizationPage'),work=page?.querySelector('.workbench');
+    if(!page||!work||work.dataset.v58Installed)return;
+    work.dataset.v58Installed='1';work.classList.add('workbench-v58');
+    const tabs=work.querySelector('.tabs');
+    if(tabs){tabs.classList.add('task-filter-group-v58');tabs.insertAdjacentHTML('afterbegin','<span class="task-filter-label-v58">任务类型</span>')}
+    const status=document.createElement('div');status.className='task-status-tabs-v58';status.setAttribute('aria-label','任务状态筛选');
+    status.innerHTML=`<span class="task-filter-label-v58">任务状态</span>${statusOptionsV58.map(([key,label])=>`<button type="button" class="task-filter-btn-v58 ${key==='all'?'active':''}" data-status="${key}">${label}</button>`).join('')}`;
+    tabs?.insertAdjacentElement('afterend',status);
+    status.querySelectorAll('[data-status]').forEach(btn=>btn.onclick=()=>{
+      statusFilterV58=btn.dataset.status;
+      status.querySelectorAll('[data-status]').forEach(x=>x.classList.toggle('active',x===btn));
+      renderOptimization();
+    });
+  }
+  const baseRenderV58=renderOptimization;
+  renderOptimization=function(){
+    installV58();
+    baseRenderV58();
+    const status=statusFilterV58;
+    if(status==='all')return;
+    document.querySelectorAll('#taskBody tr').forEach(row=>{
+      const id=row.querySelector('.openTask')?.dataset.id,t=id?tasks.find(x=>x.uid===id):null;
+      if(t)row.hidden=statusKeyV58(t)!==status;
+    });
+    const body=document.getElementById('taskBody');
+    if(body&&![...body.children].some(row=>!row.hidden)){
+      body.insertAdjacentHTML('beforeend',`<tr class="empty-status-row-v58"><td colspan="7" style="text-align:center;color:var(--text-3);padding:32px">当前状态暂无任务</td></tr>`);
+    }
+  };
+  window.taskStatusKeyV58=statusKeyV58;
+  installV58();
+  renderOptimization();
+})();
+</script>
+<style>
+/* v59: keep action-card guidance available without occupying a full text row. */
+.action-card h3{display:flex;align-items:center;gap:7px}
+.action-help-icon-v59{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:1px solid #b9c2d2;border-radius:50%;color:#7a879b;background:#fff;font-size:11px;font-weight:600;line-height:1;cursor:help}
+.action-help-icon-v59:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.action-card>.action-card-description-v59{display:none!important}
+.action-head>small{display:none}
+</style>
+<script>
+/* Replace visible explanatory paragraphs with the compact question-mark affordance. */
+(()=>{
+  const normalizeActionCardsV59=()=>{
+    document.querySelectorAll('#actionGrid .action-card').forEach(card=>{
+      const description=card.querySelector(':scope > p');
+      if(!description)return;
+      const help=document.createElement('span');
+      help.className='action-help-icon-v59';
+      help.textContent='?';
+      help.title=description.textContent.trim();
+      help.setAttribute('aria-label',description.textContent.trim());
+      const title=card.querySelector(':scope > h3');
+      if(title)title.append(help);
+      description.classList.add('action-card-description-v59');
+    });
+  };
+  const renderOptimizationV59Base=renderOptimization;
+  renderOptimization=function(){renderOptimizationV59Base();normalizeActionCardsV59()};
+  normalizeActionCardsV59();
+})();
+</script>
+<style>
+/* v60: dashboard overview and compact action-state treatment. */
+.optimization-data-head-v60{display:flex;align-items:center;justify-content:space-between;margin-top:28px;margin-bottom:14px}
+.optimization-data-head-v60 h2{display:flex;align-items:center;gap:10px;margin:0;color:#202938;font-size:20px;line-height:28px;font-weight:700}
+.section-icon-v60{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;color:#5365f4;font-size:25px;line-height:1}
+.period-select-v60{border:0;background:transparent;color:#697386;font:inherit;font-size:14px;cursor:pointer;padding:5px 2px}
+.period-select-v60 span{margin-left:5px;color:#8792a5;font-size:18px}
+.summary{margin-top:0!important;gap:24px!important}
+.stat{position:relative;min-height:162px;padding:28px 36px!important;border-color:#dfe4ec!important;box-shadow:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.stat:hover{border-color:#8d9bff!important;box-shadow:0 8px 24px rgba(73,89,225,.10);transform:translateY(-2px)}
+.stat b{font-size:48px!important;line-height:1!important;letter-spacing:-1px}
+.stat>span{font-size:16px!important;color:#697386!important;margin-left:5px}
+.stat small{display:block;margin-top:14px;font-size:17px!important;color:#697386!important}
+.stat-icon-v60{position:absolute;top:28px;right:34px;display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;font-size:25px;font-weight:600}
+.stat-icon-v60.all{color:#5365f4;background:#eef0ff}.stat-icon-v60.web{color:#3f88f5;background:#edf6ff}.stat-icon-v60.external{color:#a45df1;background:#faf0ff}.stat-icon-v60.repair{color:#e8a600;background:#fff4c9}
+.optimization-overview-v57>.action-board{margin-top:34px;border-top:1px solid #e4e8f0;border-radius:0;background:transparent}
+.optimization-overview-v57>.action-board .action-head{padding:28px 0 16px!important}
+.optimization-overview-v57>.action-board .action-head h2{display:flex;align-items:center;gap:10px;font-size:20px;color:#202938}
+.optimization-overview-v57>.action-board .action-head h2:before{content:"♧";font-size:25px;color:#ffad18;line-height:1}
+.optimization-overview-v57>.action-board .action-grid{padding:0!important;gap:24px}
+.action-card{min-height:142px;padding:28px 30px!important;border-radius:16px!important;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.action-card h3{font-size:22px!important;line-height:30px!important;font-weight:700!important;color:#202938!important}
+.action-card .action-foot{margin-top:28px}
+.action-card .action-foot small{font-size:17px!important;color:#7a879b!important}
+.action-card .status-pill{font-size:15px!important;font-weight:600;padding:7px 15px!important;border-radius:11px!important}
+.action-card.action-empty-v60{border:1px dashed #d9dee8!important;background:#fafbfc!important}
+.action-card.action-empty-v60 .status-pill{background:#f1f3f6!important;color:#8b95a5!important}
+.action-card.action-empty-v60 .status-pill:before{content:"";display:inline-block;width:9px;height:9px;margin-right:7px;border-radius:50%;background:#aeb7c5}
+.action-card.action-pending-v60{border:2px solid #ffb4b2!important;background:#fff!important;box-shadow:0 2px 8px rgba(255,76,76,.10)}
+.action-card.action-pending-v60 .action-count-v60{color:#f04444!important;font-weight:700}
+.action-card.action-pending-v60 .status-pill{background:#f04444!important;color:#fff!important;cursor:pointer}
+.action-card.action-pending-v60 .status-pill:after{content:"  →";font-size:18px}
+.action-card.action-ai-v60{border:2px solid #d9dcff!important;background:#fff!important}
+.action-card.action-ai-v60 .action-foot{align-items:center}
+.action-card.action-ai-v60 .action-foot small{display:flex;flex-direction:column;gap:4px;line-height:22px}
+.action-card.action-ai-v60 .status-pill{background:#eef0ff!important;color:#5365f4!important;cursor:pointer}
+.action-card.action-ai-v60 .running-count-v60{color:#777ff2;font-weight:600}
+.action-card.action-ai-v60.has-running-v60 .running-count-v60:before{content:"";display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:#777ff2;animation:pulseV60 1.8s ease-in-out infinite}
+@keyframes pulseV60{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+@media(max-width:980px){.summary{gap:12px!important}.stat{padding:22px!important}.stat-icon-v60{right:20px;top:22px}.optimization-overview-v57>.action-board .action-grid{gap:12px}.action-card{padding:22px!important}}
+</style>
+<script>
+/* Apply v60 presentation after every data refresh while retaining existing task bindings. */
+(()=>{
+  const statMetaV60={optTotal:['all','▣'],optWeb:['web','◎'],optExt:['external','♧'],optRepair:['repair','⌕']};
+  const decorateDashboardV60=()=>{
+    Object.entries(statMetaV60).forEach(([id,[kind,icon]])=>{
+      const stat=document.getElementById(id)?.closest('.stat');
+      if(!stat||stat.querySelector('.stat-icon-v60'))return;
+      const node=document.createElement('span');node.className=`stat-icon-v60 ${kind}`;node.textContent=icon;node.setAttribute('aria-hidden','true');stat.append(node);
+    });
+    document.querySelectorAll('#actionGrid .action-card').forEach(card=>{
+      card.classList.remove('action-empty-v60','action-pending-v60','action-ai-v60','has-running-v60');
+      const title=(card.querySelector(':scope > h3')?.textContent||'').replace(/\?/g,'').trim();
+      const foot=card.querySelector(':scope > .action-foot');
+      const small=foot?.querySelector('small');
+      const pill=foot?.querySelector('.status-pill');
+      const raw=small?.textContent||'';
+      const numbers=[...raw.matchAll(/\d+/g)].map(x=>Number(x[0]));
+      const count=numbers[0]||0;
+      if(title.includes('AI 建站协同')){
+        card.classList.add('action-ai-v60');
+        if(small){
+          const pending=numbers[0]||0,running=numbers[1]||0;
+          small.innerHTML=`<span>待处理: <b>${pending}</b></span><span class="running-count-v60">运行中: <b>${running}</b></span>`;
+          if(running)card.classList.add('has-running-v60');
+        }
+        if(pill)pill.textContent='查看进度';
+      }else if(count>0){
+        card.classList.add('action-pending-v60');
+        if(small){small.innerHTML=`当前 <b class="action-count-v60">${count}</b> 项`}
+        if(pill)pill.textContent='去处理';
+      }else{
+        card.classList.add('action-empty-v60');
+        if(pill)pill.textContent='暂无待办';
+      }
+    });
+  };
+  const renderOptimizationV60Base=renderOptimization;
+  renderOptimization=function(){renderOptimizationV60Base();decorateDashboardV60()};
+  decorateDashboardV60();
+})();
+</script>
+<style>
+/* v61: bring the dashboard treatment back into the product-wide compact system. */
+.optimization-data-head-v60{margin-top:24px;margin-bottom:12px}
+.optimization-data-head-v60 h2{font-size:16px;line-height:24px;font-weight:600;color:var(--text)}
+.section-icon-v60{width:20px;height:20px;font-size:20px}
+.period-select-v60{font-size:12px;color:var(--text-3)}
+.summary{gap:16px!important}
+.stat{min-height:112px;padding:16px!important;border-radius:12px!important}
+.stat b{font-size:28px!important;line-height:32px!important;letter-spacing:0}
+.stat>span{font-size:12px!important;margin-left:4px}
+.stat small{margin-top:4px;font-size:13px!important;line-height:20px;color:var(--text-2)!important}
+.stat-icon-v60{top:16px;right:16px;width:36px;height:36px;border-radius:9px;font-size:18px}
+.optimization-overview-v57>.action-board{margin-top:32px}
+.optimization-overview-v57>.action-board .action-head{padding:16px 0 12px!important}
+.optimization-overview-v57>.action-board .action-head h2{font-size:16px;line-height:24px;font-weight:600}
+.optimization-overview-v57>.action-board .action-head h2:before{font-size:20px}
+.optimization-overview-v57>.action-board .action-grid{gap:16px}
+.action-card{min-height:112px;padding:16px!important;border-radius:12px!important}
+.action-card h3{font-size:16px!important;line-height:24px!important;font-weight:600!important}
+.action-card .action-foot{margin-top:16px}
+.action-card .action-foot small{font-size:13px!important;line-height:20px}
+.action-card .status-pill{font-size:12px!important;line-height:20px;padding:3px 9px!important;border-radius:10px!important}
+.action-card.action-pending-v60{border-width:1px!important}
+.action-card.action-pending-v60 .status-pill:after{font-size:14px}
+.action-card.action-ai-v60{border-width:1px!important}
+.action-card.action-ai-v60 .action-foot small{line-height:20px}
+@media(max-width:980px){.stat{padding:14px!important}.stat-icon-v60{top:14px;right:14px}.action-card{padding:14px!important}}
+</style>
+<style>
+/* v62: weekly optimization-plan period filter. */
+.period-select-v62{height:32px;min-width:190px;padding:0 28px 0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-size:12px;cursor:pointer}
+.period-select-v62:hover{border-color:#bfc5d2;color:var(--text)}
+</style>
+<script>
+/* Scope the optimization center by weekly plan window instead of rolling days. */
+(()=>{
+  let selectedPeriodV62='all';
+  const stagesV62={siteSubmit:['site_submit','site_rejected','site_failed'],siteRunning:['site_submitted','site_accepted','site_running','site_returned','site_verifying'],execute:['todo','running']};
+  const periodValuesV62=()=>[...new Set([currentStrategyWindow,...tasks.map(t=>t.strategyWindow).filter(Boolean)])];
+  const periodTextV62=(value,index)=>value==='all'?'全部期次':`${index===0?'本期':'历史'}优化方案 · ${value}`;
+  const scopedTasksV62=()=>selectedPeriodV62==='all'?tasks:tasks.filter(t=>(t.strategyWindow||currentStrategyWindow)===selectedPeriodV62);
+  const installPeriodV62=()=>{
+    const old=document.querySelector('.period-select-v60');
+    if(!old)return;
+    if(old.matches('select.period-select-v62'))return;
+    const select=document.createElement('select');select.className='period-select-v62';select.id='optimizationPeriodFilterV62';select.setAttribute('aria-label','优化方案期次筛选');
+    const values=periodValuesV62();
+    select.innerHTML=`<option value="all">全部优化方案</option>${values.map((v,i)=>`<option value="${v.replace(/"/g,'&quot;')}">${periodTextV62(v,i)}</option>`).join('')}`;
+    select.value=selectedPeriodV62==='all'?'all':(values.includes(selectedPeriodV62)?selectedPeriodV62:'all');
+    select.onchange=()=>{selectedPeriodV62=select.value;renderOptimization()};
+    old.replaceWith(select);
+  };
+  const updateStatV62=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value};
+  const updateActionV62=(card,count,label='去处理')=>{
+    if(!card)return;
+    const small=card.querySelector(':scope > .action-foot small'),pill=card.querySelector(':scope > .action-foot .status-pill');
+    card.classList.remove('action-empty-v60','action-pending-v60');
+    if(count>0){card.classList.add('action-pending-v60');if(small)small.innerHTML=`当前 <b class="action-count-v60">${count}</b> 项`;if(pill)pill.textContent=label}
+    else{card.classList.add('action-empty-v60');if(small)small.textContent='当前 0 项';if(pill)pill.textContent='暂无待办'}
+  };
+  const applyPeriodV62=()=>{
+    installPeriodV62();
+    const scoped=scopedTasksV62();
+    updateStatV62('optTotal',scoped.length);
+    updateStatV62('optWeb',scoped.filter(t=>t.type==='web').length);
+    updateStatV62('optExt',scoped.filter(t=>t.type==='external').length);
+    updateStatV62('optRepair',scoped.filter(t=>t.type==='repair').length);
+    document.querySelectorAll('#taskBody tr').forEach(row=>{
+      const uid=row.querySelector('.openTask')?.dataset.id,t=uid?tasks.find(x=>x.uid===uid):null;
+      if(t)row.hidden=selectedPeriodV62!=='all'&&(t.strategyWindow||currentStrategyWindow)!==selectedPeriodV62;
+    });
+    document.querySelectorAll('#actionGrid .action-card').forEach(card=>{
+      const title=(card.querySelector(':scope > h3')?.textContent||'').replace(/\?/g,'').trim();
+      if(title.includes('AI 建站协同'))return;
+      if(title.includes('Task 草稿'))updateActionV62(card,scoped.filter(t=>t.progressStage==='brief'&&ensureOutput(t).briefStatus!=='changes_requested').length);
+      else if(title.includes('客户要求调整')||title.includes('待处理调整'))updateActionV62(card,scoped.filter(t=>t.progressStage==='brief'&&ensureOutput(t).briefStatus==='changes_requested').length);
+      else if(title.includes('正式执行任务')||title.includes('已进入执行'))updateActionV62(card,scoped.filter(t=>stagesV62.execute.includes(t.progressStage)).length);
+      else if(title.includes('待确认'))updateActionV62(card,scoped.filter(t=>t.progressStage==='brief').length);
+      else if(title.includes('待审核'))updateActionV62(card,scoped.filter(t=>t.progressStage==='human').length);
+    });
+  };
+  const renderOptimizationV62Base=renderOptimization;
+  renderOptimization=function(){renderOptimizationV62Base();applyPeriodV62()};
+  installPeriodV62();
+  applyPeriodV62();
+})();
+</script>
+<style>
+/* v63: tune vertical rhythm and border spacing for the two dashboard modules. */
+.optimization-overview-v57{margin-top:16px;border-radius:12px}
+.optimization-overview-v57>.summary{padding:16px 20px!important;gap:12px!important}
+.optimization-overview-v57>.summary .stat{min-height:96px;padding:14px!important;border-radius:10px!important}
+.optimization-overview-v57>.summary .stat b{font-size:26px!important;line-height:30px!important}
+.optimization-overview-v57>.summary .stat small{font-size:12px!important;line-height:20px;margin-top:3px}
+.optimization-overview-v57>.summary .stat-icon-v60{top:14px;right:14px;width:32px;height:32px;border-radius:8px;font-size:16px}
+.optimization-overview-v57>.action-board{margin-top:0;border-top:1px solid var(--border)}
+.optimization-overview-v57>.action-board .action-head{padding:16px 20px 12px!important}
+.optimization-overview-v57>.action-board .action-grid{padding:0 20px 20px!important;gap:12px}
+.optimization-overview-v57>.action-board .action-card{min-height:96px;padding:14px!important;border-radius:10px!important}
+.optimization-overview-v57>.action-board .action-card h3{font-size:14px!important;line-height:22px!important}
+.optimization-overview-v57>.action-board .action-card .action-foot{margin-top:14px}
+.optimization-overview-v57>.action-board .action-card .action-foot small{font-size:12px!important;line-height:20px}
+.optimization-overview-v57>.action-board .action-card .status-pill{font-size:12px!important;line-height:18px;padding:2px 8px!important}
+@media(max-width:760px){
+  .optimization-overview-v57>.summary{padding:12px 16px!important}
+  .optimization-overview-v57>.action-board .action-head{padding:14px 16px 10px!important}
+  .optimization-overview-v57>.action-board .action-grid{padding:0 16px 16px!important}
+}
+</style>
 </body>
 </html>
