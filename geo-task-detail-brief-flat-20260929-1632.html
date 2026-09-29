@@ -13538,6 +13538,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
 /* v75: client is the final reviewer; attention-only QA and paragraph feedback */
 .qa-compact-v74.qa-attention-v75{background:#fffaf3;border-color:#f1dfbd}
 .qa-chip-v74.attention-v75{background:#fff1df;color:#a65c00}
+.qa-chip-v74.pass-v77{background:#f3f5f8;color:#667085}
 .qa-chip-v74.fixed-v75{display:none}
 .generated-doc p.qa-focus-v75,.generated-doc h2.qa-focus-v75,.generated-doc h3.qa-focus-v75{background:#fff4d9;border-left:3px solid #f0a43c;padding:8px 12px;margin-left:-15px;border-radius:0 6px 6px 0}
 .generated-doc p.qa-fixed-v75,.generated-doc h2.qa-fixed-v75,.generated-doc h3.qa-fixed-v75{background:transparent;border-left:0;padding-left:0;margin-left:0}
@@ -13595,7 +13596,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     qa.querySelectorAll(".qa-chip-v74").forEach(function(chip){chip.remove()});
     var list=qa.querySelector(".qa-compact-items-v74");
     if(!list)return;
-    list.innerHTML=items.length?items.map(function(q){return '<span class="qa-chip-v74 attention-v75" title="'+escHtml(q[1]||"")+'">! '+escHtml(q[0])+'</span>'}).join(""):'<span class="qa-chip-v74" style="background:#f0fff5;color:#247a42">✓ 暂无注意项</span>';
+    list.innerHTML=(Array.isArray(o.qa)?o.qa:[]).map(function(q){var pass=q[2]==="pass";return '<span class="qa-chip-v74 '+(pass?'pass-v77':'attention-v75')+'" title="'+escHtml(q[1]||"")+'">'+(pass?'✓':'!')+' '+escHtml(q[0])+'</span>'}).join("");
     var head=qa.querySelector(".qa-compact-head-v74");if(head){var old=head.querySelector(".qa-feedback-v75");if(old)old.remove();if(items.length){var n=document.createElement("span");n.className="qa-feedback-v75";n.textContent="问题段落已标色";head.appendChild(n)}}
   }
   function forceClientFinal(t,o,root){
@@ -13672,6 +13673,62 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   window.renderReviewWorkspace=function(uid){try{old(uid)}catch(e){console.error("GEO1632 render",e)}forceBrief();forceFinal(uid)};
   window.openReviewWorkspace=window.renderReviewWorkspace; if(typeof openReviewWorkspace!=="undefined")openReviewWorkspace=window.renderReviewWorkspace;
   window.__geo1632_v76=true;
+})();
+</script>
+<style id="geo1632-v77-style">
+/* v77: 正文和质检解耦；只有存在风险的段落使用重点色。 */
+#generatedDoc blockquote{margin:16px 0!important;padding:0!important;background:transparent!important;border:0!important;border-left:0!important;color:inherit!important;font-style:normal!important}
+#generatedDoc .citation-mark{font-size:11px!important;line-height:20px!important;padding:1px 6px!important;border-radius:5px!important;white-space:nowrap!important}
+.generated-doc p.qa-focus-v75,.generated-doc h2.qa-focus-v75,.generated-doc h3.qa-focus-v75{background:#fff3d6!important;border:0!important;padding:0!important;margin-left:0!important}
+.generated-doc p.qa-fixed-v75,.generated-doc h2.qa-fixed-v75,.generated-doc h3.qa-fixed-v75{background:transparent!important;border:0!important;padding:0!important;margin-left:0!important}
+</style>
+<script id="geo1632-v77-script">
+(function(){
+  function paragraphs(doc){return doc?[].slice.call(doc.querySelectorAll('p,h2,h3,li,blockquote')):[]}
+  function issueInText(text,q){
+    var s=(text||'').trim(),rule=(String(q[0])+' '+String(q[1])).toLowerCase();
+    if(!s)return false;
+    if(/夸张|superlative|unsupported/.test(rule))return /best|leading|top|最优|领先|第一|顶级|最佳|唯一|100%|保证/i.test(s);
+    if(/可读性|节奏|长句/.test(rule))return s.length>150||/[，,].{45,}[。.!！?？]/.test(s);
+    if(/来源|事实|引用|幻觉|hallucination/.test(rule))return /据称|保证|承诺|一定|绝对|本地仓储|现货|当天交付|永久|全球第一|行业领先/i.test(s)&&!/(未确认|不得|不写入|仅使用已确认)/i.test(s);
+    if(/品牌|声音|一致/.test(rule))return /我们|本公司|our company|we are/i.test(s);
+    return false;
+  }
+  function hasIssue(doc,q){return paragraphs(doc).some(function(el){return issueInText(el.innerText||'',q)})}
+  function refresh(doc,o){
+    if(!doc)return;
+    doc.querySelectorAll('.qa-focus-v75,.qa-fixed-v75').forEach(function(el){el.classList.remove('qa-focus-v75','qa-fixed-v75')});
+    (Array.isArray(o.qa)?o.qa:[]).filter(function(q){return q[2]!=='pass'}).forEach(function(q){
+      var list=paragraphs(doc).filter(function(el){return issueInText(el.innerText||'',q)});
+      if(/可读性|节奏|长句/i.test(String(q[0])+' '+String(q[1]))&&!list.length){
+        var ps=paragraphs(doc).filter(function(el){return (el.innerText||'').trim().length>0});
+        list=ps.length?[ps.sort(function(a,b){return (b.innerText||'').length-(a.innerText||'').length;})[0]]:[];
+      }
+      list.forEach(function(el){el.classList.add('qa-focus-v75')});
+    });
+  }
+  function recheck(doc,o){
+    (Array.isArray(o.qa)?o.qa:[]).forEach(function(q){if(q[2]!=='pass'&&!hasIssue(doc,q))q[2]='pass'});
+    refresh(doc,o);
+  }
+  var old=window.renderReviewWorkspace;
+  window.renderReviewWorkspace=function(uid){
+    old(uid);
+    var t=tasks.find(function(x){return x.uid===uid}),o=t&&ensureOutput(t),root=document.getElementById('reviewWorkspaceRoot');
+    if(!t||!o||!root||!(t.type==='web'||t.type==='external'))return;
+    var doc=root.querySelector('#generatedDoc');if(!doc)return;
+    refresh(doc,o);
+    if(!doc.dataset.geoV77){
+      doc.dataset.geoV77='1';
+      doc.addEventListener('input',function(){
+        o.body=doc.innerHTML;
+        recheck(doc,o);
+        var qa=root.querySelector('.qa-compact-v74');
+        if(qa){var list=qa.querySelector('.qa-compact-items-v74');if(list)list.innerHTML=(o.qa||[]).map(function(q){var pass=q[2]==='pass';return '<span class="qa-chip-v74 '+(pass?'pass-v77':'attention-v75')+'" title="'+escHtml(q[1]||'')+'">'+(pass?'✓':'!')+' '+escHtml(q[0])+'</span>';}).join('');}
+      });
+    }
+  };
+  window.__geo1632_v77=true;
 })();
 </script>
 </body>
