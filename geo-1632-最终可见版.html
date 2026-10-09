@@ -12183,6 +12183,8 @@ refreshPendingEntryV29();
     out.brief=out.brief||{};
     if(!Array.isArray(out.briefMethodTagsV48))out.briefMethodTagsV48=parseMethodsV48(out.brief.methods||(t.methods||[]).join("、"));
     if(!Array.isArray(out.briefKnowledgeIdsV48))out.briefKnowledgeIdsV48=[];
+    if(typeof out.briefKnowledgeNoteV78!=="string")out.briefKnowledgeNoteV78="";
+    if(typeof out.briefWebSearchV78!=="boolean")out.briefWebSearchV78=true;
     return out;
   }
   function selectedKnowledgeV48(out){const ready=refreshKnowledgeStoreV48();return (out.briefKnowledgeIdsV48||[]).map(id=>ready.find(k=>k.id===id)).filter(Boolean)}
@@ -12199,7 +12201,7 @@ refreshPendingEntryV29();
     if(!out.briefMethodTagsV48.length)missing.push("至少选择 1 个执行方法");
     if(!isWebsiteStructureOptimizationV49(t)){
       const selected=selectedKnowledgeV48(out);
-      if(!selected.length)missing.push("从知识库选择已解析内容");
+      if(!selected.length&&!out.briefKnowledgeNoteV78.trim()&&!out.briefWebSearchV78)missing.push("使用 AI、填写一句话或选择资料");
     }
     return missing;
   }
@@ -12207,7 +12209,7 @@ refreshPendingEntryV29();
   function recordBriefVersionV48(t,out,note){
     const b=out.brief||{};out.briefVersions=out.briefVersions||[{version:1,time:t.createdAt||nowLabel(),brief:JSON.parse(JSON.stringify(b)),note:"Agent 初始生成"}];
     const next=Math.max(out.briefVersion||1,out.briefVersions.length)+1;out.briefVersion=next;b.methods=(out.briefMethodTagsV48||[]).join("、");b.revisedAt=nowLabel();b.adjustmentNote=note;
-    out.briefVersions.push({version:next,time:nowLabel(),brief:JSON.parse(JSON.stringify(b)),methodTags:[...(out.briefMethodTagsV48||[])],knowledgeIds:[...(out.briefKnowledgeIdsV48||[])],note});
+    out.briefVersions.push({version:next,time:nowLabel(),brief:JSON.parse(JSON.stringify(b)),methodTags:[...(out.briefMethodTagsV48||[])],knowledgeIds:[...(out.briefKnowledgeIdsV48||[])],knowledgeNote:out.briefKnowledgeNoteV78||"",webSearch:!!out.briefWebSearchV78,note});
     out.briefStatus="ready";t.statusLabel="待 Brief 确认";saveTaskOutputs();saveTasks();
   }
   function methodSectionV48(t,out){
@@ -12217,7 +12219,9 @@ refreshPendingEntryV29();
   function knowledgeSectionV48(t,out){
     if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>官网结构优化直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
     const editable=canPrepareBriefV48(t,out),items=selectedKnowledgeV48(out);
-    return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>知识库内容</h3><p>Agent 只使用从 AI 建站知识库选择的已解析资料。</p></div>${editable?'<button class="small-btn" id="chooseBriefKnowledgeV48">选择知识库内容</button>':''}</div><div class="brief-resource-body-v48">${items.length?`<div class="brief-kb-list-v48">${items.map(k=>`<div class="brief-kb-item-v48"><div><b>${escHtml(k.title)}</b><small>${escHtml(k.tag)} · ${escHtml(k.source)} · 可使用</small></div>${editable?`<button class="small-btn removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">移除</button>`:'<span class="status-pill green">可使用</span>'}</div>`).join("")}</div>`:'<div class="brief-empty-v48">暂无可用于本任务的知识库内容。上传资料后，请先前往 AI 建站知识库完成解析，再返回这里刷新并选择。</div>'}${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeBottomV48">从知识库选择</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':''}</div></section>`;
+    const text=[t.name,t.factor,t.dest,(t.methods||[]).join(" ")].join(" "),suggestions=/FAQ|问答/i.test(text)?["常见问题","标准答案","限制条件"]:/交期|产能|SLA|服务/i.test(text)?["交期与产能","服务范围","SLA","业务限制"]:/品牌|企业|实体/i.test(text)?["企业介绍","品牌定位","资质认证","官方信息"]:/案例/i.test(text)?["客户背景","问题与方案","结果数据"]:["产品介绍","核心参数","应用场景","产品优势","认证与案例"];
+    const sourceSummary=[out.briefWebSearchV78?"AI 联网":"",out.briefKnowledgeNoteV78.trim()?"已填写说明":"",items.length?`${items.length} 份资料`:""].filter(Boolean).join(" + ")||"尚未选择";
+    return `<section class="brief-resource-v48 brief-source-v78"><div class="brief-resource-head-v48"><div><h3>内容依据 <span class="brief-help-v78" tabindex="0">?<span>使用 AI、写一句话或选择资料，任选一种即可。联网得到的关键事实会在内容审核时标出。</span></span></h3><p>告诉 AI 本次可以参考什么。</p></div><span class="brief-source-summary-v78">${escHtml(sourceSummary)}</span></div><div class="brief-resource-body-v48"><div class="brief-suggest-v78"><b>AI 建议提供</b>${suggestions.map(x=>`<span>${escHtml(x)}</span>`).join("")}</div><label class="brief-note-v78"><span>直接告诉 AI <small>写一句话也可以</small></span><textarea id="briefKnowledgeNoteV78" rows="2" ${editable?"":"readonly"} placeholder="例如：重点介绍 XXX 产品，面向航空和汽车行业，不要写未经确认的价格。">${escHtml(out.briefKnowledgeNoteV78||"")}</textarea></label><label class="brief-web-v78"><span><b>使用 AI 联网搜索</b><small>自动补充公开资料；关键事实需确认</small></span><input type="checkbox" id="briefWebSearchV78" ${out.briefWebSearchV78?"checked":""} ${editable?"":"disabled"}></label>${items.length?`<div class="brief-selected-v78">${items.map(k=>`<span>${escHtml(k.title)}${editable?`<button type="button" class="removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">×</button>`:""}</span>`).join("")}</div>`:""}${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeV48">选择已有资料</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':""}</div></section>`;
   }
   function gateSectionV48(t,out){
     const missing=briefGateV48(t,out),ready=!missing.length;
@@ -12288,7 +12292,9 @@ refreshPendingEntryV29();
   bindTaskBriefActionsV24=function(t,out){
     ensureBriefResourcesV48(t,out);bindBriefActionsV48Base(t,out);
     document.getElementById("editBriefMethodsV48")?.addEventListener("click",()=>openMethodEditorV48(t,out));
-    const openPicker=()=>openKnowledgePickerV48(t,out);document.getElementById("chooseBriefKnowledgeV48")?.addEventListener("click",openPicker);document.getElementById("chooseBriefKnowledgeBottomV48")?.addEventListener("click",openPicker);document.getElementById("uploadBriefKnowledgeV48")?.addEventListener("click",()=>openKnowledgeUploadV48(t,out));
+    const openPicker=()=>openKnowledgePickerV48(t,out);document.getElementById("chooseBriefKnowledgeV48")?.addEventListener("click",openPicker);document.getElementById("uploadBriefKnowledgeV48")?.addEventListener("click",()=>openKnowledgeUploadV48(t,out));
+    const note=document.getElementById("briefKnowledgeNoteV78");if(note)note.onblur=()=>{const value=note.value.trim();if(value===out.briefKnowledgeNoteV78)return;out.briefKnowledgeNoteV78=value;recordBriefVersionV48(t,out,"更新直接提供给 AI 的信息");renderReviewWorkspace(t.uid)};
+    const web=document.getElementById("briefWebSearchV78");if(web)web.onchange=()=>{out.briefWebSearchV78=web.checked;recordBriefVersionV48(t,out,web.checked?"开启 AI 联网搜索":"关闭 AI 联网搜索");renderReviewWorkspace(t.uid)};
     document.querySelectorAll(".removeBriefKnowledgeV48").forEach(b=>b.onclick=()=>{out.briefKnowledgeIdsV48=(out.briefKnowledgeIdsV48||[]).filter(id=>id!==b.dataset.id);recordBriefVersionV48(t,out,"移除本任务知识库内容");renderReviewWorkspace(t.uid)});
     const confirm=document.getElementById("confirmTaskBriefV24");if(confirm){const original=confirm.onclick,missing=briefGateV48(t,out);if(missing.length){confirm.disabled=true;confirm.title=`还需完成：${missing.join("；")}`};confirm.onclick=()=>{const currentMissing=briefGateV48(t,out);if(currentMissing.length){showToast(`还需完成：${currentMissing.join("；")}`);return}original?.()}}
   };
@@ -13686,6 +13692,41 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   window.renderReviewWorkspace=function(uid){try{old(uid)}catch(e){console.error("GEO1632 render",e)}forceBrief();forceFinal(uid)};
   window.openReviewWorkspace=window.renderReviewWorkspace; if(typeof openReviewWorkspace!=="undefined")openReviewWorkspace=window.renderReviewWorkspace;
   window.__geo1632_v76=true;
+})();
+</script>
+<style id="geo1632-v78-style">
+.brief-source-v78 .brief-resource-head-v48{padding:10px 12px;align-items:center}.brief-source-v78 .brief-resource-body-v48{padding:10px 12px}.brief-help-v78{position:relative;display:inline-grid;place-items:center;width:17px;height:17px;margin-left:4px;border:1px solid var(--border);border-radius:50%;color:var(--text-3);font-size:11px;cursor:help}.brief-help-v78>span{display:none;position:absolute;left:22px;top:-8px;z-index:20;width:280px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;box-shadow:var(--shadow);color:var(--text-2);font-size:12px;font-weight:400;line-height:18px}.brief-help-v78:hover>span,.brief-help-v78:focus>span{display:block}.brief-source-summary-v78{padding:3px 8px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:11px;white-space:nowrap}.brief-suggest-v78{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:8px}.brief-suggest-v78 b{margin-right:2px;font-size:12px}.brief-suggest-v78 span{padding:2px 7px;border-radius:5px;background:var(--fill);color:var(--text-2);font-size:11px}.brief-note-v78{display:block}.brief-note-v78>span{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:12px;font-weight:600}.brief-note-v78 small{color:var(--text-3);font-weight:400}.brief-note-v78 textarea{width:100%;min-height:54px;resize:vertical;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font:inherit;font-size:12px;line-height:18px}.brief-web-v78{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:7px 9px;border:1px solid #DDE2FF;border-radius:7px;background:#F8F9FF}.brief-web-v78 span{display:flex;align-items:center;gap:7px}.brief-web-v78 b{font-size:12px}.brief-web-v78 small{color:var(--text-3);font-size:11px}.brief-web-v78 input{width:16px;height:16px;accent-color:var(--brand)}.brief-selected-v78{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.brief-selected-v78>span{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;background:#F0FFF4;color:#247A42;font-size:11px}.brief-selected-v78 button{border:0;background:transparent;color:inherit;cursor:pointer}.brief-source-v78 .brief-kb-actions-v48{margin-top:8px;padding-top:8px}.brief-source-v78 .brief-kb-actions-v48 .btn{min-height:30px;padding:3px 10px;font-size:12px}
+.web-review-v78{margin:0 auto 10px;max-width:916px;padding:9px 10px;border:1px solid #F1D49C;border-radius:8px;background:#FFFBF3}.web-review-head-v78{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.web-review-head-v78 b{font-size:12px}.web-review-count-v78{padding:1px 6px;border-radius:999px;background:#FFF0D2;color:#9A5A00;font-size:11px}.web-review-filters-v78{display:flex;gap:4px;margin-left:auto}.web-review-filters-v78 button{height:24px;padding:0 7px;border:1px solid #E8D8BA;border-radius:5px;background:#fff;color:var(--text-2);font-size:11px;cursor:pointer}.web-review-filters-v78 button.active{border-color:#E2A84C;background:#FFF3DA;color:#8A5100}.web-review-items-v78{display:flex;gap:5px;overflow-x:auto;margin-top:7px}.web-claim-v78{flex:0 0 auto;max-width:260px;padding:4px 7px;border:1px solid #ECD8B2;border-radius:6px;background:#fff;color:var(--text-2);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.web-claim-v78.confirmed{border-color:#BFE3C9;color:#247A42}.web-claim-v78.excluded{opacity:.6;text-decoration:line-through}.web-highlight-v78{background:#FFF4D9!important;border-left:3px solid #E9A23B!important;padding-left:10px!important}.web-hidden-v78{display:none!important}
+@media(max-width:700px){.brief-web-v78 span{display:block}.brief-web-v78 small{display:block}.web-review-filters-v78{width:100%;margin-left:0}.brief-help-v78>span{left:auto;right:-10px;width:240px}}
+</style>
+<script id="geo1632-v78-script">
+(function(){
+  function claimsForV78(t,o,doc){
+    if(!Array.isArray(o.webClaimsV78)){
+      var nodes=[].slice.call(doc.querySelectorAll("p")).filter(function(p){return (p.innerText||"").trim().length>30}).slice(0,2);
+      o.webClaimsV78=nodes.map(function(p,i){var text=(p.innerText||"").trim();return{id:"WEB-"+(i+1),excerpt:text.slice(0,110),critical:/参数|规格|认证|价格|交期|产能|SLA|服务范围|地址|案例|%|mm|天/.test(text),status:"pending",sourceTitle:"AI 联网检索来源",sourceUrl:"",queriedAt:nowLabel()}});
+      saveTaskOutputs();
+    }
+    return o.webClaimsV78;
+  }
+  function openClaimV78(t,o,claim){
+    drawerSub.textContent="AI 联网内容";drawerTitle.textContent=claim.critical?"关键业务事实确认":"联网内容确认";
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>内容片段</b><span class="status-pill orange">'+(claim.status==="pending"?"待确认":claim.status==="confirmed"?"已确认":claim.status==="excluded"?"已排除":"待重新搜索")+'</span></div><div class="detail-body"><p>'+escHtml(claim.excerpt)+'</p><div class="kv"><div class="k">来源</div><div class="v">'+escHtml(claim.sourceTitle||"AI 联网检索来源")+'</div><div class="k">来源链接</div><div class="v">'+(claim.sourceUrl?'<a href="'+escHtml(claim.sourceUrl)+'" target="_blank">查看来源</a>':'生成时记录真实来源链接')+'</div><div class="k">查询时间</div><div class="v">'+escHtml(claim.queriedAt||"—")+'</div><div class="k">事实类型</div><div class="v">'+(claim.critical?'关键业务事实，发布前必须确认':'公开辅助信息')+'</div></div></div></div>';
+    drawerFoot.innerHTML='<button class="btn" id="webExcludeV78">不采用</button><button class="btn" id="webRetryV78">重新搜索</button><button class="btn primary" id="webConfirmV78">确认准确</button>';drawer.classList.add("open");
+    document.getElementById("webExcludeV78").onclick=function(){claim.status="excluded";claim.reviewedAt=nowLabel();saveTaskOutputs();drawer.classList.remove("open");renderReviewWorkspace(t.uid)};
+    document.getElementById("webRetryV78").onclick=function(){claim.status="requery";claim.reviewedAt=nowLabel();saveTaskOutputs();drawer.classList.remove("open");showToast("已提交重新搜索");renderReviewWorkspace(t.uid)};
+    document.getElementById("webConfirmV78").onclick=function(){claim.status="confirmed";claim.reviewedAt=nowLabel();claim.reviewer=currentRole;saveTaskOutputs();drawer.classList.remove("open");renderReviewWorkspace(t.uid)};
+  }
+  function enhanceV78(uid){
+    var t=tasks.find(function(x){return x.uid===uid}),o=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(!t||!o||!root||!o.briefWebSearchV78||t.progressStage!=="human"||!(t.type==="web"||t.type==="external"))return;
+    var doc=root.querySelector("#generatedDoc");if(!doc)return;root.querySelector(".web-review-v78")?.remove();doc.querySelectorAll(".web-highlight-v78,.web-hidden-v78").forEach(function(p){p.classList.remove("web-highlight-v78","web-hidden-v78");delete p.dataset.webClaim});
+    var claims=claimsForV78(t,o,doc),paras=[].slice.call(doc.querySelectorAll("p")).filter(function(p){return (p.innerText||"").trim().length>30});claims.forEach(function(c,i){if(paras[i]){paras[i].dataset.webClaim=c.id;if(c.status==="pending"||c.status==="requery")paras[i].classList.add("web-highlight-v78")}});
+    var pending=claims.filter(function(c){return c.status==="pending"||c.status==="requery"}).length,box=document.createElement("section");box.className="web-review-v78";box.innerHTML='<div class="web-review-head-v78"><b>AI 联网内容</b><span class="web-review-count-v78">'+pending+' 处待确认</span><span class="brief-help-v78" tabindex="0">?<span>联网内容已在正文中标色。产品参数、认证、价格、交期等关键事实确认后才能发布。</span></span><div class="web-review-filters-v78"><button class="active" data-web-filter="all">全部</button><button data-web-filter="web">AI 联网</button><button data-web-filter="pending">待确认</button></div></div><div class="web-review-items-v78">'+claims.map(function(c){return'<button class="web-claim-v78 '+c.status+'" data-claim="'+c.id+'">'+(c.critical?'关键事实 · ':'')+escHtml(c.excerpt)+'</button>'}).join("")+'</div>';doc.insertAdjacentElement("beforebegin",box);
+    box.querySelectorAll("[data-claim]").forEach(function(b){b.onclick=function(){openClaimV78(t,o,claims.find(function(c){return c.id===b.dataset.claim}))}});
+    box.querySelectorAll("[data-web-filter]").forEach(function(b){b.onclick=function(){box.querySelectorAll("[data-web-filter]").forEach(function(x){x.classList.toggle("active",x===b)});var mode=b.dataset.webFilter;paras.forEach(function(p){var c=claims.find(function(x){return x.id===p.dataset.webClaim}),hide=mode==="web"&&!c||mode==="pending"&&(!c||!["pending","requery"].includes(c.status));p.classList.toggle("web-hidden-v78",hide)})}});
+    var confirm=root.querySelector("#geo1632ClientConfirmV76");if(confirm){var original=confirm.onclick;confirm.onclick=function(){var unresolved=claims.filter(function(c){return c.critical&&(c.status==="pending"||c.status==="requery")});if(unresolved.length){showToast("请先确认联网搜索中的关键业务事实");return}original?.()}};
+  }
+  var base=window.renderReviewWorkspace;window.renderReviewWorkspace=function(uid){base(uid);enhanceV78(uid)};window.openReviewWorkspace=window.renderReviewWorkspace;if(typeof openReviewWorkspace!=="undefined")openReviewWorkspace=window.renderReviewWorkspace;
 })();
 </script>
 </body>
