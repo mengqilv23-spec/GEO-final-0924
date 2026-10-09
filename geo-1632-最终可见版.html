@@ -12173,6 +12173,10 @@ refreshPendingEntryV29();
   let knowledgeStoreV48=readJsonV48("geoBriefKnowledgeV48",knowledgeDefaultsV48);
   const saveMethodOptionsV48=()=>localStorage.setItem("geoBriefMethodOptionsV48",JSON.stringify(methodOptionsV48));
   const saveKnowledgeV48=()=>localStorage.setItem("geoBriefKnowledgeV48",JSON.stringify(knowledgeStoreV48));
+  function refreshKnowledgeStoreV48(){
+    knowledgeStoreV48=readJsonV48("geoBriefKnowledgeV48",knowledgeDefaultsV48);
+    return knowledgeStoreV48.filter(k=>k&&k.status==="ready");
+  }
   const uniqV48=arr=>[...new Set((arr||[]).map(x=>String(x).trim()).filter(Boolean))];
   const parseMethodsV48=value=>uniqV48(String(value||"").split(/[、,，；;|]/).map(x=>x.trim()).filter(x=>x&&!/^本次执行约束/.test(x)));
   function ensureBriefResourcesV48(t,out){
@@ -12181,7 +12185,7 @@ refreshPendingEntryV29();
     if(!Array.isArray(out.briefKnowledgeIdsV48))out.briefKnowledgeIdsV48=[];
     return out;
   }
-  function selectedKnowledgeV48(out){return (out.briefKnowledgeIdsV48||[]).map(id=>knowledgeStoreV48.find(k=>k.id===id)).filter(Boolean)}
+  function selectedKnowledgeV48(out){const ready=refreshKnowledgeStoreV48();return (out.briefKnowledgeIdsV48||[]).map(id=>ready.find(k=>k.id===id)).filter(Boolean)}
   function isWebsiteStructureOptimizationV49(t){
     if(t.knowledgeRequirement==="required")return false;
     if(t.knowledgeRequirement==="not_required"||t.taskCategory==="website_structure")return true;
@@ -12195,8 +12199,7 @@ refreshPendingEntryV29();
     if(!out.briefMethodTagsV48.length)missing.push("至少选择 1 个执行方法");
     if(!isWebsiteStructureOptimizationV49(t)){
       const selected=selectedKnowledgeV48(out);
-      if(!selected.length)missing.push("选择或上传知识库内容");
-      else if(selected.some(k=>k.status!=="ready"))missing.push("等待知识资料解析完成");
+      if(!selected.length)missing.push("从知识库选择已解析内容");
     }
     return missing;
   }
@@ -12214,7 +12217,7 @@ refreshPendingEntryV29();
   function knowledgeSectionV48(t,out){
     if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>官网结构优化直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
     const editable=canPrepareBriefV48(t,out),items=selectedKnowledgeV48(out);
-    return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>知识库内容</h3><p>Agent 只使用本任务已选择且解析成功的品牌资料。</p></div>${editable?'<button class="small-btn" id="chooseBriefKnowledgeV48">选择知识库内容</button>':''}</div><div class="brief-resource-body-v48">${items.length?`<div class="brief-kb-list-v48">${items.map(k=>`<div class="brief-kb-item-v48"><div><b>${escHtml(k.title)}</b><small>${escHtml(k.tag)} · ${escHtml(k.source)} · ${k.status==="ready"?"解析成功":"处理中"}</small></div>${editable?`<button class="small-btn removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">移除</button>`:'<span class="status-pill green">可使用</span>'}</div>`).join("")}</div>`:'<div class="brief-empty-v48">暂无可用于本任务的知识库内容。可以从知识库选择；没有资料时，可上传并在解析成功后自动关联。</div>'}${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeBottomV48">从知识库选择</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':''}</div></section>`;
+    return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>知识库内容</h3><p>Agent 只使用从 AI 建站知识库选择的已解析资料。</p></div>${editable?'<button class="small-btn" id="chooseBriefKnowledgeV48">选择知识库内容</button>':''}</div><div class="brief-resource-body-v48">${items.length?`<div class="brief-kb-list-v48">${items.map(k=>`<div class="brief-kb-item-v48"><div><b>${escHtml(k.title)}</b><small>${escHtml(k.tag)} · ${escHtml(k.source)} · 可使用</small></div>${editable?`<button class="small-btn removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">移除</button>`:'<span class="status-pill green">可使用</span>'}</div>`).join("")}</div>`:'<div class="brief-empty-v48">暂无可用于本任务的知识库内容。上传资料后，请先前往 AI 建站知识库完成解析，再返回这里刷新并选择。</div>'}${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeBottomV48">从知识库选择</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':''}</div></section>`;
   }
   function gateSectionV48(t,out){
     const missing=briefGateV48(t,out),ready=!missing.length;
@@ -12242,35 +12245,43 @@ refreshPendingEntryV29();
   }
   function openKnowledgePickerV48(t,out){
     let selected=[...(out.briefKnowledgeIdsV48||[])];
-    drawerSub.textContent=`${t.uid} · Task Brief`;drawerTitle.textContent="选择知识库内容";
-    drawerBody.innerHTML=`<div class="readonly-note">只会把已选且解析成功的内容提供给本次 Agent。没有合适资料时，可直接上传。</div><div style="margin-top:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden">${knowledgeStoreV48.length?knowledgeStoreV48.map(k=>`<label class="kb-pick-row-v48"><input type="checkbox" value="${escHtml(k.id)}" ${selected.includes(k.id)?"checked":""} ${k.status!=="ready"?"disabled":""}><span><b>${escHtml(k.title)}</b><small>${escHtml(k.tag)} · ${escHtml(k.source)} · ${k.status==="ready"?"解析成功":"解析中"}<br>${escHtml(k.summary||"")}</small></span></label>`).join(""):'<div class="brief-empty-v48">知识库暂无可选内容。</div>'}</div>`;
-    drawerFoot.innerHTML='<button class="btn" id="uploadFromPickerV48">上传新资料</button><button class="btn" id="cancelKnowledgePickerV48">取消</button><button class="btn primary" id="saveKnowledgePickerV48">确认选择</button>';drawer.classList.add("open");
-    document.getElementById("uploadFromPickerV48").onclick=()=>openKnowledgeUploadV48(t,out);
-    document.getElementById("cancelKnowledgePickerV48").onclick=()=>drawer.classList.remove("open");
-    document.getElementById("saveKnowledgePickerV48").onclick=()=>{selected=[...drawerBody.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);out.briefKnowledgeIdsV48=selected;recordBriefVersionV48(t,out,"更新本任务使用的知识库内容");drawer.classList.remove("open");showToast("知识库内容已关联");renderReviewWorkspace(t.uid)};
+    const renderPicker=()=>{
+      const ready=refreshKnowledgeStoreV48();
+      drawerSub.textContent=`${t.uid} · Task Brief`;drawerTitle.textContent="从知识库选择";
+      drawerBody.innerHTML=`<div class="readonly-note">这里只展示 AI 建站知识库中已经解析完成、可以使用的资料。每次打开本弹窗都会获取最新列表。</div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="small-btn" id="refreshKnowledgePickerV48">刷新列表</button></div><div style="margin-top:8px;border:1px solid var(--border);border-radius:8px;overflow:hidden">${ready.length?ready.map(k=>`<label class="kb-pick-row-v48"><input type="checkbox" value="${escHtml(k.id)}" ${selected.includes(k.id)?"checked":""}><span><b>${escHtml(k.title)}</b><small>${escHtml(k.tag)} · ${escHtml(k.source)} · 可使用<br>${escHtml(k.summary||"")}</small></span></label>`).join(""):'<div class="brief-empty-v48">暂无可用资料。刚上传的内容需要先在 AI 建站知识库完成解析，请稍后刷新。</div>'}</div>`;
+      drawerFoot.innerHTML='<button class="btn" id="uploadFromPickerV48">上传新资料</button><button class="btn" id="cancelKnowledgePickerV48">取消</button><button class="btn primary" id="saveKnowledgePickerV48">确认选择</button>';drawer.classList.add("open");
+      document.getElementById("refreshKnowledgePickerV48").onclick=()=>{selected=[...drawerBody.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);renderPicker();showToast("已刷新 AI 建站知识库")};
+      document.getElementById("uploadFromPickerV48").onclick=()=>openKnowledgeUploadV48(t,out);
+      document.getElementById("cancelKnowledgePickerV48").onclick=()=>drawer.classList.remove("open");
+      document.getElementById("saveKnowledgePickerV48").onclick=()=>{selected=[...drawerBody.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);out.briefKnowledgeIdsV48=selected;recordBriefVersionV48(t,out,"更新本任务使用的知识库内容");drawer.classList.remove("open");showToast("知识库内容已关联");renderReviewWorkspace(t.uid)};
+    };
+    renderPicker();
   }
   function openKnowledgeUploadV48(t,out){
     drawerSub.textContent=`${t.uid} · Task Brief`;drawerTitle.textContent="上传知识资料";
     const knowledgeTags=uniqV48(knowledgeStoreV48.map(k=>k.tag).concat(["品牌事实","产品资料","信任证据","客户案例"]));
-    drawerBody.innerHTML=`<div class="brief-form-v48"><div><label>资料标签 *</label><select id="knowledgeTagV48"><option value="">请选择标签</option>${knowledgeTags.map(x=>`<option value="${escHtml(x)}">${escHtml(x)}</option>`).join("")}<option value="__new__">＋ 增加新标签</option></select><div class="brief-new-tag-v48" id="newKnowledgeTagRowV48"><input type="text" id="newKnowledgeTagV48" maxlength="24" placeholder="输入新标签名称"><span></span></div></div><div><label>资料名称 *</label><input type="text" id="knowledgeTitleV48" maxlength="60" placeholder="例如：2026 年产品规格与认证资料"></div><div><label>上传文件或填写数据 *</label><input type="file" id="knowledgeFileV48" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,image/*"><textarea id="knowledgeTextV48" style="margin-top:8px" placeholder="也可以直接粘贴需要提供给 Agent 的事实、数据或资料内容"></textarea><small style="display:block;margin-top:6px;color:var(--text-3)">文件和文本至少填写一项；已有内容不会被覆盖。</small></div></div>`;
-    drawerFoot.innerHTML='<button class="btn" id="cancelKnowledgeUploadV48">取消</button><button class="btn primary" id="submitKnowledgeUploadV48">上传并解析</button>';drawer.classList.add("open");
+    drawerBody.innerHTML=`<div class="readonly-note">此处只负责上传资料。上传完成后，请前往 AI 建站知识库进行内容解析；解析完成后，再从知识库刷新并选择。</div><div class="brief-form-v48" style="margin-top:12px"><div><label>资料标签 *</label><select id="knowledgeTagV48"><option value="">请选择标签</option>${knowledgeTags.map(x=>`<option value="${escHtml(x)}">${escHtml(x)}</option>`).join("")}<option value="__new__">＋ 增加新标签</option></select><div class="brief-new-tag-v48" id="newKnowledgeTagRowV48"><input type="text" id="newKnowledgeTagV48" maxlength="24" placeholder="输入新标签名称"><span></span></div></div><div><label>资料名称 *</label><input type="text" id="knowledgeTitleV48" maxlength="60" placeholder="例如：2026 年产品规格与认证资料"></div><div><label>上传文件或填写数据 *</label><input type="file" id="knowledgeFileV48" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,image/*"><textarea id="knowledgeTextV48" style="margin-top:8px" placeholder="也可以直接粘贴需要上传的事实、数据或资料内容"></textarea><small style="display:block;margin-top:6px;color:var(--text-3)">文件和文本至少填写一项；本页面不会执行内容解析。</small></div></div>`;
+    drawerFoot.innerHTML='<button class="btn" id="cancelKnowledgeUploadV48">取消</button><button class="btn primary" id="submitKnowledgeUploadV48">上传资料</button>';drawer.classList.add("open");
     document.getElementById("knowledgeTagV48").onchange=e=>document.getElementById("newKnowledgeTagRowV48").classList.toggle("show",e.target.value==="__new__");
     document.getElementById("knowledgeFileV48").onchange=e=>{const file=e.target.files[0],title=document.getElementById("knowledgeTitleV48");if(file&&!title.value)title.value=file.name.replace(/\.[^.]+$/,"")};
     document.getElementById("cancelKnowledgeUploadV48").onclick=()=>drawer.classList.remove("open");
     document.getElementById("submitKnowledgeUploadV48").onclick=()=>{
       const tagSelect=document.getElementById("knowledgeTagV48"),newTag=document.getElementById("newKnowledgeTagV48").value.trim(),tag=tagSelect.value==="__new__"?newTag:tagSelect.value,title=document.getElementById("knowledgeTitleV48").value.trim(),file=document.getElementById("knowledgeFileV48").files[0],data=document.getElementById("knowledgeTextV48").value.trim();
       if(!tag){showToast("请选择或新增资料标签");return}if(!title){showToast("请填写资料名称");return}if(!file&&!data){showToast("请上传文件或填写数据");return}
-      runKnowledgeUploadV48(t,out,{tag,title,fileName:file?.name||"",data},false);
+      runKnowledgeUploadV48(t,out,{tag,title,fileName:file?.name||"",data});
     };
   }
-  function runKnowledgeUploadV48(t,out,payload,forceSuccess){
+  function runKnowledgeUploadV48(t,out,payload){
     const showState=(title,desc,kind="loading")=>{drawerBody.innerHTML=`<div class="upload-state-v48">${kind==="loading"?'<div class="upload-spinner-v48"></div>':`<div class="brief-gate-icon-v48" style="margin:auto;width:32px;height:32px">${kind==="success"?"✓":"!"}</div>`}<strong>${escHtml(title)}</strong><p>${escHtml(desc)}</p></div>`;drawerFoot.innerHTML=kind==="loading"?'<button class="btn" id="cancelUploadStateV48">取消</button>':'';document.getElementById("cancelUploadStateV48")?.addEventListener("click",()=>drawer.classList.remove("open"))};
     showState("上传中","正在上传资料，请不要关闭页面。");
-    setTimeout(()=>{showState("上传成功 · 等待解析（Pending）","资料已接收，正在进入解析队列。");setTimeout(()=>{showState("解析中","正在识别资料内容并写入品牌知识库。");setTimeout(()=>{
-      const shouldFail=!forceSuccess&&(/fail/i.test(payload.fileName)||payload.data.includes("解析失败"));
-      if(shouldFail){showState("解析失败","资料内容暂时无法识别，已保留填写信息，可以直接重试。","error");drawerFoot.innerHTML='<button class="btn" id="cancelFailedUploadV48">取消</button><button class="btn primary" id="retryUploadV48">重试解析</button>';document.getElementById("cancelFailedUploadV48").onclick=()=>drawer.classList.remove("open");document.getElementById("retryUploadV48").onclick=()=>runKnowledgeUploadV48(t,out,payload,true);return}
-      const id=`KB-${Date.now()}`,item={id,title:payload.title,tag:payload.tag,source:"本次上传",status:"ready",summary:payload.data?payload.data.slice(0,70):(payload.fileName||"已上传文件")};knowledgeStoreV48.push(item);saveKnowledgeV48();out.briefKnowledgeIdsV48=uniqV48([...(out.briefKnowledgeIdsV48||[]),id]);recordBriefVersionV48(t,out,`上传并关联知识资料：${payload.title}`);showState("解析成功","资料已保存至知识库，并自动关联到当前 Brief。","success");drawerFoot.innerHTML='<button class="btn primary" id="finishKnowledgeUploadV48">完成</button>';document.getElementById("finishKnowledgeUploadV48").onclick=()=>{drawer.classList.remove("open");renderReviewWorkspace(t.uid)};
-    },850)},500)},450);
+    setTimeout(()=>{
+      const shouldFail=/upload-fail/i.test(payload.fileName)||payload.data.includes("上传失败");
+      if(shouldFail){showState("上传失败","资料上传失败，请检查文件后重试。","error");drawerFoot.innerHTML='<button class="btn" id="cancelFailedUploadV48">取消</button><button class="btn primary" id="retryUploadV48">重新上传</button>';document.getElementById("cancelFailedUploadV48").onclick=()=>drawer.classList.remove("open");document.getElementById("retryUploadV48").onclick=()=>runKnowledgeUploadV48(t,out,payload);return}
+      showState("上传成功","已完成内容上传，请前往 AI 建站知识库进行内容解析。解析完成后，可返回“从知识库选择”刷新查看。","success");
+      drawerFoot.innerHTML='<button class="btn" id="continueKnowledgeUploadV48">继续上传</button><button class="btn primary" id="backKnowledgePickerV48">从知识库选择</button>';
+      document.getElementById("continueKnowledgeUploadV48").onclick=()=>openKnowledgeUploadV48(t,out);
+      document.getElementById("backKnowledgePickerV48").onclick=()=>openKnowledgePickerV48(t,out);
+    },650);
   }
 
   const bindBriefActionsV48Base=bindTaskBriefActionsV24;
