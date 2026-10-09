@@ -5260,7 +5260,8 @@ function advanceTask(t){
   }
   saveTasks();saveCollab();renderStrategyQueue();renderOptimization();openEnhancedTask(t.uid)
 }
-const _saveTasksV5=saveTasks;saveTasks=function(){_saveTasksV5();renderStrategyQueue();if(document.getElementById("optimizationPage").classList.contains("active"))renderOptimization()};
+/* 持久化不再自动触发优化中心渲染，避免 syncTaskDraftsV24 保存任务时递归进入 renderOptimization。 */
+const _saveTasksV5=saveTasks;saveTasks=function(){_saveTasksV5();renderStrategyQueue()};
 refreshCollabControls();renderStrategyQueue();renderOptimization();
 </script>
 
