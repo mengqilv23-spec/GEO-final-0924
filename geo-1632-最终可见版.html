@@ -12543,7 +12543,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
 })();
 </script>
 <script>
-/* ===== v52: concise object codes (F-1 / S-1 / T-1 / V1) ===== */
+/* ===== v52: 页面对象编号统一使用阿拉伯数字 ===== */
 (()=>{
   const taskCodeCacheV52={};
   const taskCodeKeyV52=()=>`geoDisplayTaskCodesV52_${serviceMode||"managed"}`;
@@ -12570,11 +12570,11 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     return `T-${map[id]}`;
   }
   function replaceObjectCodesV52(value){
-    const auditCount=Math.max(6,typeof auditFindingsV20!=="undefined"?(auditFindingsV20?.length||0):0);
     return String(value||"")
-      .replace(/\bAF-0*(\d+)\b/g,(_,n)=>`F-${Number(n)}`)
-      .replace(/\bGS0*(\d+)\b/g,(_,n)=>`S-${Number(n)}`)
-      .replace(/\bF(\d+)\b/g,(_,n)=>`F-${auditCount+Number(n)}`)
+      /* 体检异常、策略及来源编号只展示数字；内部 AF/GS/F 标识不变。 */
+      .replace(/\bAF-0*(\d+)\b/g,(_,n)=>String(Number(n)))
+      .replace(/\bGS0*(\d+)\b/g,(_,n)=>String(Number(n)))
+      .replace(/\bF-?0*(\d+)\b/g,(_,n)=>String(Number(n)))
       .replace(/\bT(\d{2,})\b/g,id=>displayTaskCodeV52(id));
   }
   function applyObjectCodesV52(root=document.body){
