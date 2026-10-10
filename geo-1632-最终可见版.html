@@ -14324,5 +14324,51 @@ table td>*{
   renderAuditFindingsV20();
 })();
 </script>
+<style id="geo1632-v89-style">
+.persona-stage-filter-v89{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--text-2);font-size:13px}
+.persona-stage-filter-v89 select{height:34px;min-width:116px;padding:0 30px 0 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font:inherit;cursor:pointer}
+@media(max-width:760px){.persona-stage-filter-v89{width:100%;justify-content:flex-end}.persona-stage-filter-v89 select{min-width:108px}}
+</style>
+<script id="geo1632-v89-script">
+(function(){
+  var personaStageV89="all";
+  var needFactorsV89=new Set(["操作效率","维护难度","培训成本","停机风险","本地服务与培训","本地服务","代理支持","认证与合规","认证合规","品牌可信度","供应链风险","售后响应"]);
+  function stageForFactorV89(name){
+    if(name==="其他")return "all";
+    return needFactorsV89.has(name)?"need":"solution";
+  }
+  function matchesStageV89(name){return personaStageV89==="all"||stageForFactorV89(name)===personaStageV89}
+  function installFilterV89(){
+    var section=[...document.querySelectorAll("#diagnosisPage .section")].find(function(x){return x.querySelector("#personaTabs")});
+    var head=section?.querySelector(":scope > .section-head");if(!head)return;
+    var filter=head.querySelector(".persona-stage-filter-v89");
+    if(!filter){
+      filter=document.createElement("label");filter.className="persona-stage-filter-v89";
+      filter.innerHTML='<span>阶段</span><select id="personaStageSelectV89" aria-label="筛选买家阶段"><option value="all">全部</option><option value="need">需求评估</option><option value="solution">方案寻找</option></select>';
+      head.appendChild(filter);
+      filter.querySelector("select").onchange=function(){personaStageV89=this.value;renderPersona()};
+    }
+    filter.querySelector("select").value=personaStageV89;
+  }
+  var renderPersonaBaseV89=renderPersona;
+  renderPersona=function(){
+    var p=personas[currentPersona],factors=p?.factors,gaps=p?.gaps;
+    if(p&&personaStageV89!=="all"){
+      p.factors=factors.filter(function(f){return matchesStageV89(f[0])});
+      p.gaps=gaps.filter(function(g){return matchesStageV89(g[0])});
+      if(!p.factors.length)p.factors=factors.slice(0,1);
+    }
+    try{renderPersonaBaseV89()}finally{if(p){p.factors=factors;p.gaps=gaps}}
+    installFilterV89();
+    document.querySelectorAll("#personaTabs .persona").forEach(function(tab){
+      var item=personas[+tab.dataset.i],count=tab.querySelector(".count");if(!item||!count)return;
+      var n=personaStageV89==="all"?item.gaps.length:item.gaps.filter(function(g){return matchesStageV89(g[0])}).length;
+      count.textContent=n+" Gap";
+    });
+  };
+  window.renderPersona=renderPersona;
+  renderPersona();
+})();
+</script>
 </body>
 </html>
