@@ -25,7 +25,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Use latest prototype as homepage
-        run: cp "geo-1632-最终可见版.html" index.html
+        run: |
+          cp "geo-1632-最终可见版.html" index.html
+          mkdir -p "releases/${GITHUB_SHA}"
+          cp index.html "releases/${GITHUB_SHA}/index.html"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
