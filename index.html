@@ -4652,7 +4652,7 @@ button[disabled]{
 <div class="summary">
         <div class="stat"><b id="optTotal">0</b><span>项</span><small>全部任务</small></div>
         <div class="stat"><b id="optWeb">0</b><span>项</span><small>官网内容</small></div>
-        <div class="stat"><b id="optExt">0</b><span>项</span><small>三方内容</small></div>
+        <div class="stat"><b id="optExt">0</b><span>项</span><small>外部内容</small></div>
         <div class="stat"><b id="optRepair">0</b><span>项</span><small>技术修复</small></div>
       </div>
 <section class="action-board">
@@ -4665,12 +4665,12 @@ button[disabled]{
         <div class="tabs">
           <button class="tab active" data-filter="all">全部任务</button>
           <button class="tab" data-filter="web">官网内容</button>
-          <button class="tab" data-filter="external">三方内容</button>
+          <button class="tab" data-filter="external">外部内容</button>
           <button class="tab" data-filter="repair">技术修复</button>
         </div>
         <div class="table-wrap">
           <table class="task-table">
-            <thead><tr><th>任务</th><th>来源</th><th>协作状态</th><th>任务进度</th><th>方法</th><th>执行去向</th><th>操作</th></tr></thead>
+            <thead><tr><th>序号</th><th>任务</th><th>任务类型</th><th>来源</th><th>任务状态</th><th>操作</th></tr></thead>
             <tbody id="taskBody"></tbody>
           </table>
         </div>
@@ -14523,6 +14523,125 @@ table td>*{
   window.openStrategyDetailV18=openStrategyDetailV18;openCollabStrategyDetail=function(id){openStrategyDetailV18(id)};
   renderStrategyQueueV18=renderCandidateQueueV92;renderStrategyQueue=renderCandidateQueueV92;window.renderStrategyQueueV18=renderCandidateQueueV92;
   renderCandidateQueueV92();
+})();
+</script>
+<style id="geo1632-v93-style">
+/* v93: one consistent task taxonomy and five-stage lifecycle. */
+#optimizationPage .task-table{min-width:900px}
+#optimizationPage .task-table th,#optimizationPage .task-table td{text-align:center;vertical-align:middle}
+#optimizationPage .task-table th:nth-child(1),#optimizationPage .task-table td:nth-child(1){width:72px}
+#optimizationPage .task-table th:nth-child(2),#optimizationPage .task-table td:nth-child(2){min-width:250px}
+#optimizationPage .task-table th:nth-child(3),#optimizationPage .task-table td:nth-child(3){min-width:130px}
+#optimizationPage .task-table th:nth-child(4),#optimizationPage .task-table td:nth-child(4){min-width:160px}
+#optimizationPage .task-table th:nth-child(5),#optimizationPage .task-table td:nth-child(5){min-width:150px}
+#optimizationPage .task-table th:nth-child(6),#optimizationPage .task-table td:nth-child(6){width:110px}
+#optimizationPage .task-table .task-name b{display:block;text-align:center}
+#optimizationPage .task-sequence-v93{color:var(--text-3);font-variant-numeric:tabular-nums}
+#optimizationPage .action-grid-v93{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+@media(max-width:900px){#optimizationPage .action-grid-v93{grid-template-columns:1fr!important}}
+</style>
+<script id="geo1632-v93-script">
+(function(){
+  var statusFilterV93="all";
+  var statusOptionsV93=[
+    ["all","全部状态"],
+    ["brief","待确认 Brief"],
+    ["generating","内容生成中"],
+    ["article_review","文章待审核"],
+    ["website_review","待 AI 建站审核"],
+    ["done","已完成"]
+  ];
+  function taskTypeV93(t){return t?.type==="external"?"外部内容":t?.type==="repair"?"技术修复":"官网内容"}
+  function statusKeyV93(t){
+    var p=t?.progressStage||"brief";
+    if(p==="done")return "done";
+    if(p==="brief")return "brief";
+    if(p==="todo"||p==="running")return "generating";
+    if(p==="human"||p==="publish_wait")return "article_review";
+    return "website_review";
+  }
+  function statusMetaV93(t){
+    var key=statusKeyV93(t),label=statusOptionsV93.find(function(x){return x[0]===key})?.[1]||"待确认 Brief";
+    return [label,key==="done"?"approved":key==="generating"?"running":"pending"];
+  }
+  function singleSourceV93(t){return String(t?.source||"—").replace(/\s*(?:→|\/|\+).*/g,"").trim()||"—"}
+  function normalizeTaskDataV93(){
+    var changed=false;
+    (tasks||[]).forEach(function(t){
+      var label=taskTypeV93(t);
+      if(t.processingType!==label){t.processingType=label;changed=true}
+      if(t.type==="external"&&t.dest!=="外部内容"){t.dest="外部内容";changed=true}
+      if(t.type==="repair"&&t.dest!=="技术修复"){t.dest="技术修复";changed=true}
+    });
+    if(changed&&typeof saveTasks==="function")saveTasks();
+  }
+  function installStatusFiltersV93(){
+    var box=document.querySelector("#optimizationPage .task-status-tabs-v58");if(!box)return;
+    box.innerHTML='<span class="task-filter-label-v58">任务状态</span>'+statusOptionsV93.map(function(x){return '<button type="button" class="task-filter-btn-v58 '+(statusFilterV93===x[0]?'active':'')+'" data-status-v93="'+x[0]+'">'+x[1]+'</button>'}).join("");
+    box.querySelectorAll("[data-status-v93]").forEach(function(btn){btn.onclick=function(){statusFilterV93=btn.dataset.statusV93;renderOptimization()}});
+  }
+  function renderActionOverviewV93(){
+    var grid=document.getElementById("actionGrid");if(!grid)return;
+    var period=document.getElementById("optimizationPeriodFilterV62")?.value||"all";
+    var scoped=(tasks||[]).filter(function(t){return period==="all"||(t.strategyWindow||currentStrategyWindow)===period});
+    var groups=[
+      ["待确认 Brief","brief","策略生成 Brief 后，由客户或运营确认是否执行及所选知识库内容。"],
+      ["文章待审核","article_review","内容生成完成后，等待文章审核。"],
+      ["待 AI 建站审核","website_review","文章最终版确认并发送给 AI 建站后，等待 AI 建站审核。"]
+    ];
+    grid.classList.add("action-grid-v93");
+    grid.innerHTML=groups.map(function(group){
+      var count=scoped.filter(function(t){return statusKeyV93(t)===group[1]}).length;
+      return '<div class="action-card '+(count?'action-pending-v60':'action-empty-v60')+'"><h3>'+group[0]+'<span class="action-help-icon-v59" title="'+escHtml(group[2])+'" aria-label="'+escHtml(group[2])+'">?</span></h3><p class="action-card-description-v59">'+escHtml(group[2])+'</p><div class="action-foot"><small>当前 <b class="action-count-v60">'+count+'</b> 项</small><span class="status-pill">'+(count?'去处理':'暂无待办')+'</span></div></div>';
+    }).join("");
+  }
+  function renderTaskTableV93(){
+    var table=document.querySelector("#optimizationPage .task-table"),body=document.getElementById("taskBody");if(!table||!body)return;
+    var head=table.querySelector("thead tr");if(head)head.innerHTML="<th>序号</th><th>任务</th><th>任务类型</th><th>来源</th><th>任务状态</th><th>操作</th>";
+    var period=document.getElementById("optimizationPeriodFilterV62")?.value||"all";
+    var rows=(tasks||[]).filter(function(t){
+      var typeMatch=filter==="all"||t.type===filter;
+      var periodMatch=period==="all"||(t.strategyWindow||currentStrategyWindow)===period;
+      var statusMatch=statusFilterV93==="all"||statusKeyV93(t)===statusFilterV93;
+      return typeMatch&&periodMatch&&statusMatch;
+    });
+    body.innerHTML=rows.length?rows.map(function(t,index){
+      var st=statusMetaV93(t);
+      return '<tr class="'+(t.uid===highlightedTask?'highlight':'')+'"><td class="task-sequence-v93">'+(index+1)+'</td><td class="task-name"><b>'+escHtml(t.name)+'</b></td><td><span class="type '+escHtml(t.type)+'">'+taskTypeV93(t)+'</span></td><td>'+escHtml(singleSourceV93(t))+'</td><td><span class="progress-status '+st[1]+'">'+st[0]+'</span></td><td class="task-action-cell"><button class="small-btn primary openTask" data-id="'+escHtml(t.uid)+'">详情</button></td></tr>';
+    }).join(""):'<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:32px">当前筛选条件下暂无任务</td></tr>';
+    body.querySelectorAll(".openTask").forEach(function(button){button.onclick=function(){openReviewWorkspace(button.dataset.id)}});
+  }
+  function normalizeLabelsV93(){
+    var ext=document.getElementById("optExt")?.closest(".stat")?.querySelector("small");if(ext)ext.textContent="外部内容";
+    document.querySelectorAll("#optimizationPage .tab[data-filter='external']").forEach(function(tab){tab.textContent="外部内容"});
+    document.querySelectorAll("#optimizationPage .tab[data-filter='web']").forEach(function(tab){tab.textContent="官网内容"});
+    document.querySelectorAll("#optimizationPage .tab[data-filter='repair']").forEach(function(tab){tab.textContent="技术修复"});
+  }
+  normalizeTaskDataV93();
+  var renderOptimizationBaseV93=renderOptimization;
+  renderOptimization=function(){
+    renderOptimizationBaseV93();
+    normalizeLabelsV93();
+    installStatusFiltersV93();
+    renderActionOverviewV93();
+    renderTaskTableV93();
+  };
+  window.renderOptimization=renderOptimization;
+  window.taskStatusKeyV93=statusKeyV93;
+  window.taskTypeLabelV93=taskTypeV93;
+  window.processingTypeLabelV87=taskTypeV93;
+  var renderReviewWorkspaceBaseV93=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    renderReviewWorkspaceBaseV93(uid);
+    var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
+    root.querySelectorAll("*").forEach(function(node){
+      if(node.children.length===0&&node.textContent&&node.textContent.includes("三方内容"))node.textContent=node.textContent.replaceAll("三方内容","外部内容");
+    });
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;
+  window.openReviewWorkspace=renderReviewWorkspace;
+  openReviewWorkspace=renderReviewWorkspace;
+  renderOptimization();
 })();
 </script>
 </body>
