@@ -10648,7 +10648,7 @@ function auditStateHtmlV26(f){
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户确认":"待运营审核"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
@@ -11273,7 +11273,7 @@ function pendingStatusLabelV29(item){
     const task=tasks.find(t=>t.uid===item.object_id);
     if(task)return workspaceStatus(task,ensureOutput(task))[0];
   }
-  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核诊断':'待客户审核诊断';
+  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核':'待客户确认';
   const map={finding_review:"待审核诊断",strategy_review:"运营审核",strategy_confirm:"待用户审核",brief:"Brief 待确认",site_submit:"待提交 AI 建站",site_failed:"验证未通过",site_publish:"待发布确认",human:"待用户审核",pending:"待处理"};
   return map[item.status]||"待处理";
 }
@@ -14382,6 +14382,54 @@ table td>*{
   };
   window.renderPersona=renderPersona;
   renderPersona();
+})();
+</script>
+<script id="geo1632-v90-script">
+(function(){
+  var contentIdsV90=["AF-01","AF-02","AF-03","AF-04","AF-05"];
+  var contentSetupV90={
+    "AF-01":{title:"产品介绍信息不完整",desc:"碳纤维方案页缺少买家关心的产品特性、适用场景与选型说明。",strategy:"GS1",reason:"涉及产品事实与对外表达，需要客户确认后生成内容任务。",methods:["产品介绍","适用场景","选型说明"]},
+    "AF-02":{title:"采购 FAQ 内容待补充",desc:"采购问答区缺少交期、服务、验收与常见限制条件的完整回答。",strategy:"GS6",reason:"需要补充采购业务事实，由客户确认是否进入任务中心。",methods:["采购 FAQ","胶囊答案","限制条件"]},
+    "AF-03":{title:"认证与合规说明待完善",desc:"现有页面未完整说明认证范围、适用产品及可核验信息。",strategy:"GS7",reason:"认证与合规属于关键业务事实，需要客户确认内容处理决定。",methods:["认证说明","适用范围","事实核验"]},
+    "AF-04":{title:"专家作者档案待补充",desc:"2 位工程师已有内容贡献，但缺少可验证的专业背景、经验与作者介绍。",strategy:"GS4",reason:"需要确认专家范围、身份事实和对外介绍方式。",methods:["专家档案","作者介绍","身份事实"]},
+    "AF-05":{title:"品牌实体关联说明待补充",desc:"官网缺少品牌与官方渠道、产品与服务关系的清晰内容说明。",strategy:"GS5",reason:"品牌实体关系涉及对外表达，需要客户确认后再生成任务。",methods:["品牌实体说明","官方渠道","产品关系"]}
+  };
+  contentIdsV90.forEach(function(id){
+    var f=auditFindingsV20.find(function(x){return x.id===id}),setup=contentSetupV90[id];if(!f||!setup)return;
+    f.title=setup.title;f.desc=setup.desc;f.strategy=setup.strategy;
+    auditRouteMetaV26[id]={route:"strategy",reason:setup.reason,methods:setup.methods};
+  });
+  function activeModeV90(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
+  function resetAgentAuditDemoV90(){
+    if(window.__agentAuditDemoResetV90||activeModeV90()!=="agent")return;
+    window.__agentAuditDemoResetV90=true;
+    var removed=[];
+    tasks=(tasks||[]).filter(function(t){
+      var ids=[t.findingId].concat(t.findingIds||[]).filter(Boolean),hit=ids.some(function(id){return contentIdsV90.includes(id)});
+      if(hit)removed.push(t.uid);return !hit;
+    });
+    removed.forEach(function(uid){delete taskOutputStore[uid]});
+    contentIdsV90.forEach(function(id){
+      auditRouteStateV26[id]={route:"strategy",status:"pending"};
+      delete findingDecisionsV21[id];
+      var f=auditFindingsV20.find(function(x){return x.id===id}),s=f&&typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+      if(s&&typeof getCollab==="function"){
+        var c=getCollab(s.id);c.clientApproved=false;c.opsApproved=false;c.v18Deferred=false;c.mergedTo=null;c.v24TaskDraftUid=null;
+      }
+    });
+    auditFindingStateV20.generated=(auditFindingStateV20.generated||[]).filter(function(id){return !contentIdsV90.includes(id)});
+    auditFindingStateV20.selected=[];
+    if(typeof saveAuditFindingStateV20==="function")saveAuditFindingStateV20();
+    if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
+    if(typeof saveFindingDecisionsV21==="function")saveFindingDecisionsV21();
+    if(typeof saveCollab==="function")saveCollab();
+    if(typeof saveTaskOutputs==="function")saveTaskOutputs();
+    if(typeof saveTasks==="function")saveTasks();
+    localStorage.setItem("geoModeStateV47_agent",JSON.stringify({tasks:tasks,collabMap:collabMap,reviewMap:reviewMap,taskOutputStore:taskOutputStore,weeklyProposalV18:weeklyProposalV18,auditFindingStateV20:auditFindingStateV20,feedbackEventsV21:feedbackEventsV21,findingDecisionsV21:findingDecisionsV21,auditRouteStateV26:auditRouteStateV26}));
+  }
+  document.querySelectorAll(".serviceModeBtn").forEach(function(btn){btn.addEventListener("click",function(){setTimeout(function(){if(btn.dataset.mode==="agent"){resetAgentAuditDemoV90();renderAuditFindingsV20();renderOptimization()}},0)})});
+  resetAgentAuditDemoV90();
+  renderAuditFindingsV20();
 })();
 </script>
 </body>
