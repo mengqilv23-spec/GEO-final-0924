@@ -13832,5 +13832,63 @@ table td>*{
   align-items:center!important;
 }
 </style>
+<style id="geo1632-v82-style">
+.structure-confirm-v82{margin:16px 0;border:1px solid var(--border);border-radius:12px;background:#fff;overflow:hidden}
+.structure-confirm-head-v82{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);background:#FAFBFC}
+.structure-confirm-head-v82 h2{margin:0;font-size:15px}.structure-confirm-body-v82{padding:14px 16px}
+.structure-plan-v82{display:grid;gap:8px}.structure-plan-row-v82{display:grid;grid-template-columns:minmax(170px,.8fr) 1.5fr auto;gap:14px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:8px}
+.structure-plan-row-v82 b{font-size:13px}.structure-plan-row-v82 span{color:var(--text-2);font-size:12px;line-height:20px}.structure-accept-v82{margin-top:10px;padding:9px 11px;border-radius:7px;background:var(--fill);color:var(--text-2);font-size:12px}
+#reviewWorkspaceRoot.structure-task-v82 .site-collab-panel-v27{margin-top:0}
+#reviewWorkspaceRoot.structure-task-v82 .site-collab-title-v27 h3{font-size:15px}
+@media(max-width:760px){.structure-plan-row-v82{grid-template-columns:1fr}.structure-confirm-head-v82{align-items:flex-start;flex-direction:column}}
+</style>
+<script id="geo1632-v82-script">
+(function(){
+  function isStructureTaskV82(t){return !!t&&t.type==="repair"}
+  var workflowBase=window.workflowSteps||workflowSteps;
+  workflowSteps=function(t,out){
+    if(isStructureTaskV82(t))return [["任务确认","确认修复范围"],["AI 建站执行","站点修改"],["执行状态","结果与验证"]];
+    return workflowBase(t,out);
+  };
+  var stageBase=window.stageIndex||stageIndex;
+  stageIndex=function(t,out){
+    if(!isStructureTaskV82(t))return stageBase(t,out);
+    var p=t.progressStage||"todo";
+    if(["brief","todo","running","human","publish_wait"].includes(p))return 0;
+    if(["site_submit","site_submitted","site_rejected","site_accepted","site_running"].includes(p))return 1;
+    if(["site_returned","site_verifying","site_failed","site_publish","recheck"].includes(p))return 2;
+    if(p==="done")return 3;
+    return 0;
+  };
+  function taskConfirmHtmlV82(t,out){
+    var fixes=Array.isArray(out.fixes)?out.fixes:[],confirmed=out.briefConfirmed||!["brief","todo","running","human","publish_wait"].includes(t.progressStage);
+    var plans=fixes.length?fixes.map(function(f){return '<div class="structure-plan-row-v82"><b>'+escHtml(f.item||"官网结构修复")+'</b><span>'+escHtml(f.after||f.before||"按检查结果完成结构修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>'}).join(""):'<div class="structure-plan-row-v82"><b>'+escHtml(t.name||"官网结构修复")+'</b><span>'+escHtml(t.evidence||"按官网 GEO 体检结果完成修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>';
+    var acceptance=out.brief?.acceptance||"AI 建站完成修改并通过自动验证；执行结果在状态节点中查看。";
+    return '<section class="structure-confirm-v82" id="structureConfirmV82"><div class="structure-confirm-head-v82"><h2>任务确认</h2><span class="status-pill '+(confirmed?'green':'orange')+'">'+(confirmed?'已确认':'待确认')+'</span></div><div class="structure-confirm-body-v82"><div class="structure-plan-v82">'+plans+'</div><div class="structure-accept-v82"><b>验收标准：</b>'+escHtml(acceptance)+'</div></div></section>';
+  }
+  function bindStructurePreviewV82(t,out){
+    document.getElementById("viewSitePreviewV27")?.addEventListener("click",function(){
+      var sc=ensureSiteCollabV27(t);drawerSub.textContent=t.uid+" · 执行状态";drawerTitle.textContent="变更结果与 Diff";
+      drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>执行摘要</b><span>'+escHtml(sc.previewPath||"预览版本")+'</span></div><div class="detail-body"><div class="kv"><div class="k">变更前</div><div class="v">官网存在结构或配置异常，尚未满足验收条件。</div><div class="k">变更后</div><div class="v">'+escHtml(sc.resultSummary||"AI 建站已按确认任务完成修改。")+'</div><div class="k">自动验证</div><div class="v">'+(t.progressStage==="site_failed"?'未通过，已阻止发布':'结构检查与变更范围验证完成')+'</div><div class="k">发布状态</div><div class="v">'+(["recheck","done"].includes(t.progressStage)?"已上线":"尚未上线")+'</div></div></div></div>';
+      drawerFoot.innerHTML='<button class="btn primary" onclick="drawer.classList.remove(\'open\')">关闭</button>';drawer.classList.add("open");
+    });
+  }
+  var renderBase=window.renderReviewWorkspace||renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    renderBase(uid);var t=tasks.find(function(x){return x.uid===uid}),root=document.getElementById("reviewWorkspaceRoot");if(!isStructureTaskV82(t)||!root)return;
+    var out=ensureOutput(t),note=root.querySelector(":scope > .readonly-note");root.classList.add("structure-task-v82");
+    root.querySelector(".review-grid")?.remove();root.querySelector("#structureConfirmV82")?.remove();
+    if(note)note.insertAdjacentHTML("afterend",taskConfirmHtmlV82(t,out));
+    var panel=root.querySelector("#siteCollabPanelV27");if(panel){var title=panel.querySelector(".site-collab-title-v27 h3");if(title)title.textContent="AI 建站执行";var blocks=panel.querySelectorAll(".site-block-title-v27 b");if(blocks[0])blocks[0].textContent="确认后提交的执行任务";if(blocks[1])blocks[1].textContent="执行状态"}
+    var legacy=["brief","todo","running","human","publish_wait"].includes(t.progressStage),actionNote=document.getElementById("reviewActionNote"),actionBox=document.getElementById("reviewActionButtons");
+    if(legacy&&actionNote&&actionBox){var canConfirm=serviceMode==="managed"?currentRole==="ops":currentRole==="client";actionNote.textContent=canConfirm?"确认修复范围后，任务将进入 AI 建站执行。":"等待负责角色确认任务。";actionBox.innerHTML=canConfirm?'<button class="btn primary" id="confirmStructureTaskV82">确认任务</button>':'<button class="btn" disabled>等待任务确认</button>';document.getElementById("confirmStructureTaskV82")?.addEventListener("click",function(){out.briefConfirmed=true;t.progressStage="site_submit";t.statusLabel="待提交 AI 建站";ensureSiteCollabV27(t);saveTaskOutputs();saveTasks();showToast("任务已确认，进入 AI 建站执行");renderReviewWorkspace(t.uid)})}
+    bindStructurePreviewV82(t,out);
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;if(typeof openReviewWorkspace!=="undefined")openReviewWorkspace=renderReviewWorkspace;
+  var optimizationBase=window.renderOptimization||renderOptimization;
+  renderOptimization=function(){optimizationBase();document.querySelectorAll("#taskBody tr").forEach(function(row){var uid=row.querySelector(".openTask,.directTaskAction")?.dataset.id,t=tasks.find(function(x){return x.uid===uid});if(!isStructureTaskV82(t))return;var flow=row.querySelector(".task-flow-note-v26");if(flow)flow.textContent="任务确认 → AI 建站执行 → 执行状态"})};
+  window.renderOptimization=renderOptimization;
+})();
+</script>
 </body>
 </html>
