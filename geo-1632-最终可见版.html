@@ -14432,5 +14432,35 @@ table td>*{
   renderAuditFindingsV20();
 })();
 </script>
+<script id="geo1632-v91-script">
+(function(){
+  var reconcilingV91=false;
+  function reconcileRowsV91(root){
+    if(reconcilingV91)return;reconcilingV91=true;
+    try{
+      var rows=[];
+      if(root?.matches?.(".geo-finding-row"))rows.push(root);
+      if(root?.querySelectorAll)rows=rows.concat([].slice.call(root.querySelectorAll(".geo-finding-row")));
+      rows.forEach(function(row){
+        var f=auditFindingsV20.find(function(x){return x.id===row.dataset.finding});if(!f)return;
+        var tech=auditRouteForV26(f)==="repair",button=row.querySelector(".finding-actions-v26 button,.findingDetailV26,.tech-detail-v85,.finding-detail-btn"),check=row.querySelector(".finding-check");
+        if(button){button.textContent=tech?"查看详情":"审核";button.dataset.id=f.id;button.onclick=function(){openFindingDetailV26(f.id)}}
+        if(check&&tech){check.checked=false;check.disabled=true}
+      });
+    }finally{reconcilingV91=false}
+  }
+  var renderAuditBaseV91=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){renderAuditBaseV91();reconcileRowsV91(document.getElementById("geoAlertListV20"))};
+  window.renderAuditFindingsV20=renderAuditFindingsV20;
+  var listV91=document.getElementById("geoAlertListV20");
+  if(listV91){
+    new MutationObserver(function(records){
+      if(reconcilingV91)return;
+      records.forEach(function(record){record.addedNodes.forEach(function(node){if(node.nodeType===1)reconcileRowsV91(node)})});
+    }).observe(listV91,{childList:true,subtree:true});
+  }
+  reconcileRowsV91(listV91);
+})();
+</script>
 </body>
 </html>
