@@ -14946,5 +14946,20 @@ table td>*{
   if(changed){saveTaskOutputs();saveTasks()}
 })();
 </script>
+<style id="geo1632-v101-global-detail-cleanup-style">
+.site-collab-panel-v27,.brief-version-v47{display:none!important}
+</style>
+<script id="geo1632-v101-global-detail-cleanup-script">
+(function(){
+  function removeRedundantDetailBlocksV101(){
+    var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
+    root.querySelectorAll(".site-collab-panel-v27,.brief-version-v47").forEach(function(node){node.remove()});
+  }
+  var reviewBaseV101=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){var result=reviewBaseV101(uid);removeRedundantDetailBlocksV101();return result};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  removeRedundantDetailBlocksV101();
+})();
+</script>
 </body>
 </html>
