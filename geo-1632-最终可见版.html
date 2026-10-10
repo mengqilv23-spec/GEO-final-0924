@@ -12258,8 +12258,8 @@ refreshPendingEntryV29();
     if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>技术修复直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
     const editable=canPrepareBriefV48(t,out)||window.geoKnowledgeEditableV100===true,items=selectedKnowledgeV48(out);
     const text=[t.name,t.factor,t.dest,(t.methods||[]).join(" ")].join(" "),baseSuggestions=/FAQ|问答/i.test(text)?["常见问题","标准答案","限制条件"]:/交期|产能|SLA|服务/i.test(text)?["交期与产能","服务范围","SLA","业务限制"]:/品牌|企业|实体/i.test(text)?["企业介绍","品牌定位","资质认证","官方信息"]:/案例/i.test(text)?["客户背景","问题与方案","结果数据"]:["产品介绍","核心参数","应用场景","产品优势","认证与案例"],covered=items.map(k=>`${k.title} ${k.summary}`).join(" "),suggestions=baseSuggestions.filter(x=>!covered.includes(x)).slice(0,4);
-    const sourceSummary=items.length?`已关联 ${items.length} 份知识资料`:"尚未关联知识资料";
-    return `<section class="brief-resource-v48 brief-source-v78"><div class="brief-resource-head-v48"><div><h3>知识库资料</h3><p>Agent 执行时参考的知识库内容；可调整关联资料或上传新资料。</p></div><span class="brief-source-summary-v78">${escHtml(sourceSummary)}</span></div><div class="brief-resource-body-v48">${items.length?`<div class="brief-auto-v79"><b>已关联资料</b>${items.map(k=>`<span>${escHtml(k.title)}${editable?`<button type="button" class="removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">×</button>`:""}</span>`).join("")}</div>`:'<div class="brief-empty-v48">当前没有关联知识库资料。</div>'}${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeV48">调整已有资料</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':""}</div></section>`;
+    const sourceSummary=[items.length?`AI 已匹配 ${items.length} 份知识`:"知识库无匹配",out.briefWebSearchV78?"联网补充":"",out.briefKnowledgeNoteV78.trim()?"已填写说明":""].filter(Boolean).join(" + ");
+    return `<section class="brief-resource-v48 brief-source-v78"><div class="brief-resource-head-v48"><div><h3>内容依据 <span class="brief-help-v78" tabindex="0">?<span>进入 Brief 时，AI 会先检索并选择知识库资料；信息不足时再联网补充。你可以调整资料或写一句要求。</span></span></h3><p>AI 优先使用已有知识，再补充缺少的信息。</p></div><span class="brief-source-summary-v78">${escHtml(sourceSummary)}</span></div><div class="brief-resource-body-v48">${items.length?`<div class="brief-auto-v79"><b>AI 自动匹配</b>${items.map(k=>`<span>${escHtml(k.title)}${editable?`<button type="button" class="removeBriefKnowledgeV48" data-id="${escHtml(k.id)}">×</button>`:""}</span>`).join("")}</div>`:""}<div class="brief-suggest-v78"><b>${items.length?"建议再补充":"AI 建议提供"}</b>${(suggestions.length?suggestions:["补充业务要求"]).map(x=>`<span>${escHtml(x)}</span>`).join("")}</div><label class="brief-note-v78"><span>直接告诉 AI <small>写一句话也可以</small></span><textarea id="briefKnowledgeNoteV78" rows="2" ${editable?"":"readonly"} placeholder="例如：重点介绍 XXX 产品，面向航空和汽车行业，不要写未经确认的价格。">${escHtml(out.briefKnowledgeNoteV78||"")}</textarea></label><label class="brief-web-v78"><span><b>知识不足时联网补充</b><small>联网内容会在审核时标出</small></span><input type="checkbox" id="briefWebSearchV78" ${out.briefWebSearchV78?"checked":""} ${editable?"":"disabled"}></label>${editable?'<div class="brief-kb-actions-v48"><button class="btn" id="chooseBriefKnowledgeV48">调整已有资料</button><button class="btn" id="uploadBriefKnowledgeV48">上传新资料</button></div>':""}</div></section>`;
   }
   function gateSectionV48(t,out){
     const missing=briefGateV48(t,out),ready=!missing.length;
@@ -14968,19 +14968,7 @@ table td>*{
     window.geoKnowledgeEditableV100=false;
     if(!isContentTaskV99(task))return;
     var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
-    var resultTab=root.querySelector('.review-tab[data-review-tab="result"]'),resultPane=root.querySelector('.review-pane[data-pane="result"]');
-    var knowledgeSection=root.querySelector(".brief-source-v78");
-    if(knowledgeSection)knowledgeSection.remove();
-    root.querySelectorAll('.review-tab[data-review-tab="brief"],.review-pane[data-pane="brief"],.brief-version-v47,.brief-resource-v48:not(.brief-source-v78),.brief-confirm-panel-v24,.brief-gate-v48,.brief-lock-v24,.task-draft-badge-v24').forEach(function(element){element.remove()});
-    if(knowledgeSection&&resultPane){knowledgeSection.querySelectorAll(".brief-suggest-v78,.brief-note-v78,.brief-web-v78").forEach(function(element){element.remove()});resultPane.appendChild(knowledgeSection)}
-    root.querySelectorAll(".review-tab").forEach(function(tab){tab.classList.toggle("active",tab===resultTab);tab.disabled=false;tab.classList.remove("v24-disabled")});
-    root.querySelectorAll(".review-pane").forEach(function(pane){pane.classList.toggle("active",pane===resultPane)});
-    var heading=root.querySelector(".review-main-head h2");if(heading&&/Brief|草稿/.test(heading.textContent))heading.textContent="任务内容";
-    root.querySelector(".doc-toolbar")?.remove();
-    root.querySelectorAll("#toggleEditDoc,#saveDocBtn,#requestBriefChangeV24,#confirmTaskBriefV24,#reworkTaskBriefV24,#confirmBriefFactV24").forEach(function(button){button.remove()});
-    var doc=root.querySelector("#generatedDoc");if(doc){doc.contentEditable="false";doc.onclick=null;doc.removeAttribute("title")}
-    if(!["site_submit","site_submitted","site_accepted","site_running","site_returned","site_verifying","site_publish","recheck","done"].includes(task.progressStage))root.querySelector("#siteCollabPanelV27")?.remove();
-    var note=root.querySelector("#reviewActionNote");if(note&&task.progressStage==="running")note.textContent="Agent 正在根据已维护的知识库生成任务内容。";
+    root.querySelectorAll(".brief-confirm-panel-v24,.brief-gate-v48,.brief-lock-v24,#requestBriefChangeV24,#confirmTaskBriefV24,#reworkTaskBriefV24,#confirmBriefFactV24").forEach(function(element){element.remove()});
   };
   window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
   var optimizationBaseV99=renderOptimization;
