@@ -14255,9 +14255,16 @@ table td>*{
   function isContentV88(f){return !!f&&!isTechV88(f)}
   function existingTaskV88(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
   function displayStatusV88(f){
+    if(typeof window.geoAuditPresentationV96==="function")return window.geoAuditPresentationV96(f).status;
     if(isTechV88(f))return websiteAuditStatusV26(f);
     var t=existingTaskV88(f),decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
-    if(t)return{text:"已生成任务",cls:"approved"};
+    if(t){
+      var out=typeof ensureOutput==="function"?ensureOutput(t):{};
+      if(modeV88()==="agent"&&t.type==="web"&&!out.briefConfirmed){
+        return{text:"待用户去优化中心审核",cls:"pending"};
+      }
+      return{text:"已生成任务",cls:"approved"};
+    }
     if(decision?.status==="deferred")return{text:"暂不修复",cls:"defer"};
     return{text:modeV88()==="agent"?"待客户审核":"待运营审核",cls:"pending"};
   }
@@ -14297,7 +14304,7 @@ table td>*{
     return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(status.cls||"pending")+'">'+escHtml(status.text||"待处理")+'</span></div>';
   };
   auditActionsHtmlV26=function(f){
-    var label=isTechV88(f)||existingTaskV88(f)||!canReviewContentV88()?"查看详情":"审核";
+    var label=isTechV88(f)||existingTaskV88(f)||!canReviewContentV88()?"查看详情":"处理";
     return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+label+'</button></div>';
   };
   openFindingDetailV26=function(id){
@@ -14684,6 +14691,50 @@ table td>*{
   window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
   window.taskSourceLabelV95=sourceLabelV95;
   normalizeStrategyTitleV95();applyTaskSourcesV95();
+})();
+</script>
+<script id="geo1632-v96-script">
+(function(){
+  /* The audit list has one final source of truth for its status and action. */
+  function isTechnicalFinding(f){
+    return !!f&&typeof auditRouteForV26==="function"&&auditRouteForV26(f)==="repair";
+  }
+  function taskForFinding(f){
+    var linked=typeof taskByFindingV26==="function"?taskByFindingV26(f.id):null;
+    return linked||(tasks||[]).find(function(task){return task.findingId===f.id||(task.findingIds||[]).includes(f.id)})||null;
+  }
+  function isAgentMode(){
+    return (document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode)==="agent";
+  }
+  function isClientRole(){
+    return (window.currentRole||currentRole)==="client";
+  }
+  window.geoAuditPresentationV96=function(f){
+    var task=taskForFinding(f),out=task&&typeof ensureOutput==="function"?ensureOutput(task):{};
+    if(isTechnicalFinding(f)){
+      if(typeof isRecoveredV26==="function"&&isRecoveredV26(f))return {status:{text:"已修复",cls:"done"},action:"查看详情"};
+      if(task?.v42Ignored||task?.progressStage==="ignored")return {status:{text:"暂不修复",cls:"defer"},action:"查看详情"};
+      return {status:{text:"已提交官网",cls:"pending"},action:"查看详情"};
+    }
+    if(task){
+      if(isAgentMode()&&task.type==="web"&&!out.briefConfirmed){
+        return {status:{text:"待用户去优化中心审核",cls:"pending"},action:"查看详情"};
+      }
+      var taskStatus=typeof workspaceStatus==="function"?workspaceStatus(task,out):[task.statusLabel||"已生成任务","approved"];
+      return {status:{text:taskStatus[0],cls:taskStatus[1]||"approved"},action:"查看详情"};
+    }
+    if(isAgentMode())return {status:{text:"待用户审核",cls:"pending"},action:isClientRole()?"处理":"查看详情"};
+    return {status:{text:"待运营审核",cls:"pending"},action:"查看详情"};
+  };
+  auditStateHtmlV26=function(f){
+    var state=window.geoAuditPresentationV96(f).status;
+    return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(state.cls||"pending")+'">'+escHtml(state.text||"待处理")+'</span></div>';
+  };
+  auditActionsHtmlV26=function(f){
+    var action=window.geoAuditPresentationV96(f).action;
+    return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+action+'</button></div>';
+  };
+  renderAuditFindingsV20();
 })();
 </script>
 </body>
