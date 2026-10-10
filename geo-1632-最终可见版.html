@@ -13967,5 +13967,195 @@ table td>*{
   splitExistingV83();cleanMergeUiV83(document);renderAuditFindingsV20();renderStrategyQueue();renderOptimization();
 })();
 </script>
+<script id="geo1632-v84-script">
+(function(){
+  var repairMetaBaseV84=findingProcessingMetaV37;
+  findingProcessingMetaV37=function(f){
+    var meta=repairMetaBaseV84(f);
+    return auditRouteForV26(f)==="repair"&&f.id!=="AF-06"?{label:"技术修复",reason:meta.reason}:meta;
+  };
+  var statusBaseV84=websiteAuditStatusV26;
+  websiteAuditStatusV26=function(f){
+    var t=taskByFindingV26(f.id);
+    if(t&&["site_submit","site_submitted","site_accepted","site_running","site_returned","site_verifying","site_publish","recheck"].includes(t.progressStage)){
+      var labels={site_submit:"已提交官网",site_submitted:"官网处理中",site_accepted:"官网已接单",site_running:"官网处理中",site_returned:"官网已完成 · 验证中",site_verifying:"自动验证中",site_publish:"自动发布中",recheck:"Re-check 中"};
+      return {text:labels[t.progressStage]||"官网处理中",cls:"pending"};
+    }
+    return statusBaseV84(f);
+  };
+  var stageLabelBaseV84=siteStageLabelV27;
+  siteStageLabelV27=function(stage){
+    var label=stageLabelBaseV84(stage);
+    return label==="AI 建站审核中"?"官网处理中":label;
+  };
+  var contextBaseV84=contextDescriptionV27;
+  contextDescriptionV27=function(){return contextBaseV84()+" 技术修复直接提交官网，不需人工审核，任何角色均可查看进度。"};
+  var paintContextBaseV84=paintContextControlsV27;
+  paintContextControlsV27=function(){
+    paintContextBaseV84();
+    var desc=document.getElementById("diagCollabDesc");
+    if(desc)desc.textContent=serviceMode==="managed"?"代运营模式：内容策略由 Agent 产出、运营审核并由客户确认；技术修复直接提交官网，任何角色均可查看进度。":"Agent 自主模式：Agent 负责内容策略与执行；技术修复直接提交官网，任何角色均可查看进度。";
+  };
+  document.querySelectorAll(".serviceModeBtn").forEach(function(button){button.onclick=function(){
+    var next=button.dataset.mode;if(next===serviceMode)return;serviceMode=next;if(serviceMode==="agent")currentRole="client";
+    paintContextControlsV27();refreshCurrentSurfaceV27();
+    showToast("已切换为"+(serviceMode==="managed"?"代运营":"Agent 自主")+"模式；技术修复直接提交官网，内容策略按当前模式流转");
+  }});
+  function isTechFindingV84(f){return !!f&&f.id!=="AF-06"&&auditRouteForV26(f)==="repair"}
+  function isTechRepairV84(t){var ids=[t?.findingId].concat(t?.findingIds||[]).filter(Boolean);return !!t&&t.type==="repair"&&!ids.includes("AF-06")&&(t.routeType==="direct_repair"||t.taskCategory==="website_structure"||t.taskCategory==="technical_repair"||ids.some(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return isTechFindingV84(f)}))}
+  function findRepairTaskV84(f){return tasks.find(function(t){return isTechRepairV84(t)&&((t.findingId===f.id)||(t.findingIds||[]).includes(f.id))})||null}
+  function submitTechRepairV84(f){
+    var t=findRepairTaskV84(f)||makeFindingTaskV83(f),out=ensureOutput(t),sc=ensureSiteCollabV27(t);
+    t.type="repair";t.routeType="direct_repair";t.taskCategory="website_structure";t.knowledgeRequirement="not_required";t.dest="AI 官网协同";t.findingId=f.id;t.findingIds=[f.id];t.source=f.id;t.isDraft=false;t.status="running";t.statusLabel="官网处理中";t.progressStage="site_running";
+    out.briefConfirmed=true;out.briefStatus="ready";out.published=false;
+    sc.submittedAt=sc.submittedAt||nowLabel();sc.acceptedAt=sc.acceptedAt||nowLabel();sc.status="site_running";sc.targetPage=f.check_item_name||sc.targetPage;siteLogV27(sc,"官网 GEO 体检已直接提交该技术修复，官网开始处理；无需客户或运营审核。");
+    auditRouteStateV26[f.id]={...(auditRouteStateV26[f.id]||{}),route:"repair",status:"task_created",taskId:t.uid};
+    saveTaskOutputs();saveAuditRouteV26();saveTasks();
+    return t;
+  }
+  function createTechRepairsV84(ids,openProgress){
+    var fs=auditFindingsV20.filter(function(f){return ids.includes(f.id)&&isTechFindingV84(f)}),created=[];
+    fs.forEach(function(f){created.push(submitTechRepairV84(f))});
+    auditFindingStateV20.selected=auditFindingStateV20.selected.filter(function(id){return !ids.includes(id)});
+    saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();
+    if(fs.length)showToast(fs.length===1?"技术修复已直接提交官网":"已将 "+fs.length+" 个技术修复分别提交官网");
+    renderAuditFindingsV20();renderOptimization();
+    if(openProgress&&created[0])openReviewWorkspace(created[0].uid);
+    return created;
+  }
+  createRepairTasksV26=function(ids){
+    var tech=ids.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(f){return f.id===id}))}),info=ids.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});
+    if(tech.length)createTechRepairsV84(tech,false);
+    auditFindingStateV20.selected=auditFindingStateV20.selected.filter(function(id){return !ids.includes(id)});
+    info.forEach(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});if(!f)return;var t=makeFindingTaskV83(f),out=ensureOutput(t);t.taskCategory="knowledge_based";t.knowledgeRequirement="required";t.progressStage="brief";t.isDraft=true;out.briefConfirmed=false;out.briefFactConfirmed=false;auditRouteStateV26[id]={...(auditRouteStateV26[id]||{}),route:"repair",status:"task_created",taskId:t.uid}});
+    if(info.length){saveTaskOutputs();saveAuditRouteV26();saveTasks();showToast("地址口径异常需确认正确信息后处理")}
+    if(tech.length||info.length){saveAuditFindingStateV20();renderAuditFindingsV20();renderOptimization()}
+  };
+  var batchBaseV84=confirmBatchRouteV36;
+  confirmBatchRouteV36=function(route,ids){
+    if(route!=="repair")return batchBaseV84(route,ids);
+    var tech=ids.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(f){return f.id===id}))}),info=ids.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});
+    if(tech.length)createTechRepairsV84(tech,false);
+    if(info.length)batchBaseV84("repair",info);
+  };
+  var actionsBaseV84=auditActionsHtmlV26;
+  auditActionsHtmlV26=function(f){
+    if(!isTechFindingV84(f))return actionsBaseV84(f);
+    var t=findRepairTaskV84(f);
+    return '<div class="finding-actions-v26"><button class="small-btn '+(t?"tech-progress-v84":"tech-submit-v84")+'" data-id="'+escHtml(f.id)+'">'+(t?"查看官网处理进度":"处理并提交官网")+'</button></div>';
+  };
+  var detailBaseV84=openFindingDetailV26;
+  openFindingDetailV26=function(id){
+    var f=auditFindingsV20.find(function(x){return x.id===id});
+    if(f&&auditRouteForV26(f)==="repair"){
+      var t=findRepairTaskV84(f);
+      if(t){openReviewWorkspace(t.uid);return}
+      createTechRepairsV84([id],true);return;
+    }
+    return detailBaseV84(id);
+  };
+  var auditRenderBaseV84=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){
+    auditRenderBaseV84();
+    document.querySelectorAll(".tech-submit-v84").forEach(function(b){b.onclick=function(){createTechRepairsV84([b.dataset.id],true)}});
+    document.querySelectorAll(".tech-progress-v84").forEach(function(b){b.onclick=function(){var f=auditFindingsV20.find(function(x){return x.id===b.dataset.id}),t=f&&findRepairTaskV84(f);if(t)openReviewWorkspace(t.uid)}});
+    var bulk=document.getElementById("generateRepairV26");
+    if(bulk){var selected=auditFindingStateV20.selected.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(x){return x.id===id}))}),infoSelected=auditFindingStateV20.selected.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});bulk.disabled=!selected.length&&!infoSelected.length;bulk.textContent=selected.length?"提交官网 · "+selected.length:infoSelected.length?"确认信息 · "+infoSelected.length:"提交官网";bulk.onclick=function(){if(selected.length)createTechRepairsV84(selected,false);if(infoSelected.length)batchBaseV84("repair",infoSelected)}}
+    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent="技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
+    relabelV84(document.body);
+  };
+  var workspaceStatusBaseV84=workspaceStatus;
+  workspaceStatus=function(t,out){
+    if(isTechRepairV84(t)){
+      if(t.progressStage==="done")return ["已完成","done"];
+      if(t.progressStage==="recheck")return ["Re-check 中","running"];
+      if(t.progressStage==="site_failed")return ["自动重试中","running"];
+      return [({site_returned:"官网已完成 · 自动验证中",site_verifying:"自动验证中",site_publish:"自动发布中"})[t.progressStage]||"官网处理中","running"];
+    }
+    return workspaceStatusBaseV84(t,out);
+  };
+  var workflowBaseV84=workflowSteps;
+  workflowSteps=function(t,out){return isTechRepairV84(t)?[["任务确认","已自动确认"],["AI 建站执行","官网修复"],["执行状态","进度与验证"]]:workflowBaseV84(t,out)};
+  var stageBaseV84=stageIndex;
+  stageIndex=function(t,out){
+    if(isTechRepairV84(t)){
+      var p=t.progressStage||"site_running";
+      if(["brief","todo","human","publish_wait","site_submit","site_submitted","site_accepted"].includes(p))return 0;
+      if(p==="site_running")return 1;
+      return 2;
+    }
+    return stageBaseV84(t,out);
+  };
+  var reviewBaseV84=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    var t=tasks.find(function(x){return x.uid===uid});
+    if(isTechRepairV84(t)){
+      var out=ensureOutput(t);
+      if(["brief","todo","human","publish_wait","site_submit","site_submitted","site_accepted","site_rejected"].includes(t.progressStage)){
+        t.progressStage="site_running";t.status="running";t.statusLabel="官网处理中";out.briefConfirmed=true;
+        var sc=ensureSiteCollabV27(t);sc.submittedAt=sc.submittedAt||nowLabel();sc.acceptedAt=sc.acceptedAt||nowLabel();sc.status="site_running";
+        saveTaskOutputs();saveTasks();
+      }
+      if(t.progressStage==="site_publish"){
+        out.published=true;t.progressStage="recheck";t.statusLabel="Re-check 中";
+        var completed=ensureSiteCollabV27(t);completed.status="recheck";siteLogV27(completed,"自动验证通过，技术修复已自动发布并进入 Re-check。");saveTaskOutputs();saveTasks();
+      }
+      if(t.progressStage==="site_failed"){
+        t.progressStage="site_running";t.statusLabel="官网处理中";var retry=ensureSiteCollabV27(t);retry.status="site_running";siteLogV27(retry,"官网根据自动验证结果重新处理该修复。");saveTaskOutputs();saveTasks();
+      }
+    }
+    reviewBaseV84(uid);
+    if(!isTechRepairV84(t))return;
+    var box=document.getElementById("reviewActionButtons"),note=document.getElementById("reviewActionNote");
+    if(note)note.textContent=t.progressStage==="recheck"?"官网修复已自动发布，正在进行 GEO Re-check。":"技术修复已直接提交官网，当前进度与验证结果会在此更新。";
+    if(box)box.innerHTML='<span class="system-progress-v47">'+(t.progressStage==="recheck"?"Re-check 中":"官网处理中 · 无需审核")+'</span>';
+    var flow=document.querySelector("#taskBody .task-flow-note-v26");if(flow&&t)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
+    relabelV84(document.getElementById("reviewWorkspaceRoot"));
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  var optimizationBaseV84=renderOptimization;
+  renderOptimization=function(){
+    optimizationBaseV84();
+    document.querySelectorAll("#taskBody tr").forEach(function(row){
+      var uid=row.querySelector(".openTask,.directTaskAction")?.dataset.id,t=tasks.find(function(x){return x.uid===uid});if(!isTechRepairV84(t))return;
+      var action=row.querySelector(".directTaskAction"),flow=row.querySelector(".task-flow-note-v26"),next=row.querySelector(".task-next");
+      if(action){action.textContent="查看官网处理进度";action.classList.remove("primary")}
+      if(flow)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
+      if(next)next.textContent=t.progressStage==="recheck"?"当前状态：Re-check 中":"当前状态：官网处理中";
+    });
+    relabelV84(document.getElementById("optimizationPage"));
+  };
+  window.renderOptimization=renderOptimization;
+  function relabelV84(root){
+    if(!root||!document.createTreeWalker)return;
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;
+    while((node=walker.nextNode())){
+      var parent=node.parentElement;if(!parent||/^(SCRIPT|STYLE|TEXTAREA)$/.test(parent.tagName))continue;
+      node.nodeValue=node.nodeValue.replace(/官网结构优化|网站结构优化|页面结构优化|官网结构修复|官网结构|官网技术 · 直接处理/g,"技术修复");
+    }
+  }
+  if(typeof MutationObserver!=="undefined")new MutationObserver(function(){relabelV84(document.body)}).observe(document.body,{childList:true,subtree:true,characterData:true});
+  function migrateTechRepairsV84(){
+    var changed=false;
+    (tasks||[]).forEach(function(t){
+      if(!isTechRepairV84(t))return;
+      t.taskCategory="website_structure";t.knowledgeRequirement="not_required";
+      if(["brief","todo","human","publish_wait","site_submit","site_submitted","site_accepted","site_rejected","site_failed"].includes(t.progressStage)){
+        t.progressStage="site_running";t.status="running";t.statusLabel="官网处理中";
+        var out=ensureOutput(t);out.briefConfirmed=true;
+        var sc=ensureSiteCollabV27(t);sc.submittedAt=sc.submittedAt||t.createdAt||nowLabel();sc.acceptedAt=sc.acceptedAt||nowLabel();sc.status="site_running";
+        siteLogV27(sc,"已按技术修复流程直接提交官网，跳过角色审核。");changed=true;
+      }
+      if(t.progressStage==="site_publish"){
+        t.progressStage="recheck";t.statusLabel="Re-check 中";var published=ensureOutput(t);published.published=true;
+        var completeSite=ensureSiteCollabV27(t);completeSite.status="recheck";siteLogV27(completeSite,"自动验证通过，已自动发布并进入 Re-check。");changed=true;
+      }
+    });
+    if(changed){saveTaskOutputs();saveTasks()}
+  }
+  migrateTechRepairsV84();paintContextControlsV27();
+  renderAuditFindingsV20();renderOptimization();
+})();
+</script>
 </body>
 </html>
