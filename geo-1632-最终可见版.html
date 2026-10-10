@@ -4548,6 +4548,7 @@ button[disabled]{
     </div>
   </div>
 
+  <div class="geo-findings-table-scroll-v80">
   <div class="geo-findings-columns-v25">
     <span></span>
     <span>序号</span>
@@ -4560,6 +4561,7 @@ button[disabled]{
   </div>
 
   <div class="geo-alert-list geo-findings-list" id="geoAlertListV20"></div>
+  </div>
 
   <div class="findings-more-wrap" id="findingsMoreWrapV20">
     <button type="button" class="findings-more-btn" id="findingsMoreBtnV20">展开剩余 1 项 ↓</button>
@@ -10638,7 +10640,7 @@ function auditStateHtmlV26(f){
     const status=websiteAuditStatusV26(f);
     return `<div class="finding-state-stack-v26"><span class="finding-state-pill ${status.cls}">${status.text}</span></div>`;
   }
-  if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span><span>${f.strategy} · 已关联策略</span></div>`;
+  if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
   return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"待官网运营审核":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
@@ -13757,5 +13759,19 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   var queued=false;new MutationObserver(function(records){if(queued)return;queued=true;queueMicrotask(function(){queued=false;records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)removeMethodUiV79(n)})})})}).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+<style id="geo1632-v80-style">
+.geo-findings-table-scroll-v80{width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.geo-findings-table-scroll-v80 .geo-findings-columns-v25,
+.geo-findings-table-scroll-v80 .geo-findings-list{min-width:980px}
+.geo-findings-table-scroll-v80 .geo-findings-columns-v25{display:grid}
+.geo-findings-table-scroll-v80 .geo-finding-row{grid-template-columns:24px 42px minmax(210px,1fr) 170px 160px 64px minmax(150px,auto) 78px!important}
+@media(max-width:820px){
+  .geo-findings-table-scroll-v80 .geo-findings-columns-v25{display:grid}
+  .geo-findings-table-scroll-v80 .geo-finding-row{grid-template-columns:24px 42px minmax(210px,1fr) 170px 160px 64px minmax(150px,auto) 78px!important}
+  .geo-findings-table-scroll-v80 .finding-check-item-v25,
+  .geo-findings-table-scroll-v80 .finding-strategy-state,
+  .geo-findings-table-scroll-v80 .finding-detail-btn{grid-column:auto!important;grid-row:auto!important}
+}
+</style>
 </body>
 </html>
