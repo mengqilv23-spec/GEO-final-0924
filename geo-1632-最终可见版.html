@@ -4495,7 +4495,7 @@ button[disabled]{
           <div class="geo-audit-title-wrap">
             <h2>① 官网 GEO 体检</h2>
             <span class="geo-audit-help" tabindex="0" aria-label="说明">?
-              <span class="geo-audit-help-tip">官网技术诊断不需要用户审核，确定性问题会直接生成任务；推送到官网后进入“待官网运营审核”。</span>
+              <span class="geo-audit-help-tip">技术修复不需要客户或运营审核；提交后直接进入官网处理，并可随时查看处理进度。</span>
             </span>
           </div>
           <div class="geo-audit-summary"><span class="audit-pass-count">4 通过</span><span class="audit-alert-count">3 异常</span></div>
@@ -5842,7 +5842,7 @@ function renderReviewActions(t,out){
       html=canPublish?`<button class="btn primary" id="focusUrl">去登记发布 URL</button>`:`<button class="btn" disabled>等待外部发布</button>`;
     }else{
       const canApply=currentRole==="ops"||serviceMode==="agent";
-      note.textContent=canApply?"修复方案已确认，可执行变更并进入验证。":"等待运营执行技术修复。";
+      note.textContent=canApply?"修复方案已确认，可执行变更并进入验证。":"技术修复已提交官网，等待官网处理与验证。";
       html=canApply?`<button class="btn primary" id="applyRepair">执行修复并验证</button>`:`<button class="btn" disabled>等待运营执行</button>`;
     }
   }else if(t.progressStage==="recheck"){
@@ -6513,7 +6513,7 @@ function applyV9DemoFixes(){
 /* Role copy: external work no longer says publish URL. */
 roleDesc=function(){
   if(serviceMode==="agent"){
-    return "重点处理：待确认策略、待审核最终稿、官网发布授权与技术修复确认。外部信源内容确认最终稿后即完成。";
+    return "重点处理：待确认策略、待审核最终稿、官网发布授权与技术修复进度。外部信源内容确认最终稿后即完成。";
   }
   return currentRole==="ops"
     ?"重点处理：待审核策略、待质检内容、客户反馈与最终稿交付；外部信源内容不跟踪发布 URL。"
@@ -10572,7 +10572,7 @@ function findingProcessingMetaV37(f){
   const route=auditRouteForV26(f);
   if(f.id==="AF-06")return {label:"信息口径 · 确认后处理",reason:"地址字段有冲突，先确认哪一个地址正确，再交 AI 建站修改并复核。"};
   return route==="repair"
-    ?{label:"官网技术 · 直接处理",reason:auditRouteMetaV26[f.id]?.reason||"问题位置与修复动作明确，可按规则修复并验证。"}
+    ?{label:"技术修复",reason:auditRouteMetaV26[f.id]?.reason||"问题位置与修复动作明确，可按规则修复并验证。"}
     :{label:"官网内容 · 需要审核",reason:auditRouteMetaV26[f.id]?.reason||(serviceMode==="managed"?"涉及业务事实或对外表达，需要运营审核处理方案。":"涉及业务事实或对外表达，由 Agent 生成方案并在 Brief 阶段由客户确认。")};
 }
 function taskByFindingV26(id){const s=auditRouteStateV26[id];return s?.taskId?tasks.find(t=>t.uid===s.taskId):null}
@@ -10585,7 +10585,7 @@ function websiteAuditStatusV26(f){
   if(isRecoveredV26(f))return {text:"已修复",cls:"done"};
   if(decision?.status==="deferred"||t?.v42Ignored||t?.progressStage==="ignored")return {text:"暂不修复",cls:"defer"};
   if(t&&["site_rejected","site_failed"].includes(t.progressStage))return {text:"拒绝",cls:"reject"};
-  return {text:"待官网运营审核",cls:"pending"};
+  return {text:"已提交官网",cls:"pending"};
 }
 
 pendingFindingsV20=function(){return auditFindingsV20.filter(f=>{
@@ -10601,7 +10601,7 @@ function normalizeDirectRepairTasksV26(){
     const t=tasks.find(x=>x.uid===uid);if(!t)return;
     t.findingIds=ids;t.routeType="direct_repair";t.source=ids.join(" + ");
     t.strategy="不经过候选策略";t.relatedStrategies=[];t.dest="AI 官网协同";
-    if(["brief","todo"].includes(t.progressStage)){t.progressStage="site_submit";t.statusLabel="待官网运营审核";t.isDraft=false}
+    if(["brief","todo"].includes(t.progressStage)){t.progressStage="site_running";t.status="running";t.statusLabel="官网处理中";t.isDraft=false}
   });
   if(typeof saveTasks==="function")saveTasks();
 }
@@ -10647,7 +10647,7 @@ function auditStateHtmlV26(f){
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"待官网运营审核":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
@@ -10733,7 +10733,7 @@ function createRepairTasksV26(ids){
   Object.values(groups).forEach(group=>{
     const uid=`T${Math.max(110,...tasks.map(t=>parseInt(String(t.uid).replace(/\D/g,""),10)||0))+1}`;
     const isWebsiteStructure=group.every(f=>["GEO_CHECK_01","GEO_CHECK_02","GEO_CHECK_03"].includes(f.check_item_id));
-    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"pending",statusLabel:"待官网运营审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"site_submit",isDraft:false,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
+    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"running",statusLabel:"官网处理中",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"site_running",isDraft:false,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
     tasks.push(t);const out=ensureOutput(t);out.brief={
       goal:`修复 ${group.map(f=>f.title).join("、")}，恢复官网 GEO 基础检查`,
       persona:"不适用",
@@ -10746,7 +10746,7 @@ function createRepairTasksV26(ids){
     group.forEach(f=>auditRouteStateV26[f.id]={route:"repair",status:"task_created",taskId:uid});created.push(t);
   });
   auditFindingStateV20.selected=auditFindingStateV20.selected.filter(id=>!ids.includes(id));saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();
-  showToast(`已生成 ${created.length} 个修复任务，进入待官网运营审核`);renderAuditFindingsV20();renderOptimization();
+  showToast(`已将 ${created.length} 个技术修复直接提交官网`);renderAuditFindingsV20();renderOptimization();
 }
 
 function createStrategiesV26(ids){
@@ -11703,8 +11703,8 @@ refreshPendingEntryV29();
     if(p==='running')return t.type==='repair'?['Agent处理中','client']:['生成内容中','client'];
     if(p==='human')return serviceMode==='managed'&&!out.opsApproved?['运营审核','ops']:['待用户审核','client'];
     if(p==='site_rejected')return ['官网已拒绝','change'];
-    if(p==='site_submit')return ['待官网运营审核','client'];
-    if(p==='site_submitted')return ['官网运营审核中','client'];
+    if(p==='site_submit')return t.type==='repair'?['已提交官网','running']:['待提交 AI 建站','client'];
+    if(p==='site_submitted')return t.type==='repair'?['官网处理中','running']:['AI 建站审核中','client'];
     if(p==='site_verifying'||p==='site_failed')return ['Agent处理中','client'];
     if(p==='publish_wait'||p==='site_publish')return ['待官网审核','client'];
     return ['Agent处理中','client'];
@@ -11980,8 +11980,8 @@ refreshPendingEntryV29();
       if(serviceMode==="managed"&&t.type==="repair"&&!out.opsApproved)return ["运营审核","human"];
       return ["待用户审核","human"];
     }
-    if(p==="site_submit")return ["待官网运营审核","human"];
-    if(p==="site_submitted")return ["官网运营审核中","human"];
+    if(p==="site_submit")return t.type==="repair"?["已提交官网","running"]:["待提交 AI 建站","human"];
+    if(p==="site_submitted")return t.type==="repair"?["官网处理中","running"]:["AI 建站审核中","human"];
     if(p==="site_rejected")return ["AI 建站退回","human"];
     if(p==="site_failed")return ["验证未通过","human"];
     if(["site_accepted","site_running","site_returned","site_verifying","recheck"].includes(p))return ["Agent处理中","running"];
@@ -12169,7 +12169,7 @@ refreshPendingEntryV29();
 <script>
 /* ===== v48: Brief execution methods, knowledge selection/upload and Agent gate ===== */
 (()=>{
-  const methodDefaultsV48=["对比表","FAQ / Q&A","统计数据注入","专家观点","案例证明","定义框","JSON-LD","sameAs","页面结构优化"];
+  const methodDefaultsV48=["对比表","FAQ / Q&A","统计数据注入","专家观点","案例证明","定义框","JSON-LD","sameAs","技术修复"];
   const knowledgeDefaultsV48=[
     {id:"KB-001",title:"企业与品牌基础信息",tag:"品牌事实",source:"品牌知识库",status:"ready",summary:"企业简介、品牌定位、核心业务与官方名称"},
     {id:"KB-002",title:"产品规格与应用场景",tag:"产品资料",source:"品牌知识库",status:"ready",summary:"产品参数、适用行业、典型场景与能力边界"},
@@ -12211,7 +12211,7 @@ refreshPendingEntryV29();
     if(t.knowledgeRequirement==="required")return false;
     if(t.knowledgeRequirement==="not_required"||t.taskCategory==="website_structure")return true;
     const text=[t.name,t.factor,t.dest,t.source,(t.methods||[]).join(" ")].filter(Boolean).join(" ");
-    const structural=/官网结构优化|网站结构优化|页面结构优化|抓取渲染|爬取障碍|索引与 AI 指引|robots\.txt|sitemap|canonical|重定向|导航结构|页面层级/i.test(text);
+    const structural=/技术修复|抓取渲染|爬取障碍|索引与 AI 指引|robots\.txt|sitemap|canonical|重定向|导航结构|页面层级/i.test(text);
     const needsFacts=/结构化数据|schema|sameAs|FAQ|Product|产品|认证|专利|地址|企业信息|品牌实体/i.test(text);
     return structural&&!needsFacts;
   }
@@ -12235,7 +12235,7 @@ refreshPendingEntryV29();
     return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行方法</h3><p>用标签明确 Agent 本次采用的内容或技术执行方式。</p></div>${editable?'<button class="small-btn" id="editBriefMethodsV48">修改执行方法</button>':''}</div><div class="brief-resource-body-v48">${tags.length?`<div class="brief-tag-list-v48">${tags.map(x=>`<span class="brief-tag-v48">${escHtml(x)}</span>`).join("")}</div>`:'<div class="brief-empty-v48">暂未选择执行方法。</div>'}</div></section>`;
   }
   function knowledgeSectionV48(t,out){
-    if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>官网结构优化直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
+    if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>技术修复直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
     const editable=canPrepareBriefV48(t,out),items=selectedKnowledgeV48(out);
     const text=[t.name,t.factor,t.dest,(t.methods||[]).join(" ")].join(" "),baseSuggestions=/FAQ|问答/i.test(text)?["常见问题","标准答案","限制条件"]:/交期|产能|SLA|服务/i.test(text)?["交期与产能","服务范围","SLA","业务限制"]:/品牌|企业|实体/i.test(text)?["企业介绍","品牌定位","资质认证","官方信息"]:/案例/i.test(text)?["客户背景","问题与方案","结果数据"]:["产品介绍","核心参数","应用场景","产品优势","认证与案例"],covered=items.map(k=>`${k.title} ${k.summary}`).join(" "),suggestions=baseSuggestions.filter(x=>!covered.includes(x)).slice(0,4);
     const sourceSummary=[items.length?`AI 已匹配 ${items.length} 份知识`:"知识库无匹配",out.briefWebSearchV78?"联网补充":"",out.briefKnowledgeNoteV78.trim()?"已填写说明":""].filter(Boolean).join(" + ");
@@ -13196,7 +13196,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
       site_submit:"提交 AI 建站",
       site_rejected:"补充要求并重新提交",
       site_failed:"补充要求并重新提交",
-      site_submitted:"等待官网运营审核",
+      site_submitted:"等待官网处理",
       site_accepted:"开始网站修改",
       site_running:"等待 AI 建站回传",
       site_returned:"确认 GEO 验证",
@@ -13867,7 +13867,7 @@ table td>*{
   };
   function taskConfirmHtmlV82(t,out){
     var fixes=Array.isArray(out.fixes)?out.fixes:[],confirmed=out.briefConfirmed||!["brief","todo","running","human","publish_wait"].includes(t.progressStage);
-    var plans=fixes.length?fixes.map(function(f){return '<div class="structure-plan-row-v82"><b>'+escHtml(f.item||"官网结构修复")+'</b><span>'+escHtml(f.after||f.before||"按检查结果完成结构修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>'}).join(""):'<div class="structure-plan-row-v82"><b>'+escHtml(t.name||"官网结构修复")+'</b><span>'+escHtml(t.evidence||"按官网 GEO 体检结果完成修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>';
+    var plans=fixes.length?fixes.map(function(f){return '<div class="structure-plan-row-v82"><b>'+escHtml(f.item||"技术修复")+'</b><span>'+escHtml(f.after||f.before||"按检查结果完成结构修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>'}).join(""):'<div class="structure-plan-row-v82"><b>'+escHtml(t.name||"技术修复")+'</b><span>'+escHtml(t.evidence||"按官网 GEO 体检结果完成修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>';
     var acceptance=out.brief?.acceptance||"AI 建站完成修改并通过自动验证；执行结果在状态节点中查看。";
     return '<section class="structure-confirm-v82" id="structureConfirmV82"><div class="structure-confirm-head-v82"><h2>任务确认</h2><span class="status-pill '+(confirmed?'green':'orange')+'">'+(confirmed?'已确认':'待确认')+'</span></div><div class="structure-confirm-body-v82"><div class="structure-plan-v82">'+plans+'</div><div class="structure-accept-v82"><b>验收标准：</b>'+escHtml(acceptance)+'</div></div></section>';
   }
@@ -14062,7 +14062,6 @@ table td>*{
     var bulk=document.getElementById("generateRepairV26");
     if(bulk){var selected=auditFindingStateV20.selected.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(x){return x.id===id}))}),infoSelected=auditFindingStateV20.selected.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});bulk.disabled=!selected.length&&!infoSelected.length;bulk.textContent=selected.length?"提交官网 · "+selected.length:infoSelected.length?"确认信息 · "+infoSelected.length:"提交官网";bulk.onclick=function(){if(selected.length)createTechRepairsV84(selected,false);if(infoSelected.length)batchBaseV84("repair",infoSelected)}}
     var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent="技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
-    relabelV84(document.body);
   };
   var workspaceStatusBaseV84=workspaceStatus;
   workspaceStatus=function(t,out){
@@ -14110,7 +14109,6 @@ table td>*{
     if(note)note.textContent=t.progressStage==="recheck"?"官网修复已自动发布，正在进行 GEO Re-check。":"技术修复已直接提交官网，当前进度与验证结果会在此更新。";
     if(box)box.innerHTML='<span class="system-progress-v47">'+(t.progressStage==="recheck"?"Re-check 中":"官网处理中 · 无需审核")+'</span>';
     var flow=document.querySelector("#taskBody .task-flow-note-v26");if(flow&&t)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
-    relabelV84(document.getElementById("reviewWorkspaceRoot"));
   };
   window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
   var optimizationBaseV84=renderOptimization;
@@ -14123,18 +14121,8 @@ table td>*{
       if(flow)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
       if(next)next.textContent=t.progressStage==="recheck"?"当前状态：Re-check 中":"当前状态：官网处理中";
     });
-    relabelV84(document.getElementById("optimizationPage"));
   };
   window.renderOptimization=renderOptimization;
-  function relabelV84(root){
-    if(!root||!document.createTreeWalker)return;
-    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;
-    while((node=walker.nextNode())){
-      var parent=node.parentElement;if(!parent||/^(SCRIPT|STYLE|TEXTAREA)$/.test(parent.tagName))continue;
-      node.nodeValue=node.nodeValue.replace(/官网结构优化|网站结构优化|页面结构优化|官网结构修复|官网结构|官网技术 · 直接处理/g,"技术修复");
-    }
-  }
-  if(typeof MutationObserver!=="undefined")new MutationObserver(function(){relabelV84(document.body)}).observe(document.body,{childList:true,subtree:true,characterData:true});
   function migrateTechRepairsV84(){
     var changed=false;
     (tasks||[]).forEach(function(t){
