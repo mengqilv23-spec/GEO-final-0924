@@ -14184,5 +14184,34 @@ table td>*{
   renderAuditFindingsV20();renderOptimization();
 })();
 </script>
+<style id="geo1632-v86-style">
+.strategy-method-copy-v86{margin:0;color:var(--text-2);font-size:14px;line-height:1.75}
+</style>
+<script id="geo1632-v86-script">
+(function(){
+  function strategyMethodCopyV86(s){
+    var methods=(s.methods||[]).filter(Boolean);
+    var methodText=methods.length?methods.join("、"):"内容结构与表达优化";
+    var target=s.factor&&s.factor!=="其他"?"，重点解决“"+s.factor+"”相关问题":"";
+    return "建议采用"+methodText+"等方式"+target+"，完成本次"+(s.dest||"内容")+"优化。";
+  }
+  function renderSimpleStrategyDetailV86(s){
+    drawerSub.textContent=(s.displayId||s.id)+" · "+s.layer;
+    drawerTitle.textContent=s.title;
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>候选策略</b></div><div class="detail-body"><div class="kv">'
+      +'<div class="k">优先级</div><div class="v">'+escHtml(s.p||"—")+'</div>'
+      +'<div class="k">策略类型</div><div class="v"><span class="layer-chip">'+escHtml(s.layer||"—")+'</span></div>'
+      +'<div class="k">目标人设</div><div class="v">'+escHtml(s.persona||"—")+'</div>'
+      +'<div class="k">决策因子</div><div class="v">'+escHtml(s.factor||"—")+'</div>'
+      +'</div></div></div>'
+      +'<div class="detail-sec"><div class="detail-title"><b>Agent 建议方法</b></div><div class="detail-body"><p class="strategy-method-copy-v86">'+escHtml(strategyMethodCopyV86(s))+'</p></div></div>';
+    drawerFoot.innerHTML='<button class="btn primary" id="closeStrategyDetailV86">关闭</button>';
+    drawer.classList.add("open");
+    document.getElementById("closeStrategyDetailV86").onclick=function(){drawer.classList.remove("open")};
+  }
+  openStrategyDetailV18=function(id){var s=findStrategyV18(id);if(s)renderSimpleStrategyDetailV86(s)};
+  openCollabStrategyDetail=function(id){var s=getAllQueueStrategies().find(function(item){return item.id===id});if(s)renderSimpleStrategyDetailV86(s)};
+})();
+</script>
 </body>
 </html>
