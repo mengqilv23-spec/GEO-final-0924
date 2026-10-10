@@ -11399,9 +11399,12 @@ refreshPendingEntryV29();
     ['.site-collab-title-v27 > div:last-child','h3','p'],
     ['#onboardingV28','h3','p']
   ];
-  function apply(){
+  function apply(root=document){
     pairs.forEach(([selector,titleSelector,noteSelector])=>{
-      document.querySelectorAll(selector).forEach(container=>{
+      const containers=[];
+      if(root.nodeType===Node.ELEMENT_NODE&&root.matches(selector))containers.push(root);
+      if(root.querySelectorAll)containers.push(...root.querySelectorAll(selector));
+      containers.forEach(container=>{
         const title=container.querySelector(titleSelector);
         const note=container.querySelector(noteSelector);
         if(!title||!note||title.closest('.title-line-v38')||note.closest('.title-help-v38'))return;
@@ -11424,11 +11427,17 @@ refreshPendingEntryV29();
     });
   }
   apply();
-  let queued=false;
-  new MutationObserver(()=>{
-    if(queued)return;
+  let queued=false,running=false;
+  const pending=new Set();
+  new MutationObserver(records=>{
+    records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)pending.add(node)}));
+    if(queued||running||!pending.size)return;
     queued=true;
-    queueMicrotask(()=>{queued=false;apply()});
+    queueMicrotask(()=>{
+      queued=false;if(running)return;running=true;
+      const nodes=[...pending];pending.clear();
+      try{nodes.forEach(apply)}finally{running=false}
+    });
   }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
@@ -12629,10 +12638,16 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   window.displayTaskCode=displayTaskCodeV52;
   window.applyObjectCodesV52=applyObjectCodesV52;
   applyObjectCodesV52();
-  let queued=false;
+  let queued=false,running=false;
+  const pending=new Set();
   new MutationObserver(mutations=>{
-    if(queued)return;queued=true;
-    requestAnimationFrame(()=>{queued=false;mutations.forEach(m=>m.addedNodes.forEach(node=>{if(node.nodeType===Node.TEXT_NODE){const next=replaceObjectCodesV52(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}else if(node.nodeType===Node.ELEMENT_NODE)applyObjectCodesV52(node)}))});
+    mutations.forEach(m=>m.addedNodes.forEach(node=>pending.add(node)));
+    if(queued||running||!pending.size)return;queued=true;
+    requestAnimationFrame(()=>{
+      queued=false;if(running)return;running=true;
+      const nodes=[...pending];pending.clear();seedTaskCodesV52();
+      try{nodes.forEach(node=>{if(node.nodeType===Node.TEXT_NODE){const next=replaceObjectCodesV52(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}else if(node.nodeType===Node.ELEMENT_NODE)applyObjectCodesV52(node)})}finally{running=false}
+    });
   }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
@@ -12666,9 +12681,11 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     return [...list.children].filter(item=>item.matches(config.item));
   }
 
-  function apply(config){
+  const states=new Map();
+  function render(config,state){
     const list=document.querySelector(config.selector);if(!list)return;
-    const items=itemsFor(config),key=config.selector;
+    const items=state.items.filter(item=>item.isConnected&&item.parentElement===list&&item.matches(config.item)),key=config.selector;
+    state.items=items;
     const pageCount=Math.max(1,Math.ceil(items.length/pageSize));
     pages[key]=Math.min(Math.max(pages[key]||1,1),pageCount);
     const start=(pages[key]-1)*pageSize;
@@ -12686,14 +12703,27 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     controls.hidden=items.length<=pageSize;
     if(controls.hidden)return;
     controls.innerHTML=`<span>每页 ${pageSize} 条</span><button type="button" class="list-page-btn-v53" data-step="-1" ${pages[key]===1?"disabled":""}>上一页</button><select class="list-page-select-v53" aria-label="选择${config.label}页码">${Array.from({length:pageCount},(_,i)=>`<option value="${i+1}" ${pages[key]===i+1?"selected":""}>第 ${i+1} / ${pageCount} 页</option>`).join("")}</select><button type="button" class="list-page-btn-v53" data-step="1" ${pages[key]===pageCount?"disabled":""}>下一页</button>`;
-    controls.querySelector("select").onchange=e=>{pages[key]=Number(e.target.value);apply(config)};
-    controls.querySelectorAll("button[data-step]").forEach(button=>button.onclick=()=>{pages[key]+=Number(button.dataset.step);apply(config)});
+    controls.querySelector("select").onchange=e=>{pages[key]=Number(e.target.value);render(config,state)};
+    controls.querySelectorAll("button[data-step]").forEach(button=>button.onclick=()=>{pages[key]+=Number(button.dataset.step);render(config,state)});
   }
 
-  function applyAll(){configs.forEach(apply)}
+  function refresh(config){
+    const state=states.get(config.selector);if(!state)return;
+    state.items=itemsFor(config);render(config,state);
+  }
+  function applyAll(){configs.forEach(refresh)}
   configs.forEach(config=>{
     const list=document.querySelector(config.selector);if(!list)return;
-    new MutationObserver(()=>requestAnimationFrame(()=>apply(config))).observe(list,{childList:true});
+    const state={items:itemsFor(config),queued:false,running:false};states.set(config.selector,state);
+    new MutationObserver(records=>{
+      let changed=false;
+      records.forEach(record=>{
+        record.removedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE&&node.matches(config.item)){state.items=state.items.filter(item=>item!==node);changed=true}});
+        record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE&&node.matches(config.item)){state.items.push(node);changed=true}});
+      });
+      if(!changed||state.queued||state.running)return;
+      state.queued=true;requestAnimationFrame(()=>{state.queued=false;if(state.running)return;state.running=true;try{render(config,state)}finally{state.running=false}});
+    }).observe(list,{childList:true});
   });
   requestAnimationFrame(applyAll);
   window.applyGeoListPaginationV53=applyAll;
@@ -13761,7 +13791,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     root.querySelectorAll("table").forEach(function(table){var headers=[].slice.call(table.querySelectorAll("thead th")),indexes=[];headers.forEach(function(th,i){if(/^(方法|执行方法)$/.test(th.textContent.trim()))indexes.push(i)});indexes.reverse().forEach(function(i){table.querySelectorAll("tr").forEach(function(row){row.children[i]?.remove()})})});
   }
   removeMethodUiV79(document.body);
-  var queued=false;new MutationObserver(function(records){if(queued)return;queued=true;queueMicrotask(function(){queued=false;records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)removeMethodUiV79(n)})})})}).observe(document.body,{childList:true,subtree:true});
+  var queued=false,running=false,pending=new Set();new MutationObserver(function(records){records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)pending.add(n)})});if(queued||running||!pending.size)return;queued=true;queueMicrotask(function(){queued=false;if(running)return;running=true;var nodes=Array.from(pending);pending.clear();try{nodes.forEach(removeMethodUiV79)}finally{running=false}})}).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 <style id="geo1632-v80-style">
