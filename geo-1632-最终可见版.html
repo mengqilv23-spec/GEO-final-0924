@@ -13999,10 +13999,14 @@ table td>*{
 </script>
 <script id="geo1632-v84-script">
 (function(){
+  function activeServiceModeV85(){
+    return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed";
+  }
+  function isAgentModeV85(){return activeServiceModeV85()==="agent"}
   var repairMetaBaseV84=findingProcessingMetaV37;
   findingProcessingMetaV37=function(f){
     var meta=repairMetaBaseV84(f);
-    if(serviceMode==="agent"&&auditRouteForV26(f)==="repair")return {label:"技术修复 · 官网直接处理",reason:auditRouteMetaV26[f.id]?.reason||"该问题不涉及内容或业务事实审核，由官网直接处理并自动验证。"};
+    if(isAgentModeV85()&&auditRouteForV26(f)==="repair")return {label:"技术修复 · 官网直接处理",reason:auditRouteMetaV26[f.id]?.reason||"该问题不涉及内容或业务事实审核，由官网直接处理并自动验证。"};
     return auditRouteForV26(f)==="repair"&&f.id!=="AF-06"?{label:"技术修复",reason:meta.reason}:meta;
   };
   var statusBaseV84=websiteAuditStatusV26;
@@ -14032,8 +14036,8 @@ table td>*{
     paintContextControlsV27();refreshCurrentSurfaceV27();
     showToast("已切换为"+(serviceMode==="managed"?"代运营":"Agent 自主")+"模式；技术修复直接提交官网，内容策略按当前模式流转");
   }});
-  function isTechFindingV84(f){return !!f&&auditRouteForV26(f)==="repair"&&(f.id!=="AF-06"||serviceMode==="agent")}
-  function isTechRepairV84(t){var ids=[t?.findingId].concat(t?.findingIds||[]).filter(Boolean);return !!t&&t.type==="repair"&&(!ids.includes("AF-06")||serviceMode==="agent")&&(t.routeType==="direct_repair"||t.taskCategory==="website_structure"||t.taskCategory==="technical_repair"||ids.some(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return isTechFindingV84(f)}))}
+  function isTechFindingV84(f){return !!f&&auditRouteForV26(f)==="repair"&&(f.id!=="AF-06"||isAgentModeV85())}
+  function isTechRepairV84(t){var ids=[t?.findingId].concat(t?.findingIds||[]).filter(Boolean);return !!t&&t.type==="repair"&&(!ids.includes("AF-06")||isAgentModeV85())&&(t.routeType==="direct_repair"||t.taskCategory==="website_structure"||t.taskCategory==="technical_repair"||ids.some(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return isTechFindingV84(f)}))}
   function findRepairTaskV84(f){return tasks.find(function(t){return isTechRepairV84(t)&&((t.findingId===f.id)||(t.findingIds||[]).includes(f.id))})||null}
   function submitTechRepairV84(f){
     var t=findRepairTaskV84(f)||makeFindingTaskV83(f),out=ensureOutput(t),sc=ensureSiteCollabV27(t);
@@ -14071,7 +14075,7 @@ table td>*{
   };
   var actionsBaseV84=auditActionsHtmlV26;
   auditActionsHtmlV26=function(f){
-    if(serviceMode==="agent"&&auditRouteForV26(f)==="strategy")return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">审核</button></div>';
+    if(isAgentModeV85()&&auditRouteForV26(f)==="strategy")return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">审核</button></div>';
     if(!isTechFindingV84(f))return actionsBaseV84(f);
     return '<div class="finding-actions-v26"><button class="small-btn tech-detail-v85" data-id="'+escHtml(f.id)+'">查看详情</button></div>';
   };
@@ -14083,14 +14087,14 @@ table td>*{
   };
   var auditRenderBaseV84=renderAuditFindingsV20;
   renderAuditFindingsV20=function(){
-    if(serviceMode==="agent"){
+    if(isAgentModeV85()){
       auditFindingsV20.filter(isTechFindingV84).forEach(function(f){if(!findRepairTaskV84(f)&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id)))submitTechRepairV84(f)});
     }
     auditRenderBaseV84();
     document.querySelectorAll(".tech-detail-v85").forEach(function(b){b.onclick=function(){openFindingDetailV26(b.dataset.id)}});
     var bulk=document.getElementById("generateRepairV26");
     if(bulk){var selected=auditFindingStateV20.selected.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(x){return x.id===id}))}),infoSelected=auditFindingStateV20.selected.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});bulk.disabled=!selected.length&&!infoSelected.length;bulk.textContent=selected.length?"提交官网 · "+selected.length:infoSelected.length?"确认信息 · "+infoSelected.length:"提交官网";bulk.onclick=function(){if(selected.length)createTechRepairsV84(selected,false);if(infoSelected.length)batchBaseV84("repair",infoSelected)}}
-    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=serviceMode==="agent"?"Agent 模式下，仅官网内容需要客户审核；其他异常均作为技术修复直接交由官网处理，不生成客户审核任务。":"技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
+    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=isAgentModeV85()?"Agent 模式下，仅官网内容需要客户审核；其他异常均作为技术修复直接交由官网处理，不生成客户审核任务。":"技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
   };
   var workspaceStatusBaseV84=workspaceStatus;
   workspaceStatus=function(t,out){
@@ -14170,6 +14174,12 @@ table td>*{
     });
     if(changed){saveTaskOutputs();saveTasks()}
   }
+  document.querySelectorAll(".serviceModeBtn").forEach(function(button){button.addEventListener("click",function(){
+    serviceMode=button.dataset.mode;window.serviceMode=serviceMode;
+    if(serviceMode==="agent"){currentRole="client";window.currentRole="client"}
+    localStorage.setItem("geoServiceMode",serviceMode);localStorage.setItem("geoCurrentRole",currentRole);
+    queueMicrotask(function(){paintContextControlsV27();renderAuditFindingsV20();renderOptimization()});
+  })});
   migrateTechRepairsV84();paintContextControlsV27();
   renderAuditFindingsV20();renderOptimization();
 })();
