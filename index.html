@@ -14766,18 +14766,18 @@ table td>*{
     if(existing){
       auditRouteStateV26[f.id]={...(auditRouteStateV26[f.id]||{}),route:"strategy",status:"task_created",taskId:existing.uid};
       if(existing.type==="web"){
-        existing.progressStage=existing.progressStage||"brief";existing.isDraft=true;
-        existing.statusLabel="待用户去优化中心审核";
-        var existingOutput=ensureOutput(existing);existingOutput.briefConfirmed=false;existingOutput.briefStatus="ready";
+        existing.progressStage="running";existing.status="running";existing.isDraft=false;
+        existing.statusLabel="Agent处理中";
+        var existingOutput=ensureOutput(existing);existingOutput.briefConfirmed=true;existingOutput.briefStatus="not_used";
       }
       if(typeof saveTaskOutputs==="function")saveTaskOutputs();if(typeof saveTasks==="function")saveTasks();if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
       return existing;
     }
     var strategy=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
     var uid="T"+Date.now();
-    var task={uid:uid,type:"web",name:f.title,source:f.id,strategy:f.strategy,persona:strategy?.persona||"不适用",factor:f.check_item_name,methods:(auditRouteMetaV26?.[f.id]?.methods||strategy?.methods||[]).slice(),evidence:f.desc,dest:"官网内容",status:"draft",statusLabel:"待用户去优化中心审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,findingId:f.id,findingIds:[f.id],relatedStrategies:[]};
+    var task={uid:uid,type:"web",name:f.title,source:f.id,strategy:f.strategy,persona:strategy?.persona||"不适用",factor:f.check_item_name,methods:(auditRouteMetaV26?.[f.id]?.methods||strategy?.methods||[]).slice(),evidence:f.desc,dest:"官网内容",status:"running",statusLabel:"Agent处理中",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"running",isDraft:false,findingId:f.id,findingIds:[f.id],relatedStrategies:[]};
     tasks.unshift(task);
-    var out=ensureOutput(task);out.briefConfirmed=false;out.briefStatus="ready";out.briefFactConfirmed=true;
+    var out=ensureOutput(task);out.briefConfirmed=true;out.briefStatus="not_used";out.briefFactConfirmed=true;
     auditRouteStateV26[f.id]={route:"strategy",status:"task_created",taskId:uid};
     if(typeof saveTaskOutputs==="function")saveTaskOutputs();if(typeof saveTasks==="function")saveTasks();if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
     return task;
@@ -14850,6 +14850,16 @@ table td>*{
     return returned?{text:"官网已返回处理结果",cls:"done",index:2}:{text:"等待官网处理结果",cls:"running",index:1};
   }
   function workflowV98(){return [["提交官网","已提交"],["官网处理中","等待处理结果"],["返回结果","技术处理结果"]]}
+  function geoFindingInfoHtmlV98(task){
+    var ids=[task.findingId].concat(task.findingIds||[]).filter(Boolean),findings=[...new Set(ids)].map(function(id){return (auditFindingsV20||[]).find(function(f){return f.id===id})}).filter(Boolean);
+    if(!findings.length)return '<section class="detail-sec"><div class="detail-title"><b>官网 GEO 体检信息</b></div><div class="detail-body"><div class="kv"><div class="k">问题性质与处理方式</div><div class="v">技术修复 · 官网直接处理</div><div class="k">所属检查项</div><div class="v">'+escHtml(task.factor||"官网 GEO 体检")+'</div><div class="k">当前状态</div><div class="v">'+escHtml(stageStatusV98(task).text)+'</div><div class="k">异常说明</div><div class="v">'+escHtml(task.evidence||task.name||"技术修复")+'</div><div class="k">为什么这样处理</div><div class="v">技术问题已定位到官网，由官网处理流程返回修复结果。</div></div></div></section>';
+    return findings.map(function(f){
+      var meta=typeof findingProcessingMetaV37==="function"?findingProcessingMetaV37(f):{label:"技术修复 · 官网直接处理",reason:"技术问题已定位到官网，由官网处理流程返回修复结果。"};
+      var state=typeof websiteAuditStatusV26==="function"?websiteAuditStatusV26(f):stageStatusV98(task);
+      var check=typeof auditCheckLabelV25==="function"?auditCheckLabelV25(f):(f.check_item_name||"官网 GEO 体检");
+      return '<section class="detail-sec"><div class="detail-title"><b>官网 GEO 体检 · '+escHtml(f.id)+'</b></div><div class="detail-body"><div class="kv"><div class="k">问题性质与处理方式</div><div class="v">'+escHtml(meta.label||"技术修复 · 官网直接处理")+'</div><div class="k">所属检查项</div><div class="v">'+escHtml(check)+'</div><div class="k">当前状态</div><div class="v"><span class="progress-status '+escHtml(state.cls||"running")+'">'+escHtml(state.text||stageStatusV98(task).text)+'</span></div><div class="k">异常说明</div><div class="v">'+escHtml(f.desc||task.evidence||task.name)+'</div><div class="k">为什么这样处理</div><div class="v">'+escHtml(meta.reason||"技术问题已定位到官网，由官网处理流程返回修复结果。")+'</div></div></div></section>';
+    }).join("");
+  }
   function syncReturnedDataV98(task){
     var out=ensureOutput(task),site=ensureSiteCollabV27(task);
     site.returnedAt=site.returnedAt||nowLabel();site.previewPath=site.previewPath||"官网处理结果";
@@ -14901,6 +14911,7 @@ table td>*{
     root.className="repair-workspace-v98";
     root.innerHTML='<div class="review-topbar"><div class="review-title-wrap"><button class="review-back" id="backToOptimization">← 返回优化中心</button><div class="review-title"><h1>'+escHtml(task.name||"技术修复")+'</h1><span class="progress-status '+status.cls+'">'+status.text+'</span></div><div class="review-sub">'+escHtml(task.uid)+' · 官网技术修复</div></div></div>'
       +stepperHtmlV98(status)
+      +geoFindingInfoHtmlV98(task)
       +'<section class="detail-sec"><div class="detail-title"><b>技术修复描述</b></div><div class="detail-body"><p class="repair-description-v98">'+escHtml(description)+(methodText?'<br>修复方式：'+escHtml(methodText):"")+'</p></div></section>'
       +'<section class="detail-sec"><div class="detail-title"><b>官网处理结果</b><span>'+ (returned?"已返回":"等待返回") +'</span></div><div class="detail-body"><div class="repair-return-card-v98 '+(returned?"":"is-waiting")+'"><p class="repair-return-copy-v98">'+escHtml(returned?(site.resultSummary||"官网已返回技术处理结果。") :"技术修复已提交官网，正在等待官网返回处理结果。")+'</p></div></div></section>';
     document.getElementById("backToOptimization").onclick=function(){goOptimization()};
@@ -14920,6 +14931,58 @@ table td>*{
     });
   };
   window.renderOptimization=renderOptimization;
+})();
+</script>
+<script id="geo1632-v99-script">
+(function(){
+  function isContentTaskV99(task){return !!task&&(task.type==="web"||task.type==="external")}
+  function skipBriefV99(task){
+    if(!isContentTaskV99(task)||!(["brief","todo"].includes(task.progressStage)||task.isDraft))return false;
+    var output=ensureOutput(task);task.progressStage="running";task.status="running";task.statusLabel="Agent处理中";task.isDraft=false;
+    output.briefConfirmed=true;output.briefStatus="not_used";
+    saveTaskOutputs();saveTasks();return true;
+  }
+  function normalizeContentTasksV99(){(tasks||[]).forEach(skipBriefV99)}
+  var workflowBaseV99=workflowSteps;
+  workflowSteps=function(task,output){
+    if(isContentTaskV99(task))return [["内容生成","Agent 执行"],["内容审核","结果确认"],["官网执行","页面发布"],["效果复测","持续监测"]];
+    return workflowBaseV99(task,output);
+  };
+  var stageBaseV99=stageIndex;
+  stageIndex=function(task,output){
+    if(isContentTaskV99(task)){
+      var stage=task.progressStage;
+      if(stage==="human")return 1;
+      if(["site_submit","site_submitted","site_accepted","site_running","site_returned","site_verifying","site_publish","publish_wait"].includes(stage))return 2;
+      if(["recheck","done"].includes(stage))return 3;
+      return 0;
+    }
+    return stageBaseV99(task,output);
+  };
+  var reviewBaseV99=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    var task=(tasks||[]).find(function(item){return item.uid===uid});
+    if(isContentTaskV99(task))skipBriefV99(task);
+    reviewBaseV99(uid);
+    if(!isContentTaskV99(task))return;
+    var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
+    root.querySelectorAll('.review-tab[data-review-tab="brief"],.review-pane[data-pane="brief"],.brief-version-v47,.brief-resource-v48,.brief-confirm-panel-v24,.brief-gate-v48,.brief-lock-v24,.task-draft-badge-v24').forEach(function(element){element.remove()});
+    var resultTab=root.querySelector('.review-tab[data-review-tab="result"]'),resultPane=root.querySelector('.review-pane[data-pane="result"]');
+    root.querySelectorAll(".review-tab").forEach(function(tab){tab.classList.toggle("active",tab===resultTab);tab.disabled=false;tab.classList.remove("v24-disabled")});
+    root.querySelectorAll(".review-pane").forEach(function(pane){pane.classList.toggle("active",pane===resultPane)});
+    var heading=root.querySelector(".review-main-head h2");if(heading&&/Brief|草稿/.test(heading.textContent))heading.textContent="任务内容";
+    root.querySelector(".doc-toolbar")?.remove();
+    root.querySelectorAll("#toggleEditDoc,#saveDocBtn,#requestBriefChangeV24,#confirmTaskBriefV24,#reworkTaskBriefV24,#confirmBriefFactV24").forEach(function(button){button.remove()});
+    var doc=root.querySelector("#generatedDoc");if(doc){doc.contentEditable="false";doc.onclick=null;doc.removeAttribute("title")}
+    if(!["site_submit","site_submitted","site_accepted","site_running","site_returned","site_verifying","site_publish","recheck","done"].includes(task.progressStage))root.querySelector("#siteCollabPanelV27")?.remove();
+    var note=root.querySelector("#reviewActionNote");if(note&&task.progressStage==="running")note.textContent="Agent 正在根据已维护的知识库生成任务内容。";
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  var optimizationBaseV99=renderOptimization;
+  renderOptimization=function(){normalizeContentTasksV99();optimizationBaseV99()};
+  window.renderOptimization=renderOptimization;
+  normalizeContentTasksV99();
+  renderAuditFindingsV20();renderOptimization();
 })();
 </script>
 </body>
