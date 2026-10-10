@@ -14259,10 +14259,24 @@ table td>*{
   function contentActionV88(){return modeV88()==="agent"?"生成任务":"审核通过并生成任务"}
   function createContentTasksV88(ids){
     if(!canReviewContentV88()){showToast("当前视角仅可查看，内容问题由负责角色审核");return}
-    var valid=(auditFindingsV20||[]).filter(function(f){return ids.includes(f.id)&&isContentV88(f)&&!existingTaskV88(f)}).map(function(f){return f.id});
+    var findings=(auditFindingsV20||[]).filter(function(f){return ids.includes(f.id)&&isContentV88(f)&&!existingTaskV88(f)});
+    var valid=findings.map(function(f){return f.id});
     if(!valid.length)return;
+    findings.forEach(function(f){
+      var s=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+      if(!s||typeof getCollab!=="function")return;
+      var c=getCollab(s.id);
+      if(modeV88()==="managed"){
+        c.opsApproved=true;c.clientApproved=false;c.v18Deferred=false;
+        if(typeof pushReview==="function")pushReview(s.id,"ops","运营","官网 GEO 体检内容问题已审核通过，生成任务与 Brief。");
+      }else{
+        c.clientApproved=true;
+        if(typeof pushReview==="function")pushReview(s.id,"client","客户","官网 GEO 体检内容问题已确认，生成任务与 Brief。");
+      }
+    });
+    if(typeof saveCollab==="function")saveCollab();
     createStrategiesV26(valid);
-    showToast(modeV88()==="agent"?"客户已确认，任务已生成至优化中心":"运营审核已通过，任务已自动生成至优化中心");
+    showToast(modeV88()==="agent"?"客户已确认，任务与 Brief 已生成":"运营审核已通过，任务与 Brief 已生成");
   }
   function submitUnsentTechV88(){
     if(autoSubmittingTechV88)return false;
