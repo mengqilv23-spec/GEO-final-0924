@@ -14644,5 +14644,69 @@ table td>*{
   renderOptimization();
 })();
 </script>
+<script id="geo1632-v94-script">
+(function(){
+  var reconcilingV94=false;
+  function modeV94(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
+  function roleV94(){return window.currentRole||currentRole||"client"}
+  function isTechV94(f){return !!f&&auditRouteForV26(f)==="repair"}
+  function taskV94(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
+  function contentStateV94(f){return taskV94(f)?"已生成任务":"待运营审核"}
+  function reconcileManagedAuditV94(root){
+    if(reconcilingV94||modeV94()!=="managed")return;
+    reconcilingV94=true;
+    try{
+      var rows=[];
+      if(root?.matches?.(".geo-finding-row"))rows.push(root);
+      if(root?.querySelectorAll)rows=rows.concat([].slice.call(root.querySelectorAll(".geo-finding-row")));
+      rows.forEach(function(row){
+        var f=auditFindingsV20.find(function(x){return x.id===row.dataset.finding});if(!f)return;
+        var t=taskV94(f),tech=isTechV94(f),state=row.querySelector(".finding-strategy-state"),button=row.querySelector(".finding-actions-v26 button,.findingDetailV26,.tech-detail-v85,.finding-detail-btn"),check=row.querySelector(".finding-check");
+        if(!tech&&state)state.innerHTML='<div class="finding-state-stack-v26"><span class="finding-state-pill '+(t?'approved':'pending')+'">'+contentStateV94(f)+'</span></div>';
+        if(button){
+          button.textContent=tech||roleV94()==="client"||t?"查看详情":"审核";
+          button.dataset.id=f.id;
+          button.onclick=function(){openFindingDetailV26(f.id)};
+        }
+        if(check){
+          var locked=tech||roleV94()==="client"||!!t;
+          if(locked)check.checked=false;
+          check.disabled=locked;
+        }
+      });
+      var bulk=document.getElementById("generateCandidateV20");
+      if(bulk&&roleV94()==="client")bulk.hidden=true;
+    }finally{reconcilingV94=false}
+  }
+  var openFindingDetailBaseV94=openFindingDetailV26;
+  openFindingDetailV26=function(id){
+    openFindingDetailBaseV94(id);
+    if(modeV94()!=="managed")return;
+    var f=auditFindingsV20.find(function(x){return x.id===id});if(!f||isTechV94(f))return;
+    var t=taskV94(f),body=drawerBody?.querySelector(".detail-body .kv");
+    if(body&&!Array.from(body.querySelectorAll(".k")).some(function(x){return x.textContent.trim()==="当前状态"})){
+      var item=document.createElement("div");item.className="k";item.textContent="当前状态";
+      var value=document.createElement("div");value.className="v";value.innerHTML='<span class="finding-state-pill '+(t?'approved':'pending')+'">'+contentStateV94(f)+'</span>';
+      var firstValue=body.querySelector(".v");
+      if(firstValue){firstValue.insertAdjacentElement("afterend",item);item.insertAdjacentElement("afterend",value)}else body.prepend(item,value);
+    }
+    if(roleV94()==="client"){
+      drawerFoot?.querySelectorAll("#approveFindingV88,#deferFindingV88").forEach(function(button){button.remove()});
+    }
+  };
+  window.openFindingDetailV26=openFindingDetailV26;
+  var renderAuditBaseV94=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){renderAuditBaseV94();reconcileManagedAuditV94(document.getElementById("geoAlertListV20"))};
+  window.renderAuditFindingsV20=renderAuditFindingsV20;
+  var list=document.getElementById("geoAlertListV20");
+  if(list){
+    new MutationObserver(function(records){
+      if(reconcilingV94||modeV94()!=="managed")return;
+      records.forEach(function(record){record.addedNodes.forEach(function(node){if(node.nodeType===1)reconcileManagedAuditV94(node)})});
+    }).observe(list,{childList:true,subtree:true});
+  }
+  reconcileManagedAuditV94(list);
+})();
+</script>
 </body>
 </html>
