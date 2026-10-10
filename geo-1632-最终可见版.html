@@ -10644,14 +10644,25 @@ function auditStateHtmlV26(f){
     const status=websiteAuditStatusV26(f);
     return `<div class="finding-state-stack-v26"><span class="finding-state-pill ${status.cls}">${status.text}</span></div>`;
   }
+  const task=taskByFindingV26(f.id);
+  if(task){
+    const out=typeof ensureOutput==="function"?ensureOutput(task):{};
+    if(serviceMode==="agent"&&task.type==="web"&&!out.briefConfirmed){
+      return `<div class="finding-state-stack-v26"><span class="finding-state-pill pending">待用户去优化中心审核</span></div>`;
+    }
+    const state=typeof workspaceStatus==="function"?workspaceStatus(task,out):[task.statusLabel||"已生成任务","approved"];
+    return `<div class="finding-state-stack-v26"><span class="finding-state-pill ${state[1]||"approved"}">${state[0]}</span></div>`;
+  }
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户审核":"待运营审核"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待用户审核":"待运营审核"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
-  return `<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="${f.id}">处理</button></div>`;
+  const task=taskByFindingV26(f.id);
+  const action=auditRouteForV26(f)==="repair"||task?"查看详情":"处理";
+  return `<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="${f.id}">${action}</button></div>`;
 }
 
 renderAuditFindingsV20=function(){
@@ -14074,7 +14085,8 @@ table td>*{
   };
   var actionsBaseV84=auditActionsHtmlV26;
   auditActionsHtmlV26=function(f){
-    if(auditRouteForV26(f)==="strategy")return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">审核</button></div>';
+    var task=taskByFindingV26(f.id);
+    if(auditRouteForV26(f)==="strategy")return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+(task?"查看详情":"处理")+'</button></div>';
     if(!isTechFindingV84(f))return actionsBaseV84(f);
     return '<div class="finding-actions-v26"><button class="small-btn tech-detail-v85" data-id="'+escHtml(f.id)+'">查看详情</button></div>';
   };
