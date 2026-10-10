@@ -14244,5 +14244,85 @@ table td>*{
   renderOptimization();renderAuditFindingsV20();
 })();
 </script>
+<style id="geo1632-v88-style">
+#generateRepairV26{display:none!important}
+</style>
+<script id="geo1632-v88-script">
+(function(){
+  var autoSubmittingTechV88=false;
+  function modeV88(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
+  function roleV88(){return window.currentRole||currentRole||"client"}
+  function isTechV88(f){return !!f&&auditRouteForV26(f)==="repair"}
+  function isContentV88(f){return !!f&&!isTechV88(f)}
+  function existingTaskV88(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
+  function canReviewContentV88(){return modeV88()==="agent"?roleV88()==="client":roleV88()==="ops"}
+  function contentActionV88(){return modeV88()==="agent"?"生成任务":"审核通过并生成任务"}
+  function createContentTasksV88(ids){
+    if(!canReviewContentV88()){showToast("当前视角仅可查看，内容问题由负责角色审核");return}
+    var valid=(auditFindingsV20||[]).filter(function(f){return ids.includes(f.id)&&isContentV88(f)&&!existingTaskV88(f)}).map(function(f){return f.id});
+    if(!valid.length)return;
+    createStrategiesV26(valid);
+    showToast(modeV88()==="agent"?"客户已确认，任务已生成至优化中心":"运营审核已通过，任务已自动生成至优化中心");
+  }
+  function submitUnsentTechV88(){
+    if(autoSubmittingTechV88)return false;
+    var ids=(auditFindingsV20||[]).filter(function(f){return isTechV88(f)&&!existingTaskV88(f)&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id))}).map(function(f){return f.id});
+    if(!ids.length)return false;
+    autoSubmittingTechV88=true;
+    try{createRepairTasksV26(ids)}finally{autoSubmittingTechV88=false}
+    return true;
+  }
+  auditStateHtmlV26=function(f){
+    var t=existingTaskV88(f),decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
+    if(isTechV88(f)){
+      var status=websiteAuditStatusV26(f);
+      return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(status.cls||"pending")+'">'+escHtml(status.text||"官网处理中")+'</span></div>';
+    }
+    if(t)return '<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成任务</span></div>';
+    if(decision?.status==="deferred")return '<div class="finding-state-stack-v26"><span class="finding-state-pill defer">暂不修复</span></div>';
+    return '<div class="finding-state-stack-v26"><span>'+(modeV88()==="agent"?"待客户审核":"待运营审核")+'</span></div>';
+  };
+  auditActionsHtmlV26=function(f){
+    var label=isTechV88(f)||!canReviewContentV88()?"查看详情":"审核";
+    return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+label+'</button></div>';
+  };
+  openFindingDetailV26=function(id){
+    var f=(auditFindingsV20||[]).find(function(x){return x.id===id});if(!f)return;
+    var t=existingTaskV88(f),findingNo=auditFindingsV20.findIndex(function(x){return x.id===id})+1,status=isTechV88(f)?websiteAuditStatusV26(f):null;
+    drawerSub.textContent="异常"+findingNo;drawerTitle.textContent="异常处理 · "+f.title;
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 '+(isTechV88(f)?'repair':'strategy')+'">'+escHtml(findingProcessingMetaV37(f).label)+'</span></div><div class="detail-body"><div class="kv">'
+      +'<div class="k">所属检查项</div><div class="v">'+escHtml(auditCheckLabelV25(f))+'</div>'
+      +(status?'<div class="k">当前状态</div><div class="v"><span class="finding-state-pill '+escHtml(status.cls||'pending')+'">'+escHtml(status.text||'官网处理中')+'</span></div>':'')
+      +'<div class="k">异常说明</div><div class="v">'+escHtml(f.desc)+'</div><div class="k">为什么这样处理</div><div class="v">'+escHtml(findingProcessingMetaV37(f).reason)+'</div></div></div></div>';
+    var buttons='<button class="btn" id="closeFindingV88">关闭</button>';
+    if(!isTechV88(f)){
+      if(t)buttons+='<button class="btn primary" id="viewFindingTaskV88">查看任务</button>';
+      else if(canReviewContentV88())buttons+='<button class="btn" id="deferFindingV88">暂不修复</button><button class="btn primary" id="approveFindingV88">'+contentActionV88()+'</button>';
+    }
+    drawerFoot.innerHTML=buttons;drawer.classList.add("open");
+    document.getElementById("closeFindingV88").onclick=function(){drawer.classList.remove("open")};
+    document.getElementById("deferFindingV88")?.addEventListener("click",function(){openDeferFindingsV26([id])});
+    document.getElementById("approveFindingV88")?.addEventListener("click",function(){drawer.classList.remove("open");createContentTasksV88([id])});
+    document.getElementById("viewFindingTaskV88")?.addEventListener("click",function(){drawer.classList.remove("open");goOptimization();setTimeout(function(){openReviewWorkspace(t.uid)},80)});
+  };
+  var renderAuditBaseV88=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){
+    if(!autoSubmittingTechV88&&submitUnsentTechV88())return;
+    renderAuditBaseV88();
+    var repair=document.getElementById("generateRepairV26");if(repair)repair.hidden=true;
+    var selected=(auditFindingStateV20.selected||[]).map(function(id){return auditFindingsV20.find(function(f){return f.id===id})}).filter(function(f){return isContentV88(f)&&!existingTaskV88(f)});
+    var generate=document.getElementById("generateCandidateV20");
+    if(generate){
+      var allowed=canReviewContentV88();generate.hidden=!allowed;generate.disabled=!allowed||!selected.length;
+      generate.textContent=selected.length?contentActionV88()+" · "+selected.length:contentActionV88();
+      generate.onclick=function(){createContentTasksV88(selected.map(function(f){return f.id}))};
+    }
+    document.querySelectorAll("#geoAlertListV20 .finding-check").forEach(function(cb){var f=auditFindingsV20.find(function(x){return x.id===cb.dataset.id});if(isTechV88(f)){cb.checked=false;cb.disabled=true}});
+    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=modeV88()==="agent"?"技术修复由官网直接处理；官网内容和三方内容需客户审核后生成任务。":"技术修复由官网直接处理；官网内容和三方内容由运营审核，通过后自动生成任务。";
+  };
+  window.renderAuditFindingsV20=renderAuditFindingsV20;
+  renderAuditFindingsV20();
+})();
+</script>
 </body>
 </html>
