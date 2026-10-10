@@ -4495,7 +4495,7 @@ button[disabled]{
           <div class="geo-audit-title-wrap">
             <h2>① 官网 GEO 体检</h2>
             <span class="geo-audit-help" tabindex="0" aria-label="说明">?
-              <span class="geo-audit-help-tip">官网技术诊断不需要用户审核，确定性问题会直接生成任务；推送到官网后进入“待官网运营审核”。</span>
+              <span class="geo-audit-help-tip">技术修复不需要客户或运营审核；提交后直接进入官网处理，并可随时查看处理进度。</span>
             </span>
           </div>
           <div class="geo-audit-summary"><span class="audit-pass-count">4 通过</span><span class="audit-alert-count">3 异常</span></div>
@@ -4653,8 +4653,8 @@ button[disabled]{
 <div class="summary">
         <div class="stat"><b id="optTotal">0</b><span>项</span><small>全部任务</small></div>
         <div class="stat"><b id="optWeb">0</b><span>项</span><small>官网内容</small></div>
-        <div class="stat"><b id="optExt">0</b><span>项</span><small>外部内容</small></div>
-        <div class="stat"><b id="optRepair">0</b><span>项</span><small>基础修复</small></div>
+        <div class="stat"><b id="optExt">0</b><span>项</span><small>三方内容</small></div>
+        <div class="stat"><b id="optRepair">0</b><span>项</span><small>技术修复</small></div>
       </div>
 <section class="action-board">
         <div class="action-head"><h2>今天需要你处理</h2><small>自动聚合当前任务里需要人工确认的事项</small></div>
@@ -4666,8 +4666,8 @@ button[disabled]{
         <div class="tabs">
           <button class="tab active" data-filter="all">全部任务</button>
           <button class="tab" data-filter="web">官网内容</button>
-          <button class="tab" data-filter="external">外部内容</button>
-          <button class="tab" data-filter="repair">基础修复</button>
+          <button class="tab" data-filter="external">三方内容</button>
+          <button class="tab" data-filter="repair">技术修复</button>
         </div>
         <div class="table-wrap">
           <table class="task-table">
@@ -4790,8 +4790,8 @@ const configHistory=[
 
 const repairDefs={
  R1:{id:"R1",type:"repair",name:"修复 Product / FAQ / Organization 结构化数据",source:"AEO审计 / F7",strategy:"GS2",persona:"不适用",factor:"机器可读性",methods:["Product Schema","FAQ Schema","Organization Schema"],evidence:"结构化数据覆盖存在2处缺失",dest:"技术修复",status:"queue",layer:"技术",p:"P1"},
- R2:{id:"R2",type:"repair",name:"补齐认证结构化、专家档案与 sameAs",source:"AEO审计 / F7",strategy:"GS3",persona:"不适用",factor:"实体与信任",methods:["sameAs","作者档案","认证结构化"],evidence:"认证编号未结构化；专家档案待建；sameAs不完整",dest:"实体修复",status:"queue",layer:"实体与信任",p:"P1"},
- R3:{id:"R3",type:"repair",name:"统一官网 / LinkedIn / 名录企业信息",source:"AEO审计",strategy:"BASE-1",persona:"不适用",factor:"实体一致性",methods:["跨平台一致性","地址口径统一"],evidence:"发现1处地址口径不一致",dest:"实体修复",status:"queue",layer:"实体与信任",p:"P1"}
+ R2:{id:"R2",type:"repair",name:"补齐认证结构化、专家档案与 sameAs",source:"AEO审计 / F7",strategy:"GS3",persona:"不适用",factor:"实体与信任",methods:["sameAs","作者档案","认证结构化"],evidence:"认证编号未结构化；专家档案待建；sameAs不完整",dest:"技术修复",status:"queue",layer:"实体与信任",p:"P1"},
+ R3:{id:"R3",type:"repair",name:"统一官网 / LinkedIn / 名录企业信息",source:"AEO审计",strategy:"BASE-1",persona:"不适用",factor:"实体一致性",methods:["跨平台一致性","地址口径统一"],evidence:"发现1处地址口径不一致",dest:"技术修复",status:"queue",layer:"实体与信任",p:"P1"}
 };
 
 const personas=[
@@ -4801,8 +4801,8 @@ const personas=[
  gaps:[["本地服务与培训",40,"买家重视80，但我方覆盖仅40","官网+第三方"],["认证与合规",35,"买家重视80，我方45，竞品82","官网"],["交期与产能",25,"交期与SLA信息不足","官网"],["其他",0,"","其他"]],
  opts:[
  {id:"GS1",p:"P0",type:"web",layer:"实体与信任",title:"碳纤维方案页品牌显影：对比表 + FAQ + 品牌实体加密",methods:["对比表 / 定义框 / Q&A","统计数据注入","JSON-LD sameAs / Product / FAQ"],persona:"复材技术负责人、复材初创",factor:"无热影响区 / 品牌显影",source:"F1",evidence:"页面被Perplexity引为来源，但回答只推荐Flow",dest:"官网内容"},
- {id:"GS8",p:"P1",type:"external",layer:"外部信源",title:"CompositesWorld 投稿《碳纤维切割工艺对比》",methods:["行业媒体长稿","统计数据注入","专家引语"],persona:"复材技术负责人、复材初创",factor:"无热影响区 / 第三方信任",source:"F5",evidence:"82.9%引用来自第三方；CompositesWorld高频且我方零提及",dest:"外部内容"},
- {id:"GS9",p:"P1",type:"external",layer:"外部信源",title:"LinkedIn工程师专栏 + r/Machinists回答草稿",methods:["社区真实讨论","专家引语","选型问答"],persona:"复材技术负责人",factor:"价格与TCO",source:"F5",evidence:"Perplexity中Reddit/r/Machinists高频出现",dest:"外部内容"}
+ {id:"GS8",p:"P1",type:"external",layer:"外部信源",title:"CompositesWorld 投稿《碳纤维切割工艺对比》",methods:["行业媒体长稿","统计数据注入","专家引语"],persona:"复材技术负责人、复材初创",factor:"无热影响区 / 第三方信任",source:"F5",evidence:"82.9%引用来自第三方；CompositesWorld高频且我方零提及",dest:"三方内容"},
+ {id:"GS9",p:"P1",type:"external",layer:"外部信源",title:"LinkedIn工程师专栏 + r/Machinists回答草稿",methods:["社区真实讨论","专家引语","选型问答"],persona:"复材技术负责人",factor:"价格与TCO",source:"F5",evidence:"Perplexity中Reddit/r/Machinists高频出现",dest:"三方内容"}
  ]},
 {
  name:"航空采购",market:"欧洲 / 英语",
@@ -4841,7 +4841,7 @@ const extraStrategyDefs=[
     factor:"切割精度 / 可操作性",
     source:"F5",
     evidence:"来源图谱显示视频是当前行业可建设的高价值第三方信源",
-    dest:"外部内容"
+    dest:"三方内容"
   }
 ];
 
@@ -5029,7 +5029,7 @@ function createRepairTask(id){
  if(exists){highlightedTask=exists.uid;showToast("该修复任务已存在，已为你定位");goOptimization();return;}
  const uid="T"+Date.now();
  tasks.unshift({uid,...r,statusLabel:"待执行",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:new Date().toLocaleString()});
- highlightedTask=uid;saveTasks();showToast("已生成基础修复任务");goOptimization();
+ highlightedTask=uid;saveTasks();showToast("已生成技术修复任务");goOptimization();
 }
 
 function switchPage(name){
@@ -5088,7 +5088,7 @@ function renderOptimization(){
  document.getElementById("actionGrid").innerHTML=pending.length?pending.map(t=>`<div class="action-card"><h3>${t.name}</h3><p>来源：${t.source} / ${t.strategy}<br>目标：${t.dest}</p><div class="action-foot"><small>${t.statusLabel}</small><button class="small-btn primary openTask" data-id="${t.uid}">处理</button></div></div>`).join(""):`<div class="action-card"><h3>暂无待处理事项</h3><p>从“诊断与策略”确认方案后，任务会自动出现在这里。</p></div>`;
  const rows=tasks.filter(t=>filter==="all"||t.type===filter);
  document.getElementById("taskBody").innerHTML=rows.length?rows.map(t=>`<tr class="${t.uid===highlightedTask?'highlight':''}">
-  <td class="task-name"><b>${t.name}</b><div class="subline"><span class="type ${t.type}">${t.type==="web"?"官网内容":t.type==="external"?"外部内容":"基础修复"}</span>　${t.persona}</div></td>
+  <td class="task-name"><b>${t.name}</b><div class="subline"><span class="type ${t.type}">${t.type==="web"?"官网内容":t.type==="external"?"三方内容":"技术修复"}</span>　${t.persona}</div></td>
   <td>${t.source} / ${t.strategy}<div class="subline">口径 ${t.baselineVersion||"V1"} · 周期 ${t.strategyWindow||"历史任务"}</div></td>
   <td>${t.methods.map(m=>`<span class="method">${m}</span>`).join("")}</td>
   <td><span class="status ${t.status}">${t.statusLabel}</span></td>
@@ -5842,7 +5842,7 @@ function renderReviewActions(t,out){
       html=canPublish?`<button class="btn primary" id="focusUrl">去登记发布 URL</button>`:`<button class="btn" disabled>等待外部发布</button>`;
     }else{
       const canApply=currentRole==="ops"||serviceMode==="agent";
-      note.textContent=canApply?"修复方案已确认，可执行变更并进入验证。":"等待运营执行技术修复。";
+      note.textContent=canApply?"修复方案已确认，可执行变更并进入验证。":"技术修复已提交官网，等待官网处理与验证。";
       html=canApply?`<button class="btn primary" id="applyRepair">执行修复并验证</button>`:`<button class="btn" disabled>等待运营执行</button>`;
     }
   }else if(t.progressStage==="recheck"){
@@ -5911,7 +5911,7 @@ openEnhancedTask=function(uid){
       <div class="kv">
         <div class="k">来源诊断</div><div class="v">${escHtml(t.source)}</div>
         <div class="k">策略</div><div class="v">${escHtml(t.strategy)}</div>
-        <div class="k">任务类型</div><div class="v">${t.type==="web"?"官网内容":t.type==="external"?"外部内容":"基础修复"}</div>
+        <div class="k">任务类型</div><div class="v">${t.type==="web"?"官网内容":t.type==="external"?"三方内容":"技术修复"}</div>
         <div class="k">当前节点</div><div class="v"><span class="progress-status ${st[1]}">${st[0]}</span></div>
         <div class="k">影响对象</div><div class="v">${escHtml(t.persona)}</div>
         <div class="k">分析口径</div><div class="v">${escHtml(t.baselineVersion||"V1")}</div>
@@ -5956,7 +5956,7 @@ renderOptimization=function(){
     else if(t.progressStage==="recheck"){actionLabel="查看复测";primary=""}
     const nextMap={todo:"下一步：Agent执行",running:"下一步：自动质检",human:`下一步：${st[0]}`,publish_wait:`下一步：${st[0]}`,recheck:"下一步：Re-check",done:"任务已闭环"};
     return `<tr class="${t.uid===highlightedTask?'highlight':''}">
-      <td class="task-name"><b>${escHtml(t.name)}</b><div class="subline"><span class="type ${t.type}">${t.type==="web"?"官网内容":t.type==="external"?"外部内容":"基础修复"}</span>　${escHtml(t.persona)}</div><span class="task-next">${nextMap[t.progressStage||"todo"]}</span></td>
+      <td class="task-name"><b>${escHtml(t.name)}</b><div class="subline"><span class="type ${t.type}">${t.type==="web"?"官网内容":t.type==="external"?"三方内容":"技术修复"}</span>　${escHtml(t.persona)}</div><span class="task-next">${nextMap[t.progressStage||"todo"]}</span></td>
       <td>${escHtml(t.source)} / ${escHtml(t.strategy)}<div class="subline">口径 ${escHtml(t.baselineVersion||"V1")} · ${escHtml(t.strategyWindow||"历史任务")}</div></td>
       <td><span class="collab-status ${cs.cls}">${cs.text}</span></td>
       <td><span class="progress-status ${st[1]}">${st[0]}</span>${t.relatedStrategies&&t.relatedStrategies.length>1?`<div class="subline">${t.relatedStrategies.length} 条策略已合并</div>`:""}</td>
@@ -6015,7 +6015,7 @@ const demoStrategyDefsV8=[
     title:"欧洲服务响应主题稿：补充服务承诺与适用范围",
     methods:["服务范围说明","业务事实核验","适用市场边界"],persona:"航空采购、汽车工艺",factor:"售后响应 / 供应链风险",
     source:"F3 / F5",evidence:"Agent发现可与现有外部稿件合并，但会新增欧洲服务响应承诺和适用市场范围，属于业务事实与内容范围变化。",
-    dest:"外部信源内容",queueKind:"strategy",targetPage:"外部行业稿件",
+    dest:"三方内容",queueKind:"strategy",targetPage:"外部行业稿件",
     mergeProfile:{risk:"high",candidateUid:"T103",reason:"合并后会扩大既有行业稿件的内容范围，并新增“欧洲服务响应”业务事实；需要客户确认事实是否准确、是否允许写入最终稿。"}
   },
   {
@@ -6031,7 +6031,7 @@ const demoStrategyDefsV8=[
     title:"工程师专家档案实体统一与同名消歧",
     methods:["作者实体","专家档案","sameAs消歧"],persona:"不适用",factor:"实体可信度",
     source:"F7",evidence:"正在扫描是否可复用“认证结构化、专家档案与 sameAs”修复任务。",
-    dest:"实体修复",queueKind:"strategy",targetPage:"/experts",
+    dest:"技术修复",queueKind:"strategy",targetPage:"/experts",
     mergeProfile:{risk:"medium",candidateUid:"T108",reason:"与专家档案修复存在部分重合，扫描完成后再决定。"}
   }
 ];
@@ -6353,14 +6353,14 @@ function seedDemoDataV8(force=false){
   tasks=[
     mk("T101","web","碳纤维方案页品牌显影：对比表 + FAQ + 品牌实体加密","F1","GS1","复材技术负责人、复材初创","无热影响区 / 品牌显影",["对比表 / 定义框 / Q&A","统计数据注入","JSON-LD"],"官网内容","human"),
     mk("T102","web","交期与产能页：标准交期区间 + 德国服务网络 SLA","F3","GS6","汽车Tier-1、航空采购","交期与产能",["胶囊答案","统计数据注入","权威语态","对比表 / Q&A"],"官网内容","running",{relatedStrategies:["GS6","GS10"],relatedSources:["F3"],relatedPersonas:["汽车Tier-1、航空采购","航空采购"],executionScope:"官网单页优化",mergeAudit:[{strategy:"GS10",risk:"low",time:"09/18 15:20",summary:"Agent 自动去重合并"}]}),
-    mk("T103","external","CompositesWorld 投稿《碳纤维切割工艺对比》","F5","GS8","复材技术负责人、复材初创","第三方信任",["行业媒体长稿","统计数据注入","专家引语"],"外部内容","publish_wait"),
+    mk("T103","external","CompositesWorld 投稿《碳纤维切割工艺对比》","F5","GS8","复材技术负责人、复材初创","第三方信任",["行业媒体长稿","统计数据注入","专家引语"],"三方内容","publish_wait"),
     mk("T104","repair","修复 Product / FAQ / Organization 结构化数据","F7","GS2","不适用","机器可读性",["Product Schema","FAQ Schema","Organization Schema"],"技术修复","recheck"),
     mk("T105","web","切割精度事实纠错：统一±0.05mm并结构化参数","F4","GS7","航空采购","事实准确性",["事实纠错","参数结构化","事实库对齐"],"官网内容","done"),
     mk("T106","web","日本代理合作与本地服务说明页","F2","GS13","日本商社","代理支持 / 本地服务",["日语本地化","代理合作说明","服务范围 Q&A"],"官网内容","todo"),
-    mk("T107","external","LinkedIn工程师专栏 + r/Machinists回答草稿","F5","GS9","复材技术负责人","价格与TCO",["社区真实讨论","专家引语","选型问答"],"外部内容","human"),
-    mk("T108","repair","补齐认证结构化、专家档案与 sameAs","F7","GS3","不适用","实体与信任",["sameAs","作者档案","认证结构化"],"实体修复","human"),
+    mk("T107","external","LinkedIn工程师专栏 + r/Machinists回答草稿","F5","GS9","复材技术负责人","价格与TCO",["社区真实讨论","专家引语","选型问答"],"三方内容","human"),
+    mk("T108","repair","补齐认证结构化、专家档案与 sameAs","F7","GS3","不适用","实体与信任",["sameAs","作者档案","认证结构化"],"技术修复","human"),
     mk("T109","web","JP市场日语内容补齐：日语问答与采购决策内容","F2","GS4","日本商社","本地服务 / 代理支持",["日语本地化","Q&A","市场内容覆盖"],"官网内容","running"),
-    mk("T110","external","YouTube 试切演示视频描述实体化 + 章节时间戳","F5","EXT-YT","车间主管、复材技术负责人","切割精度 / 可操作性",["视频描述优化","品牌 / 型号 / 参数实体","章节时间戳"],"外部内容","todo")
+    mk("T110","external","YouTube 试切演示视频描述实体化 + 章节时间戳","F5","EXT-YT","车间主管、复材技术负责人","切割精度 / 可操作性",["视频描述优化","品牌 / 型号 / 参数实体","章节时间戳"],"三方内容","todo")
   ];
 
   collabMap={};
@@ -6469,7 +6469,7 @@ function applyV9DemoFixes(){
         out.published=false;
         if(!(out.versions||[]).some(v=>String(v.note||"").includes("最终稿已确认"))){
           out.versions=out.versions||[];
-          out.versions.push({v:`V${out.version||1}`,time:nowLabel(),note:"最终稿已确认，本期外部信源内容任务完成；不跟踪外部发布 URL。"});
+          out.versions.push({v:`V${out.version||1}`,time:nowLabel(),note:"最终稿已确认，本期三方内容任务完成；不跟踪外部发布 URL。"});
         }
       }
     }
@@ -6481,7 +6481,7 @@ function applyV9DemoFixes(){
     g12.title="欧洲服务响应主题稿：补充服务承诺与适用范围";
     g12.methods=["服务范围说明","业务事实核验","适用市场边界"];
     g12.evidence="Agent发现可并入既有行业稿件，但会新增欧洲服务响应承诺与适用市场范围，属于业务事实和内容范围变化。";
-    g12.dest="外部信源内容";
+    g12.dest="三方内容";
     g12.targetPage="外部行业稿件";
     g12.mergeProfile={risk:"high",candidateUid:"T103",reason:"合并后会扩大既有行业稿件的内容范围，并新增“欧洲服务响应”业务事实；需要客户确认事实是否准确、是否允许写入最终稿。"};
   }
@@ -6492,16 +6492,16 @@ function applyV9DemoFixes(){
   // Demo data: T103 is already a finalized deliverable.
   const t103=tasks.find(t=>t.uid==="T103");
   if(t103){
-    t103.dest="外部信源内容";
+    t103.dest="三方内容";
     t103.progressStage="done";
     t103.statusLabel=V9_EXTERNAL_FINAL_LABEL;
     const out=ensureOutput(t103);
     out.opsApproved=true;out.clientApproved=true;out.published=false;delete out.url;
   }
   const t107=tasks.find(t=>t.uid==="T107");
-  if(t107){t107.dest="外部信源内容";}
+  if(t107){t107.dest="三方内容";}
   const t110=tasks.find(t=>t.uid==="T110");
-  if(t110){t110.dest="外部信源内容";}
+  if(t110){t110.dest="三方内容";}
 
   localStorage.setItem("geoLinkedTasks",JSON.stringify(tasks));
   localStorage.setItem("geoCollabMap",JSON.stringify(collabMap));
@@ -6513,11 +6513,11 @@ function applyV9DemoFixes(){
 /* Role copy: external work no longer says publish URL. */
 roleDesc=function(){
   if(serviceMode==="agent"){
-    return "重点处理：待确认策略、待审核最终稿、官网发布授权与技术修复确认。外部信源内容确认最终稿后即完成。";
+    return "重点处理：待确认策略、待审核最终稿、官网发布授权与技术修复进度。三方内容确认最终稿后即完成。";
   }
   return currentRole==="ops"
-    ?"重点处理：待审核策略、待质检内容、客户反馈与最终稿交付；外部信源内容不跟踪发布 URL。"
-    :"重点处理：待确认策略、待终审内容与官网发布授权；外部信源内容确认最终稿后即完成。";
+    ?"重点处理：待审核策略、待质检内容、客户反馈与最终稿交付；三方内容不跟踪发布 URL。"
+    :"重点处理：待确认策略、待终审内容与官网发布授权；三方内容确认最终稿后即完成。";
 };
 
 /* External workflow is intentionally shorter this phase. */
@@ -6611,7 +6611,7 @@ roleActionCards=function(){
   return[
     ["待确认策略",pendingClient,"只展示已经达到客户确认节点的策略。"],
     ["待审核最终结果",humanTasks,"确认业务事实、最终内容或修复结果。"],
-    ["待官网发布授权",websitePublish,"只针对官网内容；外部信源内容确认最终稿后即完成。"]
+    ["待官网发布授权",websitePublish,"只针对官网内容；三方内容确认最终稿后即完成。"]
   ];
 };
 
@@ -6626,7 +6626,7 @@ renderReviewActions=function(t,out){
   const note=document.getElementById("reviewActionNote"),box=document.getElementById("reviewActionButtons");
   let html="";
   if(t.progressStage==="todo"){
-    note.textContent="Brief 已确认，Agent 将自动生成外部信源内容稿。";
+    note.textContent="Brief 已确认，Agent 将自动生成三方内容稿。";
     html=`<span class="system-progress-v47">等待 Agent 自动启动</span>`;
   }else if(t.progressStage==="running"){
     note.textContent="Agent 正在生成稿件并运行 7 项自动质检。";
@@ -6650,7 +6650,7 @@ renderReviewActions=function(t,out){
       }
     }
   }else if(t.progressStage==="done"){
-    note.textContent="最终稿已经确认，本期外部信源内容任务完成。系统不跟踪第三方发布 URL。";
+    note.textContent="最终稿已经确认，本期三方内容任务完成。系统不跟踪第三方发布 URL。";
     html=`<button class="btn" id="backDoneV9">返回优化中心</button>`;
   }
   box.innerHTML=html;
@@ -6676,7 +6676,7 @@ renderReviewActions=function(t,out){
   const cp=document.getElementById("clientFinalV9");if(cp)cp.onclick=()=>{
     out.clientApproved=true;out.published=false;t.progressStage="done";t.statusLabel=V9_EXTERNAL_FINAL_LABEL;
     out.versions=out.versions||[];
-    out.versions.push({v:`V${out.version||1}`,time:nowLabel(),note:"客户确认最终稿；外部信源内容任务完成。"});
+    out.versions.push({v:`V${out.version||1}`,time:nowLabel(),note:"客户确认最终稿；三方内容任务完成。"});
     saveTaskOutputs();saveTasks();
     if(typeof pushReview==="function")pushReview(t.strategy,"client","客户","最终稿和业务事实确认通过，本期任务完成。");
     showToast("最终稿已确认，任务完成");renderReviewWorkspace(t.uid)
@@ -6721,7 +6721,7 @@ renderOptimization=function(){
       ]
       :[
         ["待客户确认",getAllQueueStrategies().filter(s=>{const c=getCollab(s.id);return(serviceMode==="agent"||c.opsApproved)&&!c.clientApproved}).length,"需要你确认的策略或业务事实"],
-        ["待客户终审",reviewCount,"外部信源内容确认最终稿后即完成"],
+        ["待客户终审",reviewCount,"三方内容确认最终稿后即完成"],
         ["待官网发布授权",websitePublish,"仅官网内容需要发布授权"]
       ];
     ag.innerHTML=cards.map((c,i)=>`<div class="action-card ${c[1]?"clickable":""}" data-action-index="${i}">
@@ -6773,7 +6773,7 @@ function resetDemoV9(){
   applyV9DemoFixes();
   refreshCollabControls();renderPersona();renderStrategyQueue();renderMergeHubV8();renderOptimization();
   switchPage("diagnosis");
-  showToast("演示数据已恢复：外部内容以最终稿确认为终点，不含 URL 登记");
+  showToast("演示数据已恢复：三方内容以最终稿确认为终点，不含 URL 登记");
 }
 document.querySelectorAll(".demoResetBtn").forEach(b=>b.onclick=resetDemoV9);
 
@@ -7747,7 +7747,7 @@ function proposalGroupDefsV18(){
     {
       ids:["GS2","GS3","GS14"],
       title:"结构化数据与实体信任协同修复",
-      type:"协同修复",
+      type:"技术修复",
       target:"AI 官网协同",
       desc:"GEO 输出诊断与修复任务，由 AI 官网处理 Schema、sameAs、认证与专家实体基础。",
       risk:{id:"fact_cert",label:"认证 / 合规事实",text:"认证范围、编号与对外合规声明需客户确认后才能写入结构化内容。"}
@@ -7763,14 +7763,14 @@ function proposalGroupDefsV18(){
     {
       ids:["GS8"],
       title:"CompositesWorld 行业稿最终稿",
-      type:"外部信源内容",
+      type:"三方内容",
       target:"最终稿交付",
       desc:"生成行业媒体可用的碳纤维切割工艺对比稿；本期做到最终稿确认，不跟踪外部发布 URL。"
     },
     {
       ids:["GS9"],
       title:"工程师专栏 / 社区回答稿",
-      type:"外部信源内容",
+      type:"三方内容",
       target:"最终稿交付",
       desc:"生成工程师视角的专业回答稿，运营审核与客户确认后形成可交付最终稿。"
     },
@@ -7820,7 +7820,7 @@ function buildProposalV18(showToastAfter=true){
       id:`PI-${String(items.length+1).padStart(2,"0")}`,
       title:s.title,
       strategyIds:[s.id],
-      type:s.type==="external"?"外部信源内容":s.type==="repair"?"协同修复":"官网内容",
+      type:s.type==="external"?"三方内容":s.type==="repair"?"技术修复":"官网内容",
       target:s.dest,
       desc:s.evidence,
       personas:[s.persona],
@@ -8031,7 +8031,7 @@ function ensureTaskForProposalItemV18(item){
     factor:s.factor,
     methods:s.methods||[],
     evidence:s.evidence,
-    dest:item.type==="协同修复"?"AI 官网协同":s.dest,
+    dest:item.type==="技术修复"?"AI 官网协同":s.dest,
     status:"queue",
     statusLabel:"待执行",
     baselineVersion:currentConfigVersion,
@@ -9888,7 +9888,7 @@ function enrichTaskDraftBriefV24(task,item){
   out.brief.factor=factors.join(" / ") || task.factor || "执行基础";
   out.brief.source=sources.join("；") || `${task.source} / ${task.strategy}`;
   out.brief.methods=methods.join("、") || (task.methods||[]).join("、");
-  out.brief.acceptance=item.type==="协同修复"
+  out.brief.acceptance=item.type==="技术修复"
     ?"完成对应站点修复、自动验证通过，并进入 GEO Re-check"
     :task.type==="external"
       ?"产出通过事实与来源质检，完成运营 / 客户确认后形成可交付发布稿"
@@ -10570,10 +10570,11 @@ function saveAuditRouteV26(){localStorage.setItem(auditRouteStorageV26,JSON.stri
 function auditRouteForV26(f){return auditRouteMetaV26[f.id]?.route||"strategy"}
 function findingProcessingMetaV37(f){
   const route=auditRouteForV26(f);
-  if(f.id==="AF-06")return {label:"信息口径 · 确认后处理",reason:"地址字段有冲突，先确认哪一个地址正确，再交 AI 建站修改并复核。"};
-  return route==="repair"
-    ?{label:"官网技术 · 直接处理",reason:auditRouteMetaV26[f.id]?.reason||"问题位置与修复动作明确，可按规则修复并验证。"}
-    :{label:"官网内容 · 需要审核",reason:auditRouteMetaV26[f.id]?.reason||(serviceMode==="managed"?"涉及业务事实或对外表达，需要运营审核处理方案。":"涉及业务事实或对外表达，由 Agent 生成方案并在 Brief 阶段由客户确认。")};
+  if(route==="repair")return {label:"技术修复 · 官网直接处理",reason:auditRouteMetaV26[f.id]?.reason||"问题位置与修复动作明确，由官网直接处理并自动验证。"};
+  const strategy=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+  return strategy?.type==="external"
+    ?{label:"三方内容 · 需要审核",reason:auditRouteMetaV26[f.id]?.reason||"涉及第三方平台内容与对外表达，需要人工审核。"}
+    :{label:"官网内容 · 需要审核",reason:auditRouteMetaV26[f.id]?.reason||"涉及官网业务事实或对外表达，需要人工审核。"};
 }
 function taskByFindingV26(id){const s=auditRouteStateV26[id];return s?.taskId?tasks.find(t=>t.uid===s.taskId):null}
 function isRecoveredV26(f){const s=auditRouteStateV26[f.id];const t=taskByFindingV26(f.id);return s?.status==="recovered"||!!(t&&t.progressStage==="done")}
@@ -10585,7 +10586,7 @@ function websiteAuditStatusV26(f){
   if(isRecoveredV26(f))return {text:"已修复",cls:"done"};
   if(decision?.status==="deferred"||t?.v42Ignored||t?.progressStage==="ignored")return {text:"暂不修复",cls:"defer"};
   if(t&&["site_rejected","site_failed"].includes(t.progressStage))return {text:"拒绝",cls:"reject"};
-  return {text:"待官网运营审核",cls:"pending"};
+  return {text:"已提交官网",cls:"pending"};
 }
 
 pendingFindingsV20=function(){return auditFindingsV20.filter(f=>{
@@ -10601,7 +10602,7 @@ function normalizeDirectRepairTasksV26(){
     const t=tasks.find(x=>x.uid===uid);if(!t)return;
     t.findingIds=ids;t.routeType="direct_repair";t.source=ids.join(" + ");
     t.strategy="不经过候选策略";t.relatedStrategies=[];t.dest="AI 官网协同";
-    if(["brief","todo"].includes(t.progressStage)){t.progressStage="site_submit";t.statusLabel="待官网运营审核";t.isDraft=false}
+    if(["brief","todo"].includes(t.progressStage)){t.progressStage="site_running";t.status="running";t.statusLabel="官网处理中";t.isDraft=false}
   });
   if(typeof saveTasks==="function")saveTasks();
 }
@@ -10647,7 +10648,7 @@ function auditStateHtmlV26(f){
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"待官网运营审核":serviceMode==="agent"?"待客户审核诊断":"待运营审核诊断"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户确认":"待运营审核"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
@@ -10733,7 +10734,7 @@ function createRepairTasksV26(ids){
   Object.values(groups).forEach(group=>{
     const uid=`T${Math.max(110,...tasks.map(t=>parseInt(String(t.uid).replace(/\D/g,""),10)||0))+1}`;
     const isWebsiteStructure=group.every(f=>["GEO_CHECK_01","GEO_CHECK_02","GEO_CHECK_03"].includes(f.check_item_id));
-    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"pending",statusLabel:"待官网运营审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"site_submit",isDraft:false,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
+    const t={uid,type:"repair",name:`${group[0].check_item_name}修复：${group.map(f=>f.title.replace(/缺失|待补|不完整/g,"")).join(" + ")}`,source:group.map(f=>f.id).join(" + "),strategy:"不经过候选策略",persona:"不适用",factor:"官网 GEO 基础",methods:[...new Set(group.flatMap(f=>auditRouteMetaV26[f.id]?.methods||[]))],evidence:group.map(f=>f.desc).join("；"),dest:"AI 官网协同",status:"running",statusLabel:"官网处理中",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"site_running",isDraft:false,routeType:"direct_repair",findingIds:group.map(f=>f.id),taskCategory:isWebsiteStructure?"website_structure":"knowledge_based",knowledgeRequirement:isWebsiteStructure?"not_required":"required",relatedStrategies:[]};
     tasks.push(t);const out=ensureOutput(t);out.brief={
       goal:`修复 ${group.map(f=>f.title).join("、")}，恢复官网 GEO 基础检查`,
       persona:"不适用",
@@ -10746,7 +10747,7 @@ function createRepairTasksV26(ids){
     group.forEach(f=>auditRouteStateV26[f.id]={route:"repair",status:"task_created",taskId:uid});created.push(t);
   });
   auditFindingStateV20.selected=auditFindingStateV20.selected.filter(id=>!ids.includes(id));saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();
-  showToast(`已生成 ${created.length} 个修复任务，进入待官网运营审核`);renderAuditFindingsV20();renderOptimization();
+  showToast(`已将 ${created.length} 个技术修复直接提交官网`);renderAuditFindingsV20();renderOptimization();
 }
 
 function createStrategiesV26(ids){
@@ -11272,7 +11273,7 @@ function pendingStatusLabelV29(item){
     const task=tasks.find(t=>t.uid===item.object_id);
     if(task)return workspaceStatus(task,ensureOutput(task))[0];
   }
-  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核诊断':'待客户审核诊断';
+  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核':'待客户确认';
   const map={finding_review:"待审核诊断",strategy_review:"运营审核",strategy_confirm:"待用户审核",brief:"Brief 待确认",site_submit:"待提交 AI 建站",site_failed:"验证未通过",site_publish:"待发布确认",human:"待用户审核",pending:"待处理"};
   return map[item.status]||"待处理";
 }
@@ -11399,9 +11400,12 @@ refreshPendingEntryV29();
     ['.site-collab-title-v27 > div:last-child','h3','p'],
     ['#onboardingV28','h3','p']
   ];
-  function apply(){
+  function apply(root=document){
     pairs.forEach(([selector,titleSelector,noteSelector])=>{
-      document.querySelectorAll(selector).forEach(container=>{
+      const containers=[];
+      if(root.nodeType===Node.ELEMENT_NODE&&root.matches(selector))containers.push(root);
+      if(root.querySelectorAll)containers.push(...root.querySelectorAll(selector));
+      containers.forEach(container=>{
         const title=container.querySelector(titleSelector);
         const note=container.querySelector(noteSelector);
         if(!title||!note||title.closest('.title-line-v38')||note.closest('.title-help-v38'))return;
@@ -11424,11 +11428,17 @@ refreshPendingEntryV29();
     });
   }
   apply();
-  let queued=false;
-  new MutationObserver(()=>{
-    if(queued)return;
+  let queued=false,running=false;
+  const pending=new Set();
+  new MutationObserver(records=>{
+    records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)pending.add(node)}));
+    if(queued||running||!pending.size)return;
     queued=true;
-    queueMicrotask(()=>{queued=false;apply()});
+    queueMicrotask(()=>{
+      queued=false;if(running)return;running=true;
+      const nodes=[...pending];pending.clear();
+      try{nodes.forEach(apply)}finally{running=false}
+    });
   }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
@@ -11703,8 +11713,8 @@ refreshPendingEntryV29();
     if(p==='running')return t.type==='repair'?['Agent处理中','client']:['生成内容中','client'];
     if(p==='human')return serviceMode==='managed'&&!out.opsApproved?['运营审核','ops']:['待用户审核','client'];
     if(p==='site_rejected')return ['官网已拒绝','change'];
-    if(p==='site_submit')return ['待官网运营审核','client'];
-    if(p==='site_submitted')return ['官网运营审核中','client'];
+    if(p==='site_submit')return t.type==='repair'?['已提交官网','running']:['待提交 AI 建站','client'];
+    if(p==='site_submitted')return t.type==='repair'?['官网处理中','running']:['AI 建站审核中','client'];
     if(p==='site_verifying'||p==='site_failed')return ['Agent处理中','client'];
     if(p==='publish_wait'||p==='site_publish')return ['待官网审核','client'];
     return ['Agent处理中','client'];
@@ -11980,8 +11990,8 @@ refreshPendingEntryV29();
       if(serviceMode==="managed"&&t.type==="repair"&&!out.opsApproved)return ["运营审核","human"];
       return ["待用户审核","human"];
     }
-    if(p==="site_submit")return ["待官网运营审核","human"];
-    if(p==="site_submitted")return ["官网运营审核中","human"];
+    if(p==="site_submit")return t.type==="repair"?["已提交官网","running"]:["待提交 AI 建站","human"];
+    if(p==="site_submitted")return t.type==="repair"?["官网处理中","running"]:["AI 建站审核中","human"];
     if(p==="site_rejected")return ["AI 建站退回","human"];
     if(p==="site_failed")return ["验证未通过","human"];
     if(["site_accepted","site_running","site_returned","site_verifying","recheck"].includes(p))return ["Agent处理中","running"];
@@ -12169,7 +12179,7 @@ refreshPendingEntryV29();
 <script>
 /* ===== v48: Brief execution methods, knowledge selection/upload and Agent gate ===== */
 (()=>{
-  const methodDefaultsV48=["对比表","FAQ / Q&A","统计数据注入","专家观点","案例证明","定义框","JSON-LD","sameAs","页面结构优化"];
+  const methodDefaultsV48=["对比表","FAQ / Q&A","统计数据注入","专家观点","案例证明","定义框","JSON-LD","sameAs","技术修复"];
   const knowledgeDefaultsV48=[
     {id:"KB-001",title:"企业与品牌基础信息",tag:"品牌事实",source:"品牌知识库",status:"ready",summary:"企业简介、品牌定位、核心业务与官方名称"},
     {id:"KB-002",title:"产品规格与应用场景",tag:"产品资料",source:"品牌知识库",status:"ready",summary:"产品参数、适用行业、典型场景与能力边界"},
@@ -12211,7 +12221,7 @@ refreshPendingEntryV29();
     if(t.knowledgeRequirement==="required")return false;
     if(t.knowledgeRequirement==="not_required"||t.taskCategory==="website_structure")return true;
     const text=[t.name,t.factor,t.dest,t.source,(t.methods||[]).join(" ")].filter(Boolean).join(" ");
-    const structural=/官网结构优化|网站结构优化|页面结构优化|抓取渲染|爬取障碍|索引与 AI 指引|robots\.txt|sitemap|canonical|重定向|导航结构|页面层级/i.test(text);
+    const structural=/技术修复|抓取渲染|爬取障碍|索引与 AI 指引|robots\.txt|sitemap|canonical|重定向|导航结构|页面层级/i.test(text);
     const needsFacts=/结构化数据|schema|sameAs|FAQ|Product|产品|认证|专利|地址|企业信息|品牌实体/i.test(text);
     return structural&&!needsFacts;
   }
@@ -12235,7 +12245,7 @@ refreshPendingEntryV29();
     return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行方法</h3><p>用标签明确 Agent 本次采用的内容或技术执行方式。</p></div>${editable?'<button class="small-btn" id="editBriefMethodsV48">修改执行方法</button>':''}</div><div class="brief-resource-body-v48">${tags.length?`<div class="brief-tag-list-v48">${tags.map(x=>`<span class="brief-tag-v48">${escHtml(x)}</span>`).join("")}</div>`:'<div class="brief-empty-v48">暂未选择执行方法。</div>'}</div></section>`;
   }
   function knowledgeSectionV48(t,out){
-    if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>官网结构优化直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
+    if(isWebsiteStructureOptimizationV49(t))return `<section class="brief-resource-v48"><div class="brief-resource-head-v48"><div><h3>执行依据</h3><p>技术修复直接使用 Finding、页面结构与技术检测规则，不依赖知识库生成。</p></div><span class="status-pill green">无需知识资料</span></div></section>`;
     const editable=canPrepareBriefV48(t,out),items=selectedKnowledgeV48(out);
     const text=[t.name,t.factor,t.dest,(t.methods||[]).join(" ")].join(" "),baseSuggestions=/FAQ|问答/i.test(text)?["常见问题","标准答案","限制条件"]:/交期|产能|SLA|服务/i.test(text)?["交期与产能","服务范围","SLA","业务限制"]:/品牌|企业|实体/i.test(text)?["企业介绍","品牌定位","资质认证","官方信息"]:/案例/i.test(text)?["客户背景","问题与方案","结果数据"]:["产品介绍","核心参数","应用场景","产品优势","认证与案例"],covered=items.map(k=>`${k.title} ${k.summary}`).join(" "),suggestions=baseSuggestions.filter(x=>!covered.includes(x)).slice(0,4);
     const sourceSummary=[items.length?`AI 已匹配 ${items.length} 份知识`:"知识库无匹配",out.briefWebSearchV78?"联网补充":"",out.briefKnowledgeNoteV78.trim()?"已填写说明":""].filter(Boolean).join(" + ");
@@ -12629,10 +12639,16 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
   window.displayTaskCode=displayTaskCodeV52;
   window.applyObjectCodesV52=applyObjectCodesV52;
   applyObjectCodesV52();
-  let queued=false;
+  let queued=false,running=false;
+  const pending=new Set();
   new MutationObserver(mutations=>{
-    if(queued)return;queued=true;
-    requestAnimationFrame(()=>{queued=false;mutations.forEach(m=>m.addedNodes.forEach(node=>{if(node.nodeType===Node.TEXT_NODE){const next=replaceObjectCodesV52(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}else if(node.nodeType===Node.ELEMENT_NODE)applyObjectCodesV52(node)}))});
+    mutations.forEach(m=>m.addedNodes.forEach(node=>pending.add(node)));
+    if(queued||running||!pending.size)return;queued=true;
+    requestAnimationFrame(()=>{
+      queued=false;if(running)return;running=true;
+      const nodes=[...pending];pending.clear();seedTaskCodesV52();
+      try{nodes.forEach(node=>{if(node.nodeType===Node.TEXT_NODE){const next=replaceObjectCodesV52(node.nodeValue);if(next!==node.nodeValue)node.nodeValue=next}else if(node.nodeType===Node.ELEMENT_NODE)applyObjectCodesV52(node)})}finally{running=false}
+    });
   }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
@@ -12666,9 +12682,11 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     return [...list.children].filter(item=>item.matches(config.item));
   }
 
-  function apply(config){
+  const states=new Map();
+  function render(config,state){
     const list=document.querySelector(config.selector);if(!list)return;
-    const items=itemsFor(config),key=config.selector;
+    const items=state.items.filter(item=>item.isConnected&&item.parentElement===list&&item.matches(config.item)),key=config.selector;
+    state.items=items;
     const pageCount=Math.max(1,Math.ceil(items.length/pageSize));
     pages[key]=Math.min(Math.max(pages[key]||1,1),pageCount);
     const start=(pages[key]-1)*pageSize;
@@ -12686,14 +12704,27 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     controls.hidden=items.length<=pageSize;
     if(controls.hidden)return;
     controls.innerHTML=`<span>每页 ${pageSize} 条</span><button type="button" class="list-page-btn-v53" data-step="-1" ${pages[key]===1?"disabled":""}>上一页</button><select class="list-page-select-v53" aria-label="选择${config.label}页码">${Array.from({length:pageCount},(_,i)=>`<option value="${i+1}" ${pages[key]===i+1?"selected":""}>第 ${i+1} / ${pageCount} 页</option>`).join("")}</select><button type="button" class="list-page-btn-v53" data-step="1" ${pages[key]===pageCount?"disabled":""}>下一页</button>`;
-    controls.querySelector("select").onchange=e=>{pages[key]=Number(e.target.value);apply(config)};
-    controls.querySelectorAll("button[data-step]").forEach(button=>button.onclick=()=>{pages[key]+=Number(button.dataset.step);apply(config)});
+    controls.querySelector("select").onchange=e=>{pages[key]=Number(e.target.value);render(config,state)};
+    controls.querySelectorAll("button[data-step]").forEach(button=>button.onclick=()=>{pages[key]+=Number(button.dataset.step);render(config,state)});
   }
 
-  function applyAll(){configs.forEach(apply)}
+  function refresh(config){
+    const state=states.get(config.selector);if(!state)return;
+    state.items=itemsFor(config);render(config,state);
+  }
+  function applyAll(){configs.forEach(refresh)}
   configs.forEach(config=>{
     const list=document.querySelector(config.selector);if(!list)return;
-    new MutationObserver(()=>requestAnimationFrame(()=>apply(config))).observe(list,{childList:true});
+    const state={items:itemsFor(config),queued:false,running:false};states.set(config.selector,state);
+    new MutationObserver(records=>{
+      let changed=false;
+      records.forEach(record=>{
+        record.removedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE&&node.matches(config.item)){state.items=state.items.filter(item=>item!==node);changed=true}});
+        record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE&&node.matches(config.item)){state.items.push(node);changed=true}});
+      });
+      if(!changed||state.queued||state.running)return;
+      state.queued=true;requestAnimationFrame(()=>{state.queued=false;if(state.running)return;state.running=true;try{render(config,state)}finally{state.running=false}});
+    }).observe(list,{childList:true});
   });
   requestAnimationFrame(applyAll);
   window.applyGeoListPaginationV53=applyAll;
@@ -13176,7 +13207,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
 <script>
 /* v65: optimization center uses a compact task list and opens the task workspace directly. */
 (()=>{
-  const taskTypeLabel=t=>t.type==="web"?"官网内容":t.type==="external"?"外部内容":"网站结构";
+  const taskTypeLabel=t=>t.type==="web"?"官网内容":t.type==="external"?"三方内容":"技术修复";
   const nextTaskLabel=t=>{
     const p=t.progressStage||"todo";
     const out=ensureOutput(t);
@@ -13196,7 +13227,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
       site_submit:"提交 AI 建站",
       site_rejected:"补充要求并重新提交",
       site_failed:"补充要求并重新提交",
-      site_submitted:"等待官网运营审核",
+      site_submitted:"等待官网处理",
       site_accepted:"开始网站修改",
       site_running:"等待 AI 建站回传",
       site_returned:"确认 GEO 验证",
@@ -13761,7 +13792,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     root.querySelectorAll("table").forEach(function(table){var headers=[].slice.call(table.querySelectorAll("thead th")),indexes=[];headers.forEach(function(th,i){if(/^(方法|执行方法)$/.test(th.textContent.trim()))indexes.push(i)});indexes.reverse().forEach(function(i){table.querySelectorAll("tr").forEach(function(row){row.children[i]?.remove()})})});
   }
   removeMethodUiV79(document.body);
-  var queued=false;new MutationObserver(function(records){if(queued)return;queued=true;queueMicrotask(function(){queued=false;records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)removeMethodUiV79(n)})})})}).observe(document.body,{childList:true,subtree:true});
+  var queued=false,running=false,pending=new Set();new MutationObserver(function(records){records.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)pending.add(n)})});if(queued||running||!pending.size)return;queued=true;queueMicrotask(function(){queued=false;if(running)return;running=true;var nodes=Array.from(pending);pending.clear();try{nodes.forEach(removeMethodUiV79)}finally{running=false}})}).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 <style id="geo1632-v80-style">
@@ -13867,7 +13898,7 @@ table td>*{
   };
   function taskConfirmHtmlV82(t,out){
     var fixes=Array.isArray(out.fixes)?out.fixes:[],confirmed=out.briefConfirmed||!["brief","todo","running","human","publish_wait"].includes(t.progressStage);
-    var plans=fixes.length?fixes.map(function(f){return '<div class="structure-plan-row-v82"><b>'+escHtml(f.item||"官网结构修复")+'</b><span>'+escHtml(f.after||f.before||"按检查结果完成结构修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>'}).join(""):'<div class="structure-plan-row-v82"><b>'+escHtml(t.name||"官网结构修复")+'</b><span>'+escHtml(t.evidence||"按官网 GEO 体检结果完成修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>';
+    var plans=fixes.length?fixes.map(function(f){return '<div class="structure-plan-row-v82"><b>'+escHtml(f.item||"技术修复")+'</b><span>'+escHtml(f.after||f.before||"按检查结果完成结构修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>'}).join(""):'<div class="structure-plan-row-v82"><b>'+escHtml(t.name||"技术修复")+'</b><span>'+escHtml(t.evidence||"按官网 GEO 体检结果完成修复")+'</span><span class="progress-status '+(confirmed?'done':'todo')+'">'+(confirmed?'已确认':'待确认')+'</span></div>';
     var acceptance=out.brief?.acceptance||"AI 建站完成修改并通过自动验证；执行结果在状态节点中查看。";
     return '<section class="structure-confirm-v82" id="structureConfirmV82"><div class="structure-confirm-head-v82"><h2>任务确认</h2><span class="status-pill '+(confirmed?'green':'orange')+'">'+(confirmed?'已确认':'待确认')+'</span></div><div class="structure-confirm-body-v82"><div class="structure-plan-v82">'+plans+'</div><div class="structure-accept-v82"><b>验收标准：</b>'+escHtml(acceptance)+'</div></div></section>';
   }
@@ -13946,7 +13977,7 @@ table td>*{
   };
   taskForStrategy=function(s){return tasks.find(function(t){return t.strategy===s.id&&!t.findingId})||tasks.find(function(t){return t.strategy===s.id&&(t.findingIds||[]).length===1})||null};
   function independentItemsV83(){
-    var approved=eligibleStrategiesV18();return approved.map(function(s,i){return{id:"ONE-"+s.id,title:s.title,strategyIds:[s.id],type:s.type==="external"?"外部信源内容":s.type==="repair"?"协同修复":"官网内容",target:s.dest,desc:s.evidence,personas:[s.persona],risk:null,merged:false}});
+    var approved=eligibleStrategiesV18();return approved.map(function(s,i){return{id:"ONE-"+s.id,title:s.title,strategyIds:[s.id],type:s.type==="external"?"三方内容":s.type==="repair"?"技术修复":"官网内容",target:s.dest,desc:s.evidence,personas:[s.persona],risk:null,merged:false}});
   }
   taskDraftInternalItemsV24=function(){weeklyProposalV18.items=independentItemsV83();weeklyProposalV18.v24StrategySignature=eligibleStrategiesV18().map(function(s){return s.id}).sort().join("|");saveProposalV18();return weeklyProposalV18.items};
   buildProposalV18=function(showToastAfter){weeklyProposalV18.items=independentItemsV83();weeklyProposalV18.status="draft";weeklyProposalV18.generatedAt=nowLabel();saveProposalV18();if(showToastAfter!==false)showToast("每条策略已分别生成独立执行项")};
@@ -13969,10 +14000,14 @@ table td>*{
 </script>
 <script id="geo1632-v84-script">
 (function(){
+  function activeServiceModeV85(){
+    return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed";
+  }
+  function isAgentModeV85(){return activeServiceModeV85()==="agent"}
   var repairMetaBaseV84=findingProcessingMetaV37;
   findingProcessingMetaV37=function(f){
     var meta=repairMetaBaseV84(f);
-    return auditRouteForV26(f)==="repair"&&f.id!=="AF-06"?{label:"技术修复",reason:meta.reason}:meta;
+    return auditRouteForV26(f)==="repair"?{label:"技术修复 · 官网直接处理",reason:meta.reason}:meta;
   };
   var statusBaseV84=websiteAuditStatusV26;
   websiteAuditStatusV26=function(f){
@@ -14001,8 +14036,8 @@ table td>*{
     paintContextControlsV27();refreshCurrentSurfaceV27();
     showToast("已切换为"+(serviceMode==="managed"?"代运营":"Agent 自主")+"模式；技术修复直接提交官网，内容策略按当前模式流转");
   }});
-  function isTechFindingV84(f){return !!f&&f.id!=="AF-06"&&auditRouteForV26(f)==="repair"}
-  function isTechRepairV84(t){var ids=[t?.findingId].concat(t?.findingIds||[]).filter(Boolean);return !!t&&t.type==="repair"&&!ids.includes("AF-06")&&(t.routeType==="direct_repair"||t.taskCategory==="website_structure"||t.taskCategory==="technical_repair"||ids.some(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return isTechFindingV84(f)}))}
+  function isTechFindingV84(f){return !!f&&auditRouteForV26(f)==="repair"}
+  function isTechRepairV84(t){var ids=[t?.findingId].concat(t?.findingIds||[]).filter(Boolean);return !!t&&t.type==="repair"&&(t.routeType==="direct_repair"||t.taskCategory==="website_structure"||t.taskCategory==="technical_repair"||ids.some(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return isTechFindingV84(f)}))}
   function findRepairTaskV84(f){return tasks.find(function(t){return isTechRepairV84(t)&&((t.findingId===f.id)||(t.findingIds||[]).includes(f.id))})||null}
   function submitTechRepairV84(f){
     var t=findRepairTaskV84(f)||makeFindingTaskV83(f),out=ensureOutput(t),sc=ensureSiteCollabV27(t);
@@ -14040,29 +14075,26 @@ table td>*{
   };
   var actionsBaseV84=auditActionsHtmlV26;
   auditActionsHtmlV26=function(f){
+    if(auditRouteForV26(f)==="strategy")return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">审核</button></div>';
     if(!isTechFindingV84(f))return actionsBaseV84(f);
-    var t=findRepairTaskV84(f);
-    return '<div class="finding-actions-v26"><button class="small-btn '+(t?"tech-progress-v84":"tech-submit-v84")+'" data-id="'+escHtml(f.id)+'">'+(t?"查看官网处理进度":"处理并提交官网")+'</button></div>';
+    return '<div class="finding-actions-v26"><button class="small-btn tech-detail-v85" data-id="'+escHtml(f.id)+'">查看详情</button></div>';
   };
   var detailBaseV84=openFindingDetailV26;
   openFindingDetailV26=function(id){
     var f=auditFindingsV20.find(function(x){return x.id===id});
-    if(f&&auditRouteForV26(f)==="repair"){
-      var t=findRepairTaskV84(f);
-      if(t){openReviewWorkspace(t.uid);return}
-      createTechRepairsV84([id],true);return;
-    }
+    if(f&&isTechFindingV84(f))return detailBaseV84(id);
     return detailBaseV84(id);
   };
   var auditRenderBaseV84=renderAuditFindingsV20;
   renderAuditFindingsV20=function(){
+    if(isAgentModeV85()){
+      auditFindingsV20.filter(isTechFindingV84).forEach(function(f){if(!findRepairTaskV84(f)&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id)))submitTechRepairV84(f)});
+    }
     auditRenderBaseV84();
-    document.querySelectorAll(".tech-submit-v84").forEach(function(b){b.onclick=function(){createTechRepairsV84([b.dataset.id],true)}});
-    document.querySelectorAll(".tech-progress-v84").forEach(function(b){b.onclick=function(){var f=auditFindingsV20.find(function(x){return x.id===b.dataset.id}),t=f&&findRepairTaskV84(f);if(t)openReviewWorkspace(t.uid)}});
+    document.querySelectorAll(".tech-detail-v85").forEach(function(b){b.onclick=function(){openFindingDetailV26(b.dataset.id)}});
     var bulk=document.getElementById("generateRepairV26");
     if(bulk){var selected=auditFindingStateV20.selected.filter(function(id){return isTechFindingV84(auditFindingsV20.find(function(x){return x.id===id}))}),infoSelected=auditFindingStateV20.selected.filter(function(id){var f=auditFindingsV20.find(function(x){return x.id===id});return f&&auditRouteForV26(f)==="repair"&&!isTechFindingV84(f)});bulk.disabled=!selected.length&&!infoSelected.length;bulk.textContent=selected.length?"提交官网 · "+selected.length:infoSelected.length?"确认信息 · "+infoSelected.length:"提交官网";bulk.onclick=function(){if(selected.length)createTechRepairsV84(selected,false);if(infoSelected.length)batchBaseV84("repair",infoSelected)}}
-    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent="技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
-    relabelV84(document.body);
+    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=isAgentModeV85()?"Agent 模式下，仅官网内容需要客户审核；其他异常均作为技术修复直接交由官网处理，不生成客户审核任务。":"技术修复类异常提交后会直接进入官网处理，不需要客户或运营审核；提交后可查看官网处理进度。每个异常单独记录，Re-check 通过后恢复。";
   };
   var workspaceStatusBaseV84=workspaceStatus;
   workspaceStatus=function(t,out){
@@ -14110,7 +14142,6 @@ table td>*{
     if(note)note.textContent=t.progressStage==="recheck"?"官网修复已自动发布，正在进行 GEO Re-check。":"技术修复已直接提交官网，当前进度与验证结果会在此更新。";
     if(box)box.innerHTML='<span class="system-progress-v47">'+(t.progressStage==="recheck"?"Re-check 中":"官网处理中 · 无需审核")+'</span>';
     var flow=document.querySelector("#taskBody .task-flow-note-v26");if(flow&&t)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
-    relabelV84(document.getElementById("reviewWorkspaceRoot"));
   };
   window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
   var optimizationBaseV84=renderOptimization;
@@ -14123,18 +14154,8 @@ table td>*{
       if(flow)flow.textContent="任务确认 → AI 建站执行 → 执行状态";
       if(next)next.textContent=t.progressStage==="recheck"?"当前状态：Re-check 中":"当前状态：官网处理中";
     });
-    relabelV84(document.getElementById("optimizationPage"));
   };
   window.renderOptimization=renderOptimization;
-  function relabelV84(root){
-    if(!root||!document.createTreeWalker)return;
-    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),node;
-    while((node=walker.nextNode())){
-      var parent=node.parentElement;if(!parent||/^(SCRIPT|STYLE|TEXTAREA)$/.test(parent.tagName))continue;
-      node.nodeValue=node.nodeValue.replace(/官网结构优化|网站结构优化|页面结构优化|官网结构修复|官网结构|官网技术 · 直接处理/g,"技术修复");
-    }
-  }
-  if(typeof MutationObserver!=="undefined")new MutationObserver(function(){relabelV84(document.body)}).observe(document.body,{childList:true,subtree:true,characterData:true});
   function migrateTechRepairsV84(){
     var changed=false;
     (tasks||[]).forEach(function(t){
@@ -14153,8 +14174,292 @@ table td>*{
     });
     if(changed){saveTaskOutputs();saveTasks()}
   }
+  document.querySelectorAll(".serviceModeBtn").forEach(function(button){button.addEventListener("click",function(){
+    serviceMode=button.dataset.mode;window.serviceMode=serviceMode;
+    if(serviceMode==="agent"){currentRole="client";window.currentRole="client"}
+    localStorage.setItem("geoServiceMode",serviceMode);localStorage.setItem("geoCurrentRole",currentRole);
+    queueMicrotask(function(){paintContextControlsV27();renderAuditFindingsV20();renderOptimization()});
+  })});
   migrateTechRepairsV84();paintContextControlsV27();
   renderAuditFindingsV20();renderOptimization();
+})();
+</script>
+<style id="geo1632-v86-style">
+.strategy-method-copy-v86{margin:0;color:var(--text-2);font-size:14px;line-height:1.75}
+</style>
+<script id="geo1632-v86-script">
+(function(){
+  function strategyMethodCopyV86(s){
+    var methods=(s.methods||[]).filter(Boolean);
+    var methodText=methods.length?methods.join("、"):"内容结构与表达优化";
+    var target=s.factor&&s.factor!=="其他"?"，重点解决“"+s.factor+"”相关问题":"";
+    return "建议采用"+methodText+"等方式"+target+"，完成本次"+(s.dest||"内容")+"优化。";
+  }
+  function renderSimpleStrategyDetailV86(s){
+    drawerSub.textContent=(s.displayId||s.id)+" · "+s.layer;
+    drawerTitle.textContent=s.title;
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>候选策略</b></div><div class="detail-body"><div class="kv">'
+      +'<div class="k">优先级</div><div class="v">'+escHtml(s.p||"—")+'</div>'
+      +'<div class="k">策略类型</div><div class="v"><span class="layer-chip">'+escHtml(s.layer||"—")+'</span></div>'
+      +'<div class="k">目标人设</div><div class="v">'+escHtml(s.persona||"—")+'</div>'
+      +'<div class="k">决策因子</div><div class="v">'+escHtml(s.factor||"—")+'</div>'
+      +'</div></div></div>'
+      +'<div class="detail-sec"><div class="detail-title"><b>Agent 建议方法</b></div><div class="detail-body"><p class="strategy-method-copy-v86">'+escHtml(strategyMethodCopyV86(s))+'</p></div></div>';
+    drawerFoot.innerHTML='<button class="btn primary" id="closeStrategyDetailV86">关闭</button>';
+    drawer.classList.add("open");
+    document.getElementById("closeStrategyDetailV86").onclick=function(){drawer.classList.remove("open")};
+  }
+  openStrategyDetailV18=function(id){var s=findStrategyV18(id);if(s)renderSimpleStrategyDetailV86(s)};
+  openCollabStrategyDetail=function(id){var s=getAllQueueStrategies().find(function(item){return item.id===id});if(s)renderSimpleStrategyDetailV86(s)};
+})();
+</script>
+<script id="geo1632-v87-script">
+(function(){
+  function typeLabelV87(value){
+    var type=typeof value==="string"?value:value?.type;
+    return type==="repair"?"技术修复":type==="external"?"三方内容":"官网内容";
+  }
+  function handlingLabelV87(value){return (typeof value==="string"?value:value?.type)==="repair"?"官网直接处理":"需要审核"}
+  window.processingTypeLabelV87=typeLabelV87;
+  window.processingHandlingLabelV87=handlingLabelV87;
+  (tasks||[]).forEach(function(t){
+    t.processingType=typeLabelV87(t);t.handlingMode=handlingLabelV87(t);
+    if(t.type==="external"&&["外部内容","外部信源内容"].includes(t.dest))t.dest="三方内容";
+    if(t.type==="repair"&&["基础修复","网站结构","协同修复","实体修复"].includes(t.dest))t.dest="技术修复";
+  });
+  if(typeof saveTasks==="function")saveTasks();
+  var renderOptimizationBaseV87=renderOptimization;
+  renderOptimization=function(){
+    renderOptimizationBaseV87();
+    document.querySelectorAll("#taskBody tr").forEach(function(row){
+      var uid=row.querySelector("[data-id]")?.dataset.id,t=tasks.find(function(item){return item.uid===uid});
+      if(!t)return;
+      var badge=row.querySelector(".type");if(badge)badge.textContent=typeLabelV87(t);
+      row.dataset.processingType=typeLabelV87(t);row.dataset.handlingMode=handlingLabelV87(t);
+    });
+  };
+  window.renderOptimization=renderOptimization;
+  document.querySelectorAll(".tab[data-filter='external']").forEach(function(x){x.textContent="三方内容"});
+  document.querySelectorAll(".tab[data-filter='repair']").forEach(function(x){x.textContent="技术修复"});
+  renderOptimization();renderAuditFindingsV20();
+})();
+</script>
+<style id="geo1632-v88-style">
+#generateRepairV26{display:none!important}
+</style>
+<script id="geo1632-v88-script">
+(function(){
+  var autoSubmittingTechV88=false;
+  function modeV88(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
+  function roleV88(){return window.currentRole||currentRole||"client"}
+  function isTechV88(f){return !!f&&auditRouteForV26(f)==="repair"}
+  function isContentV88(f){return !!f&&!isTechV88(f)}
+  function existingTaskV88(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
+  function canReviewContentV88(){return modeV88()==="agent"?roleV88()==="client":roleV88()==="ops"}
+  function contentActionV88(){return modeV88()==="agent"?"生成任务":"审核通过并生成任务"}
+  function createContentTasksV88(ids){
+    if(!canReviewContentV88()){showToast("当前视角仅可查看，内容问题由负责角色审核");return}
+    var findings=(auditFindingsV20||[]).filter(function(f){return ids.includes(f.id)&&isContentV88(f)&&!existingTaskV88(f)});
+    var valid=findings.map(function(f){return f.id});
+    if(!valid.length)return;
+    findings.forEach(function(f){
+      var s=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+      if(!s||typeof getCollab!=="function")return;
+      var c=getCollab(s.id);
+      if(modeV88()==="managed"){
+        c.opsApproved=true;c.clientApproved=false;c.v18Deferred=false;
+        if(typeof pushReview==="function")pushReview(s.id,"ops","运营","官网 GEO 体检内容问题已审核通过，生成任务与 Brief。");
+      }else{
+        c.clientApproved=true;
+        if(typeof pushReview==="function")pushReview(s.id,"client","客户","官网 GEO 体检内容问题已确认，生成任务与 Brief。");
+      }
+    });
+    if(typeof saveCollab==="function")saveCollab();
+    createStrategiesV26(valid);
+    showToast(modeV88()==="agent"?"客户已确认，任务与 Brief 已生成":"运营审核已通过，任务与 Brief 已生成");
+  }
+  function submitUnsentTechV88(){
+    if(autoSubmittingTechV88)return false;
+    var ids=(auditFindingsV20||[]).filter(function(f){return isTechV88(f)&&!existingTaskV88(f)&&!isRecoveredV26(f)&&!(typeof isFindingDeferredV21==="function"&&isFindingDeferredV21(f.id))}).map(function(f){return f.id});
+    if(!ids.length)return false;
+    autoSubmittingTechV88=true;
+    try{createRepairTasksV26(ids)}finally{autoSubmittingTechV88=false}
+    return true;
+  }
+  auditStateHtmlV26=function(f){
+    var t=existingTaskV88(f),decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
+    if(isTechV88(f)){
+      var status=websiteAuditStatusV26(f);
+      return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(status.cls||"pending")+'">'+escHtml(status.text||"官网处理中")+'</span></div>';
+    }
+    if(t)return '<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成任务</span></div>';
+    if(decision?.status==="deferred")return '<div class="finding-state-stack-v26"><span class="finding-state-pill defer">暂不修复</span></div>';
+    return '<div class="finding-state-stack-v26"><span>'+(modeV88()==="agent"?"待客户审核":"待运营审核")+'</span></div>';
+  };
+  auditActionsHtmlV26=function(f){
+    var label=isTechV88(f)||!canReviewContentV88()?"查看详情":"审核";
+    return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+label+'</button></div>';
+  };
+  openFindingDetailV26=function(id){
+    var f=(auditFindingsV20||[]).find(function(x){return x.id===id});if(!f)return;
+    var t=existingTaskV88(f),findingNo=auditFindingsV20.findIndex(function(x){return x.id===id})+1,status=isTechV88(f)?websiteAuditStatusV26(f):null;
+    drawerSub.textContent="异常"+findingNo;drawerTitle.textContent="异常处理 · "+f.title;
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 '+(isTechV88(f)?'repair':'strategy')+'">'+escHtml(findingProcessingMetaV37(f).label)+'</span></div><div class="detail-body"><div class="kv">'
+      +'<div class="k">所属检查项</div><div class="v">'+escHtml(auditCheckLabelV25(f))+'</div>'
+      +(status?'<div class="k">当前状态</div><div class="v"><span class="finding-state-pill '+escHtml(status.cls||'pending')+'">'+escHtml(status.text||'官网处理中')+'</span></div>':'')
+      +'<div class="k">异常说明</div><div class="v">'+escHtml(f.desc)+'</div><div class="k">为什么这样处理</div><div class="v">'+escHtml(findingProcessingMetaV37(f).reason)+'</div></div></div></div>';
+    var buttons='<button class="btn" id="closeFindingV88">关闭</button>';
+    if(!isTechV88(f)){
+      if(t)buttons+='<button class="btn primary" id="viewFindingTaskV88">查看任务</button>';
+      else if(canReviewContentV88())buttons+='<button class="btn" id="deferFindingV88">暂不修复</button><button class="btn primary" id="approveFindingV88">'+contentActionV88()+'</button>';
+    }
+    drawerFoot.innerHTML=buttons;drawer.classList.add("open");
+    document.getElementById("closeFindingV88").onclick=function(){drawer.classList.remove("open")};
+    document.getElementById("deferFindingV88")?.addEventListener("click",function(){openDeferFindingsV26([id])});
+    document.getElementById("approveFindingV88")?.addEventListener("click",function(){drawer.classList.remove("open");createContentTasksV88([id])});
+    document.getElementById("viewFindingTaskV88")?.addEventListener("click",function(){drawer.classList.remove("open");goOptimization();setTimeout(function(){openReviewWorkspace(t.uid)},80)});
+  };
+  var renderAuditBaseV88=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){
+    if(!autoSubmittingTechV88&&submitUnsentTechV88())return;
+    renderAuditBaseV88();
+    var repair=document.getElementById("generateRepairV26");if(repair)repair.hidden=true;
+    var selected=(auditFindingStateV20.selected||[]).map(function(id){return auditFindingsV20.find(function(f){return f.id===id})}).filter(function(f){return isContentV88(f)&&!existingTaskV88(f)});
+    var generate=document.getElementById("generateCandidateV20");
+    if(generate){
+      var allowed=canReviewContentV88();generate.hidden=!allowed;generate.disabled=!allowed||!selected.length;
+      generate.textContent=selected.length?contentActionV88()+" · "+selected.length:contentActionV88();
+      generate.onclick=function(){createContentTasksV88(selected.map(function(f){return f.id}))};
+    }
+    document.querySelectorAll("#geoAlertListV20 .finding-check").forEach(function(cb){var f=auditFindingsV20.find(function(x){return x.id===cb.dataset.id});if(isTechV88(f)){cb.checked=false;cb.disabled=true}});
+    var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=modeV88()==="agent"?"技术修复由官网直接处理；官网内容和三方内容需客户审核后生成任务。":"技术修复由官网直接处理；官网内容和三方内容由运营审核，通过后自动生成任务。";
+  };
+  window.renderAuditFindingsV20=renderAuditFindingsV20;
+  renderAuditFindingsV20();
+})();
+</script>
+<style id="geo1632-v89-style">
+.persona-stage-filter-v89{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--text-2);font-size:13px}
+.persona-stage-filter-v89 select{height:34px;min-width:116px;padding:0 30px 0 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font:inherit;cursor:pointer}
+@media(max-width:760px){.persona-stage-filter-v89{width:100%;justify-content:flex-end}.persona-stage-filter-v89 select{min-width:108px}}
+</style>
+<script id="geo1632-v89-script">
+(function(){
+  var personaStageV89="all";
+  var needFactorsV89=new Set(["操作效率","维护难度","培训成本","停机风险","本地服务与培训","本地服务","代理支持","认证与合规","认证合规","品牌可信度","供应链风险","售后响应"]);
+  function stageForFactorV89(name){
+    if(name==="其他")return "all";
+    return needFactorsV89.has(name)?"need":"solution";
+  }
+  function matchesStageV89(name){return personaStageV89==="all"||stageForFactorV89(name)===personaStageV89}
+  function installFilterV89(){
+    var section=[...document.querySelectorAll("#diagnosisPage .section")].find(function(x){return x.querySelector("#personaTabs")});
+    var head=section?.querySelector(":scope > .section-head");if(!head)return;
+    var filter=head.querySelector(".persona-stage-filter-v89");
+    if(!filter){
+      filter=document.createElement("label");filter.className="persona-stage-filter-v89";
+      filter.innerHTML='<span>阶段</span><select id="personaStageSelectV89" aria-label="筛选买家阶段"><option value="all">全部</option><option value="need">需求评估</option><option value="solution">方案寻找</option></select>';
+      head.appendChild(filter);
+      filter.querySelector("select").onchange=function(){personaStageV89=this.value;renderPersona()};
+    }
+    filter.querySelector("select").value=personaStageV89;
+  }
+  var renderPersonaBaseV89=renderPersona;
+  renderPersona=function(){
+    var p=personas[currentPersona],factors=p?.factors,gaps=p?.gaps;
+    if(p&&personaStageV89!=="all"){
+      p.factors=factors.filter(function(f){return matchesStageV89(f[0])});
+      p.gaps=gaps.filter(function(g){return matchesStageV89(g[0])});
+      if(!p.factors.length)p.factors=factors.slice(0,1);
+    }
+    try{renderPersonaBaseV89()}finally{if(p){p.factors=factors;p.gaps=gaps}}
+    installFilterV89();
+    document.querySelectorAll("#personaTabs .persona").forEach(function(tab){
+      var item=personas[+tab.dataset.i],count=tab.querySelector(".count");if(!item||!count)return;
+      var n=personaStageV89==="all"?item.gaps.length:item.gaps.filter(function(g){return matchesStageV89(g[0])}).length;
+      count.textContent=n+" Gap";
+    });
+  };
+  window.renderPersona=renderPersona;
+  renderPersona();
+})();
+</script>
+<script id="geo1632-v90-script">
+(function(){
+  var contentIdsV90=["AF-01","AF-02","AF-03","AF-04","AF-05"];
+  var contentSetupV90={
+    "AF-01":{title:"产品介绍信息不完整",desc:"碳纤维方案页缺少买家关心的产品特性、适用场景与选型说明。",strategy:"GS1",reason:"涉及产品事实与对外表达，需要客户确认后生成内容任务。",methods:["产品介绍","适用场景","选型说明"]},
+    "AF-02":{title:"采购 FAQ 内容待补充",desc:"采购问答区缺少交期、服务、验收与常见限制条件的完整回答。",strategy:"GS6",reason:"需要补充采购业务事实，由客户确认是否进入任务中心。",methods:["采购 FAQ","胶囊答案","限制条件"]},
+    "AF-03":{title:"认证与合规说明待完善",desc:"现有页面未完整说明认证范围、适用产品及可核验信息。",strategy:"GS7",reason:"认证与合规属于关键业务事实，需要客户确认内容处理决定。",methods:["认证说明","适用范围","事实核验"]},
+    "AF-04":{title:"专家作者档案待补充",desc:"2 位工程师已有内容贡献，但缺少可验证的专业背景、经验与作者介绍。",strategy:"GS4",reason:"需要确认专家范围、身份事实和对外介绍方式。",methods:["专家档案","作者介绍","身份事实"]},
+    "AF-05":{title:"品牌实体关联说明待补充",desc:"官网缺少品牌与官方渠道、产品与服务关系的清晰内容说明。",strategy:"GS5",reason:"品牌实体关系涉及对外表达，需要客户确认后再生成任务。",methods:["品牌实体说明","官方渠道","产品关系"]}
+  };
+  contentIdsV90.forEach(function(id){
+    var f=auditFindingsV20.find(function(x){return x.id===id}),setup=contentSetupV90[id];if(!f||!setup)return;
+    f.title=setup.title;f.desc=setup.desc;f.strategy=setup.strategy;
+    auditRouteMetaV26[id]={route:"strategy",reason:setup.reason,methods:setup.methods};
+  });
+  function activeModeV90(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
+  function resetAgentAuditDemoV90(){
+    if(window.__agentAuditDemoResetV90||activeModeV90()!=="agent")return;
+    window.__agentAuditDemoResetV90=true;
+    var removed=[];
+    tasks=(tasks||[]).filter(function(t){
+      var ids=[t.findingId].concat(t.findingIds||[]).filter(Boolean),hit=ids.some(function(id){return contentIdsV90.includes(id)});
+      if(hit)removed.push(t.uid);return !hit;
+    });
+    removed.forEach(function(uid){delete taskOutputStore[uid]});
+    contentIdsV90.forEach(function(id){
+      auditRouteStateV26[id]={route:"strategy",status:"pending"};
+      delete findingDecisionsV21[id];
+      var f=auditFindingsV20.find(function(x){return x.id===id}),s=f&&typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+      if(s&&typeof getCollab==="function"){
+        var c=getCollab(s.id);c.clientApproved=false;c.opsApproved=false;c.v18Deferred=false;c.mergedTo=null;c.v24TaskDraftUid=null;
+      }
+    });
+    auditFindingStateV20.generated=(auditFindingStateV20.generated||[]).filter(function(id){return !contentIdsV90.includes(id)});
+    auditFindingStateV20.selected=[];
+    if(typeof saveAuditFindingStateV20==="function")saveAuditFindingStateV20();
+    if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
+    if(typeof saveFindingDecisionsV21==="function")saveFindingDecisionsV21();
+    if(typeof saveCollab==="function")saveCollab();
+    if(typeof saveTaskOutputs==="function")saveTaskOutputs();
+    if(typeof saveTasks==="function")saveTasks();
+    localStorage.setItem("geoModeStateV47_agent",JSON.stringify({tasks:tasks,collabMap:collabMap,reviewMap:reviewMap,taskOutputStore:taskOutputStore,weeklyProposalV18:weeklyProposalV18,auditFindingStateV20:auditFindingStateV20,feedbackEventsV21:feedbackEventsV21,findingDecisionsV21:findingDecisionsV21,auditRouteStateV26:auditRouteStateV26}));
+  }
+  document.querySelectorAll(".serviceModeBtn").forEach(function(btn){btn.addEventListener("click",function(){setTimeout(function(){if(btn.dataset.mode==="agent"){resetAgentAuditDemoV90();renderAuditFindingsV20();renderOptimization()}},0)})});
+  resetAgentAuditDemoV90();
+  renderAuditFindingsV20();
+})();
+</script>
+<script id="geo1632-v91-script">
+(function(){
+  var reconcilingV91=false;
+  function reconcileRowsV91(root){
+    if(reconcilingV91)return;reconcilingV91=true;
+    try{
+      var rows=[];
+      if(root?.matches?.(".geo-finding-row"))rows.push(root);
+      if(root?.querySelectorAll)rows=rows.concat([].slice.call(root.querySelectorAll(".geo-finding-row")));
+      rows.forEach(function(row){
+        var f=auditFindingsV20.find(function(x){return x.id===row.dataset.finding});if(!f)return;
+        var tech=auditRouteForV26(f)==="repair",button=row.querySelector(".finding-actions-v26 button,.findingDetailV26,.tech-detail-v85,.finding-detail-btn"),check=row.querySelector(".finding-check");
+        if(button){button.textContent=tech?"查看详情":"审核";button.dataset.id=f.id;button.onclick=function(){openFindingDetailV26(f.id)}}
+        if(check&&tech){check.checked=false;check.disabled=true}
+      });
+    }finally{reconcilingV91=false}
+  }
+  var renderAuditBaseV91=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){renderAuditBaseV91();reconcileRowsV91(document.getElementById("geoAlertListV20"))};
+  window.renderAuditFindingsV20=renderAuditFindingsV20;
+  var listV91=document.getElementById("geoAlertListV20");
+  if(listV91){
+    new MutationObserver(function(records){
+      if(reconcilingV91)return;
+      records.forEach(function(record){record.addedNodes.forEach(function(node){if(node.nodeType===1)reconcileRowsV91(node)})});
+    }).observe(listV91,{childList:true,subtree:true});
+  }
+  reconcileRowsV91(listV91);
 })();
 </script>
 </body>
