@@ -4626,11 +4626,10 @@ button[disabled]{
         <div class="queue-filter" id="queueFilter"></div>
         <div class="strategy-table-shell">
           <div class="strategy-table-head" role="row" aria-label="候选策略表头">
-            <span role="columnheader">序号（问题编码）</span>
+            <span role="columnheader">序号</span>
             <span role="columnheader">优先级</span>
             <span role="columnheader">策略类型</span>
             <span role="columnheader">描述</span>
-            <span role="columnheader">来源</span>
             <span role="columnheader">人设·决策因子</span>
             <span role="columnheader">当前状态</span>
             <span role="columnheader">操作</span>
@@ -8561,37 +8560,37 @@ const auditFindingsV20=[
   {
     id:"AF-01",check:"4",
     check_item_id:"GEO_CHECK_04",check_item_name:"结构化数据",
-    title:"Product Schema 缺失",
-    desc:"碳纤维方案页缺少 Product 结构化数据。",
-    priority:"P0",diagnosis:"F7",strategy:"GS2"
+    title:"产品介绍信息不完整",
+    desc:"碳纤维方案页缺少买家关心的产品特性、适用场景与选型说明。",
+    priority:"P0",diagnosis:"F1",strategy:"GS1"
   },
   {
     id:"AF-02",check:"4",
     check_item_id:"GEO_CHECK_04",check_item_name:"结构化数据",
-    title:"FAQ Schema 缺失",
-    desc:"采购问答区已有内容，但未形成 FAQ 结构化数据。",
-    priority:"P0",diagnosis:"F7",strategy:"GS2"
+    title:"采购 FAQ 内容待补充",
+    desc:"采购问答区缺少交期、服务、验收与常见限制条件的完整回答。",
+    priority:"P0",diagnosis:"F3",strategy:"GS6"
   },
   {
     id:"AF-03",check:"5",
     check_item_id:"GEO_CHECK_05",check_item_name:"品牌实体",
-    title:"认证编号未结构化",
-    desc:"认证信息可见，但证书编号与适用范围未形成机器可读实体信息。",
-    priority:"P1",diagnosis:"F7",strategy:"GS3"
+    title:"认证与合规说明待完善",
+    desc:"现有页面未完整说明认证范围、适用产品及可核验信息。",
+    priority:"P1",diagnosis:"F4",strategy:"GS7"
   },
   {
     id:"AF-04",check:"5",
     check_item_id:"GEO_CHECK_05",check_item_name:"品牌实体",
-    title:"专家作者档案待补",
-    desc:"2 位工程师已有内容贡献，但缺少可验证作者 / 专家实体档案。",
-    priority:"P1",diagnosis:"F7",strategy:"GS14"
+    title:"专家作者档案待补充",
+    desc:"2 位工程师已有内容贡献，但缺少可验证的专业背景、经验与作者介绍。",
+    priority:"P1",diagnosis:"F2",strategy:"GS4"
   },
   {
     id:"AF-05",check:"5",
     check_item_id:"GEO_CHECK_05",check_item_name:"品牌实体",
-    title:"Organization sameAs 不完整",
-    desc:"Organization 已部署，但品牌官方外部实体关联仍不完整。",
-    priority:"P1",diagnosis:"F7",strategy:"GS3"
+    title:"品牌实体关联说明待补充",
+    desc:"官网缺少品牌与官方渠道、产品与服务关系的清晰内容说明。",
+    priority:"P1",diagnosis:"F6",strategy:"GS5"
   },
   {
     id:"AF-06",check:"7",
@@ -10547,22 +10546,22 @@ renderAuditFindingsV20();
 /* ===== v26: dual outlet, check filtering, lifecycle writeback and overview handoff ===== */
 const auditRouteStorageV26="geoAuditRouteStateV26";
 let auditRouteStateV26={
-  "AF-01":{route:"repair",status:"task_created",taskId:"T104"},
-  "AF-02":{route:"repair",status:"task_created",taskId:"T104"},
-  "AF-03":{route:"repair",status:"task_created",taskId:"T108"},
+  "AF-01":{route:"strategy",status:"pending"},
+  "AF-02":{route:"strategy",status:"pending"},
+  "AF-03":{route:"strategy",status:"pending"},
   "AF-04":{route:"strategy",status:"pending"},
-  "AF-05":{route:"repair",status:"task_created",taskId:"T108"},
+  "AF-05":{route:"strategy",status:"pending"},
   "AF-06":{route:"repair",status:"pending"}
 };
 try{auditRouteStateV26={...auditRouteStateV26,...(JSON.parse(localStorage.getItem(auditRouteStorageV26)||"{}"))}}catch(e){}
 let auditFilterV26="all";
 
 const auditRouteMetaV26={
-  "AF-01":{route:"repair",reason:"缺失项明确，可按标准规则直接修复和验证",methods:["Product Schema","自动结构验证"]},
-  "AF-02":{route:"repair",reason:"已有 FAQ 内容，只需补齐机器可读标记",methods:["FAQ Schema","自动结构验证"]},
-  "AF-03":{route:"repair",reason:"认证事实已存在，本次只补机器可读字段",methods:["认证实体字段","结构验证"]},
-  "AF-04":{route:"strategy",reason:"需要确认专家范围、身份事实和内容建设方式",methods:["专家档案策略","事实确认"]},
-  "AF-05":{route:"repair",reason:"官方实体来源明确，可补齐 sameAs 关联",methods:["Organization sameAs","实体一致性验证"]},
+  "AF-01":{route:"strategy",reason:"涉及产品事实与对外表达，需要客户确认后生成内容任务",methods:["产品介绍","适用场景","选型说明"]},
+  "AF-02":{route:"strategy",reason:"需要补充采购业务事实，由客户确认是否进入任务中心",methods:["采购 FAQ","胶囊答案","限制条件"]},
+  "AF-03":{route:"strategy",reason:"认证与合规属于关键业务事实，需要客户确认内容处理决定",methods:["认证说明","适用范围","事实核验"]},
+  "AF-04":{route:"strategy",reason:"需要确认专家范围、身份事实和对外介绍方式",methods:["专家档案","作者介绍","身份事实"]},
+  "AF-05":{route:"strategy",reason:"品牌实体关系涉及对外表达，需要客户确认后再生成任务",methods:["品牌实体说明","官方渠道","产品关系"]},
   "AF-06":{route:"repair",reason:"地址冲突位置明确，可创建跨平台修复任务",methods:["地址口径统一","跨平台复核"]}
 };
 
@@ -14460,6 +14459,69 @@ table td>*{
     }).observe(listV91,{childList:true,subtree:true});
   }
   reconcileRowsV91(listV91);
+})();
+</script>
+<style id="geo1632-v92-style">
+#gapList{max-height:286px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-gutter:stable}
+#gapList::-webkit-scrollbar{width:7px}#gapList::-webkit-scrollbar-thumb{background:#cfd5df;border-radius:8px}#gapList::-webkit-scrollbar-track{background:transparent}
+.strategy-table-head,#queueList .queue-row{grid-template-columns:76px 68px 112px minmax(300px,2fr) minmax(190px,1.15fr) minmax(170px,1fr) minmax(116px,.75fr)!important;min-width:1040px!important}
+#queueList .queue-row{padding-left:20px!important;padding-right:20px!important}
+#queueList .queue-persona-v92{color:var(--text-2);font-size:12px;line-height:1.55;text-align:center}
+#queueList .queue-persona-v92 b{display:block;color:var(--text);font-size:13px}
+#queueList .queue-status-v92{display:flex;justify-content:center;text-align:center}
+#queueList .queue-status-v92 .collab-status{white-space:normal;line-height:18px}
+#queueList .queue-actions-v92{display:flex;justify-content:center}
+</style>
+<script id="geo1632-v92-script">
+(function(){
+  var queueTypeV92="all";
+  function candidateStrategiesV92(){return getAllQueueStrategies().filter(function(s){return s.type==="web"||s.type==="external"})}
+  function candidateTypeV92(s){return s.type==="external"?"外部信源":"官网内容"}
+  function candidateTaskV92(s){var c=getCollab(s.id);return tasks.find(function(t){return t.strategy===s.id})||tasks.find(function(t){return t.uid===c.v24TaskDraftUid||t.uid===c.mergedTo})||null}
+  function candidateStatusV92(s){
+    var c=getCollab(s.id),t=candidateTaskV92(s);
+    if(c.v42Ignored)return["已忽略","defer"];
+    if(!t){if(serviceMode==="managed"&&!c.opsApproved)return["待运营审核","ops"];return["待进入优化中心","todo"]}
+    var out=ensureOutput(t);
+    if(t.progressStage==="brief"){
+      if(serviceMode==="managed"&&!out.opsApproved)return["待运营去优化中心审核","ops"];
+      if(!out.briefConfirmed)return["待用户去优化中心审核","client"];
+    }
+    if(typeof workspaceStatus==="function")return workspaceStatus(t,out);
+    return[t.statusLabel||"执行中","running"];
+  }
+  function nextTaskUidV92(){return "T"+((tasks||[]).reduce(function(n,t){return Math.max(n,parseInt(String(t.uid||"").replace(/\D/g,""),10)||0)},110)+1)}
+  function ensureStrategyBriefV92(s){
+    var existing=candidateTaskV92(s);if(existing)return existing;
+    var t={uid:nextTaskUidV92(),type:s.type,name:s.title,source:"候选策略 "+(s.displayId||s.id),strategy:s.id,persona:s.persona||"不适用",factor:s.factor||"内容优化",methods:(s.methods||[]).slice(),evidence:s.evidence||"",dest:s.type==="external"?"外部信源":"官网内容",status:"draft",statusLabel:"待 Brief 审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,relatedStrategies:[s.id]};
+    tasks.unshift(t);var out=ensureOutput(t);out.brief={goal:s.title,persona:s.persona||"不适用",factor:s.factor||"内容优化",source:"候选策略 "+(s.displayId||s.id),executionTarget:t.dest,methods:(s.methods||[]).join("、"),acceptance:"完成该策略对应的内容产出、审核与验证。"};out.briefStatus="ready";out.briefConfirmed=false;out.briefFactConfirmed=true;out.opsApproved=serviceMode==="agent";
+    var c=getCollab(s.id);c.v24TaskDraftUid=t.uid;c.mergedTo=t.uid;c.scanState="done";c.mergeDecision="independent";
+    saveTaskOutputs();saveTasks();saveCollab();return t;
+  }
+  function goStrategyBriefV92(s){var t=ensureStrategyBriefV92(s);drawer.classList.remove("open");goOptimization();setTimeout(function(){openReviewWorkspace(t.uid)},120)}
+  function renderCandidateQueueV92(){
+    var all=candidateStrategiesV92(),shown=queueTypeV92==="all"?all:all.filter(function(s){return s.type===queueTypeV92});
+    var filter=document.getElementById("queueFilter");if(!filter)return;
+    var tabs=[["all","全部"],["web","官网内容"],["external","外部信源"]];
+    filter.innerHTML=tabs.map(function(x){var n=x[0]==="all"?all.length:all.filter(function(s){return s.type===x[0]}).length;return '<button class="queue-tab '+(queueTypeV92===x[0]?'active':'')+'" data-type="'+x[0]+'">'+x[1]+' · '+n+'</button>'}).join("");
+    filter.querySelectorAll(".queue-tab").forEach(function(b){b.onclick=function(){queueTypeV92=b.dataset.type;renderCandidateQueueV92()}});
+    var head=document.querySelector(".strategy-table-head");if(head)head.innerHTML='<span role="columnheader">序号</span><span role="columnheader">优先级</span><span role="columnheader">策略类型</span><span role="columnheader">描述</span><span role="columnheader">人设·决策因子</span><span role="columnheader">当前状态</span><span role="columnheader">操作</span>';
+    var list=document.getElementById("queueList");
+    list.innerHTML=shown.length?shown.map(function(s){var index=all.findIndex(function(x){return x.id===s.id})+1,state=candidateStatusV92(s);return '<div class="queue-row" data-strategy="'+escHtml(s.id)+'"><div class="queue-priority"><span class="queue-id">'+index+'</span></div><div><span class="priority '+(s.p==="P1"?'p1':'')+'">'+escHtml(s.p||'P1')+'</span></div><div class="queue-type"><span class="layer-chip">'+candidateTypeV92(s)+'</span></div><div class="queue-main"><div class="queue-title">'+escHtml(s.title)+'</div></div><div class="queue-persona-v92"><b>'+escHtml(s.persona||'不适用')+'</b>'+escHtml(s.factor||'—')+'</div><div class="queue-status-v92"><span class="collab-status '+escHtml(state[1]||'todo')+'">'+escHtml(state[0])+'</span></div><div class="queue-actions-v92"><button class="small-btn queueDetailV92" data-id="'+escHtml(s.id)+'">详情</button></div></div>'}).join(""):'<div class="queue-empty">当前分类暂无候选策略</div>';
+    list.querySelectorAll(".queueDetailV92").forEach(function(b){b.onclick=function(){openStrategyDetailV18(b.dataset.id)}});
+    var pagination=document.getElementById("queuePagination");if(pagination)pagination.innerHTML="";
+  }
+  function methodCopyV92(s){var methods=(s.methods||[]).filter(Boolean);return "建议采用"+(methods.length?methods.join("、"):"内容结构与表达优化")+"等方式，完成本次"+candidateTypeV92(s)+"优化。"}
+  openStrategyDetailV18=function(id){
+    var s=candidateStrategiesV92().find(function(x){return x.id===id});if(!s)return;var state=candidateStatusV92(s);
+    drawerSub.textContent="候选策略 "+(candidateStrategiesV92().findIndex(function(x){return x.id===id})+1);drawerTitle.textContent=s.title;
+    drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>候选策略</b><span class="collab-status '+escHtml(state[1]||'todo')+'">'+escHtml(state[0])+'</span></div><div class="detail-body"><div class="kv"><div class="k">优先级</div><div class="v">'+escHtml(s.p||'—')+'</div><div class="k">策略类型</div><div class="v">'+candidateTypeV92(s)+'</div><div class="k">目标人设</div><div class="v">'+escHtml(s.persona||'不适用')+'</div><div class="k">决策因子</div><div class="v">'+escHtml(s.factor||'—')+'</div></div></div></div><div class="detail-sec"><div class="detail-title"><b>Agent 建议方法</b></div><div class="detail-body"><p class="strategy-method-copy-v86">'+escHtml(methodCopyV92(s))+'</p></div></div>';
+    drawerFoot.innerHTML='<button class="btn" id="closeStrategyV92">关闭</button><button class="btn primary" id="goStrategyBriefV92">去优化中心</button>';drawer.classList.add("open");
+    document.getElementById("closeStrategyV92").onclick=function(){drawer.classList.remove("open")};document.getElementById("goStrategyBriefV92").onclick=function(){goStrategyBriefV92(s)};
+  };
+  window.openStrategyDetailV18=openStrategyDetailV18;openCollabStrategyDetail=function(id){openStrategyDetailV18(id)};
+  renderStrategyQueueV18=renderCandidateQueueV92;renderStrategyQueue=renderCandidateQueueV92;window.renderStrategyQueueV18=renderCandidateQueueV92;
+  renderCandidateQueueV92();
 })();
 </script>
 </body>
