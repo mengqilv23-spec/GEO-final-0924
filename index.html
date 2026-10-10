@@ -13545,7 +13545,6 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
 #reviewWorkspaceRoot .brief-v.brief-inline-editable{cursor:text}
 #reviewWorkspaceRoot .brief-v.brief-inline-editable:hover{background:#F8F9FF}
 #reviewWorkspaceRoot .brief-v.brief-inline-editable:focus{outline:2px solid #dce1ff;outline-offset:-2px}
-.brief-inline-hint-v74{margin:0 0 12px;color:var(--text-3);font-size:12px;line-height:18px}
 .qa-compact-v74{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 10px;border:1px solid #E7EAF1;border-radius:9px;background:#FAFBFD;min-width:0}
 .qa-compact-head-v74{display:flex;align-items:center;gap:7px;flex:0 0 auto;white-space:nowrap}
 .qa-compact-head-v74 b{font-size:12px;color:var(--text)}
@@ -13585,7 +13584,7 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     if(bar){bar.querySelectorAll("[data-cmd],[data-block]").forEach(function(b){b.onmousedown=function(e){e.preventDefault()};b.onclick=function(){d.focus();document.execCommand(b.dataset.block?"formatBlock":b.dataset.cmd,false,b.dataset.block||b.dataset.value||null)}});var c=bar.querySelector("#editorColorV74");if(c)c.onchange=function(){if(c.value){d.focus();document.execCommand("foreColor",false,c.value);c.value=""}}}
   }
   function briefSave(el,t,o){
-    var label=el.previousElementSibling&&el.previousElementSibling.textContent.trim(),map={"任务目标":"goal","目标人设":"persona","决策因子":"factor","执行对象":"executionTarget","验收条件":"acceptance"},key=map[label];if(!key)return;
+    var label=el.previousElementSibling&&el.previousElementSibling.textContent.trim(),map={"验收条件":"acceptance"},key=map[label];if(!key)return;
     var val=el.innerText.trim();o.brief=o.brief||{};if((o.brief[key]||"")===val)return;
     o.brief[key]=val;o.briefVersion=(o.briefVersion||1)+1;o.briefVersions=o.briefVersions||[];
     o.briefVersions.push({version:o.briefVersion,time:nowLabel(),brief:JSON.parse(JSON.stringify(o.brief)),note:"直接编辑「"+label+"」"});
@@ -13603,12 +13602,13 @@ body.mode-switching-v51 .roleBtn{pointer-events:none}
     var bp=root.querySelector('.review-pane[data-pane="brief"]');
     if(bp){var editable=canBrief(t,o);bp.querySelectorAll(".brief-v").forEach(function(el){
       var label=el.previousElementSibling&&el.previousElementSibling.textContent.trim();
+      if(["任务目标","目标人设","决策因子","执行对象"].includes(label)){el.contentEditable="false";el.removeAttribute("contenteditable");el.classList.remove("brief-inline-editable");el.removeAttribute("title");return}
       if(!editable){el.removeAttribute("contenteditable");el.classList.remove("brief-inline-editable");el.title="Brief 已确认或内容生成后不可修改";return}
-      if(!["任务目标","目标人设","决策因子","执行对象","验收条件"].includes(label))return;
+      if(label!=="验收条件")return;
       el.contentEditable="true";el.classList.add("brief-inline-editable");el.title="点击字段内容直接编辑；离开字段后自动保存";
       if(!el.dataset.briefBoundV74){el.dataset.briefBoundV74="1";el.addEventListener("blur",function(){briefSave(el,t,o)})}
     });
-    if(editable&&!bp.querySelector(".brief-inline-hint-v74")){var h=document.createElement("div");h.className="brief-inline-hint-v74";h.textContent="点击字段内容即可直接编辑；Brief 确认或内容生成后将自动锁定。";bp.prepend(h)}}
+    }
   };
   window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace
 })();
