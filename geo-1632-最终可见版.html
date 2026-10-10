@@ -3047,7 +3047,7 @@ button[disabled]{
   font-size:12px;
   font-weight:600;
 }
-.finding-index-v26{color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center}\n.finding-main{
+.finding-main{
   min-width:0;
 }
 .finding-main b{
@@ -4079,6 +4079,7 @@ button[disabled]{
 .geo-finding-row{
   grid-template-columns:24px 42px minmax(0,1fr) 170px 160px 64px minmax(150px,auto) 78px!important;
 }
+.finding-index-v26{color:var(--text-3);font-variant-numeric:tabular-nums;text-align:center}
 .finding-check-item-v25{
   min-width:0;
 }
@@ -5263,7 +5264,10 @@ function advanceTask(t){
   }
   saveTasks();saveCollab();renderStrategyQueue();renderOptimization();openEnhancedTask(t.uid)
 }
-/* 持久化不再自动触发优化中心渲染，避免 syncTaskDraftsV24 保存任务时递归进入 renderOptimization。 */
+/* 持久化不再自动触发优化中心渲染。
+   syncTaskDraftsV24 会在渲染过程中调用 saveTasks；这里再次 renderOptimization
+   会形成 renderOptimization → syncTaskDraftsV24 → saveTasks → renderOptimization
+   的递归，最终导致 Maximum call stack size exceeded。需要刷新时由调用方显式触发。 */
 const _saveTasksV5=saveTasks;saveTasks=function(){_saveTasksV5();renderStrategyQueue()};
 refreshCollabControls();renderStrategyQueue();renderOptimization();
 </script>
@@ -10662,7 +10666,8 @@ renderAuditFindingsV20=function(){
     const selected=auditFindingStateV20.selected.includes(f.id)&&!done;
     return `<div class="geo-finding-row ${isRecoveredV26(f)?"recovered":""} ${i>=limit?"hidden-by-limit":""}" data-finding="${f.id}">
       <input class="finding-check" type="checkbox" data-id="${f.id}" ${selected?"checked":""} ${done?"disabled":""} aria-label="选择 ${escHtml(f.title)}">
-      <span class="finding-index-v26">${i+1}</span>\n      <span class="finding-main"><b>${escHtml(f.title)}</b></span>
+      <span class="finding-index-v26">${i+1}</span>
+      <span class="finding-main"><b>${escHtml(f.title)}</b></span>
       <span class="finding-route-cell-v41"><span class="finding-route-v26 ${isRecoveredV26(f)?"recovered":auditRouteForV26(f)}">${isRecoveredV26(f)?"已完成闭环":escHtml(findingProcessingMetaV37(f).label)}</span></span>
       <span class="finding-check-item-v25"><span class="finding-check-item-chip-v25"><span class="check-code-v25">${auditCheckLabelV25(f).split(" ")[0]}</span><span>${escHtml(f.check_item_name)}</span></span></span>
       <span class="finding-priority ${f.priority.toLowerCase()}">${f.priority}</span>
@@ -13888,6 +13893,78 @@ table td>*{
   var optimizationBase=window.renderOptimization||renderOptimization;
   renderOptimization=function(){optimizationBase();document.querySelectorAll("#taskBody tr").forEach(function(row){var uid=row.querySelector(".openTask,.directTaskAction")?.dataset.id,t=tasks.find(function(x){return x.uid===uid});if(!isStructureTaskV82(t))return;var flow=row.querySelector(".task-flow-note-v26");if(flow)flow.textContent="任务确认 → AI 建站执行 → 执行状态"})};
   window.renderOptimization=renderOptimization;
+})();
+</script>
+<style id="geo1632-v83-style">
+#mergeHub,.trace-merge,.proposal-tag.merge{display:none!important}
+</style>
+<script id="geo1632-v83-script">
+(function(){
+  var migratingV83=false;
+  var uidSeedV83=(tasks||[]).reduce(function(n,t){return Math.max(n,parseInt(String(t.uid||"").replace(/\D/g,""),10)||0)},110);
+  function cloneV83(v){return JSON.parse(JSON.stringify(v))}
+  function nextUidV83(){var liveMax=(tasks||[]).reduce(function(n,t){return Math.max(n,parseInt(String(t.uid||"").replace(/\D/g,""),10)||0)},110);uidSeedV83=Math.max(uidSeedV83,liveMax)+1;return "T"+uidSeedV83}
+  function findingV83(id){return (auditFindingsV20||[]).find(function(f){return f.id===id})}
+  function planV83(f){var meta=auditRouteMetaV26?.[f.id];return meta?.reason||("修复“"+f.title+"”，并完成独立验证")}
+  function configureFindingTaskV83(t,f){
+    var route=typeof auditRouteForV26==="function"?auditRouteForV26(f):"repair";
+    t.findingId=f.id;t.findingIds=[f.id];t.source=f.id;t.name=f.title;t.relatedStrategies=[];t.relatedSources=[];t.relatedPersonas=[];delete t.mergeAudit;delete t.v24InternalGroupId;
+    t.routeType=route==="repair"?"direct_repair":"strategy_task";t.strategy=route==="repair"?"不经过候选策略":f.strategy;t.dest=route==="repair"?"AI 官网协同":t.dest;t.taskCategory=route==="repair"?"website_structure":(t.taskCategory||"knowledge_based");t.knowledgeRequirement=route==="repair"?"not_required":(t.knowledgeRequirement||"required");
+    var out=ensureOutput(t);out.brief=out.brief||{};out.brief.goal="处理“"+f.title+"”";out.brief.persona=t.persona||"不适用";out.brief.factor=f.check_item_name||t.factor||"官网 GEO";out.brief.source=f.id+" · "+f.check_item_name;out.brief.executionTarget=t.dest||"AI 官网协同";out.brief.acceptance="该异常独立完成修复与验证；Re-check 只更新 "+f.id+" 的状态。";
+    var done=["site_publish","recheck","done"].includes(t.progressStage),failed=t.progressStage==="site_failed";out.fixes=[{item:f.title,before:f.desc,after:planV83(f),status:failed?"待重新修复":done?"验证通过":"待执行"}];
+    return out;
+  }
+  function configureStrategyTaskV83(t,s){
+    t.strategy=s.id;t.relatedStrategies=[s.id];t.relatedSources=[s.source];t.relatedPersonas=[s.persona];t.source=s.source;t.name=s.title;t.persona=s.persona;t.factor=s.factor;t.methods=(s.methods||[]).slice();t.evidence=s.evidence;t.dest=s.dest;delete t.mergeAudit;delete t.v24InternalGroupId;
+    var out=ensureOutput(t);out.brief=out.brief||{};out.brief.goal=s.evidence||("执行 "+s.title);out.brief.persona=s.persona||"不适用";out.brief.factor=s.factor||"执行基础";out.brief.source=s.source+" → "+s.id;out.brief.executionTarget=s.dest;return out;
+  }
+  function splitExistingV83(){
+    if(migratingV83)return false;migratingV83=true;var changed=false,result=[];
+    (tasks||[]).forEach(function(original){
+      var fids=[...new Set([original.findingId].concat(original.findingIds||[]).filter(Boolean))];
+      if(fids.length>1){var baseOut=taskOutputStore[original.uid]?cloneV83(taskOutputStore[original.uid]):null;fids.forEach(function(fid,i){var f=findingV83(fid);if(!f)return;var t=i===0?original:cloneV83(original);if(i>0)t.uid=nextUidV83();if(i>0&&baseOut)taskOutputStore[t.uid]=cloneV83(baseOut);configureFindingTaskV83(t,f);auditRouteStateV26[fid]={...(auditRouteStateV26[fid]||{}),route:auditRouteForV26(f),status:"task_created",taskId:t.uid};result.push(t)});changed=true;return}
+      if(fids.length===1){var f=findingV83(fids[0]);if(f){configureFindingTaskV83(original,f);auditRouteStateV26[f.id]={...(auditRouteStateV26[f.id]||{}),taskId:original.uid};changed=true}result.push(original);return}
+      var sids=[...new Set([original.strategy].concat(original.relatedStrategies||[]).filter(function(x){return x&&x!=="不经过候选策略"}))];
+      if(sids.length>1){var oldOut=taskOutputStore[original.uid]?cloneV83(taskOutputStore[original.uid]):null;sids.forEach(function(sid,i){var s=findStrategyV18?.(sid);if(!s)return;var t=i===0?original:cloneV83(original);if(i>0)t.uid=nextUidV83();if(i>0&&oldOut)taskOutputStore[t.uid]=cloneV83(oldOut);configureStrategyTaskV83(t,s);var c=getCollab(sid);c.mergedTo=t.uid;c.v24TaskDraftUid=t.uid;c.mergeDecision="independent";c.scanState="done";c.mergeCandidateUid=null;result.push(t)});changed=true;return}
+      if(sids.length===1){var s=findStrategyV18?.(sids[0]);if(s){configureStrategyTaskV83(original,s);var c=getCollab(s.id);c.mergedTo=original.uid;c.v24TaskDraftUid=original.uid;c.mergeDecision="independent";c.scanState="done";c.mergeCandidateUid=null}result.push(original);return}
+      result.push(original);
+    });
+    tasks=result;Object.values(collabMap||{}).forEach(function(c){c.mergeCandidateUid=null;c.mergeRisk=null;if(["auto_merged","merged","pending_ops","pending_client","scanning","merge"].includes(c.mergeDecision))c.mergeDecision="independent";if(["merge","scanning","pending_ops","pending_client"].includes(c.scanState))c.scanState="done";c.orchestrationMode="independent"});
+    if(changed){localStorage.setItem("geoLinkedTasks",JSON.stringify(tasks));localStorage.setItem("geoTaskOutputStore",JSON.stringify(taskOutputStore));localStorage.setItem("geoCollabMap",JSON.stringify(collabMap));localStorage.setItem(auditRouteStorageV26,JSON.stringify(auditRouteStateV26));localStorage.setItem("geoModeStateV47_"+serviceMode,JSON.stringify({tasks:tasks,collabMap:collabMap,reviewMap:reviewMap,taskOutputStore:taskOutputStore,weeklyProposalV18:weeklyProposalV18,auditFindingStateV20:auditFindingStateV20,feedbackEventsV21:feedbackEventsV21,findingDecisionsV21:findingDecisionsV21,auditRouteStateV26:auditRouteStateV26}))}
+    migratingV83=false;return changed;
+  }
+  function makeFindingTaskV83(f){
+    var existing=tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).length===1&&t.findingIds[0]===f.id});if(existing)return existing;
+    var route=auditRouteForV26(f),s=findStrategyV18?.(f.strategy),t={uid:nextUidV83(),type:route==="repair"?"repair":(s?.type||"web"),name:f.title,source:f.id,strategy:route==="repair"?"不经过候选策略":f.strategy,persona:s?.persona||"不适用",factor:f.check_item_name,methods:(auditRouteMetaV26[f.id]?.methods||s?.methods||[]).slice(),evidence:f.desc,dest:route==="repair"?"AI 官网协同":(s?.dest||"官网内容"),status:"draft",statusLabel:"待任务确认",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,findingId:f.id,findingIds:[f.id],relatedStrategies:[]};
+    tasks.unshift(t);configureFindingTaskV83(t,f);var out=ensureOutput(t);out.briefConfirmed=false;out.briefStatus="ready";out.briefFactConfirmed=true;auditRouteStateV26[f.id]={route:route,status:"task_created",taskId:t.uid};return t;
+  }
+  createRepairTasksV26=function(ids){
+    var fs=auditFindingsV20.filter(function(f){return ids.includes(f.id)&&auditRouteForV26(f)==="repair"}),created=[];fs.forEach(function(f){created.push(makeFindingTaskV83(f))});auditFindingStateV20.selected=auditFindingStateV20.selected.filter(function(id){return !ids.includes(id)});saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();showToast("已为 "+created.length+" 个问题分别创建独立任务");renderAuditFindingsV20();renderOptimization();
+  };
+  createStrategiesV26=function(ids){
+    var fs=auditFindingsV20.filter(function(f){return ids.includes(f.id)&&auditRouteForV26(f)==="strategy"}),created=[];fs.forEach(function(f){created.push(makeFindingTaskV83(f));auditRouteStateV26[f.id]={route:"strategy",status:"task_created",taskId:created[created.length-1].uid};if(!auditFindingStateV20.generated.includes(f.id))auditFindingStateV20.generated.push(f.id)});auditFindingStateV20.selected=auditFindingStateV20.selected.filter(function(id){return !ids.includes(id)});saveAuditFindingStateV20();saveAuditRouteV26();saveTaskOutputs();saveTasks();showToast("已为 "+created.length+" 个问题分别创建独立 Brief");renderAuditFindingsV20();renderOptimization();
+  };
+  taskForStrategy=function(s){return tasks.find(function(t){return t.strategy===s.id&&!t.findingId})||tasks.find(function(t){return t.strategy===s.id&&(t.findingIds||[]).length===1})||null};
+  function independentItemsV83(){
+    var approved=eligibleStrategiesV18();return approved.map(function(s,i){return{id:"ONE-"+s.id,title:s.title,strategyIds:[s.id],type:s.type==="external"?"外部信源内容":s.type==="repair"?"协同修复":"官网内容",target:s.dest,desc:s.evidence,personas:[s.persona],risk:null,merged:false}});
+  }
+  taskDraftInternalItemsV24=function(){weeklyProposalV18.items=independentItemsV83();weeklyProposalV18.v24StrategySignature=eligibleStrategiesV18().map(function(s){return s.id}).sort().join("|");saveProposalV18();return weeklyProposalV18.items};
+  buildProposalV18=function(showToastAfter){weeklyProposalV18.items=independentItemsV83();weeklyProposalV18.status="draft";weeklyProposalV18.generatedAt=nowLabel();saveProposalV18();if(showToastAfter!==false)showToast("每条策略已分别生成独立执行项")};
+  startScan=function(s){
+    var c=getCollab(s.id),t=tasks.find(function(x){return x.strategy===s.id&&!x.findingId});if(!t){t=createIndependentTaskV8(s);t.relatedStrategies=[s.id];t.progressStage="brief";t.status="draft";t.statusLabel="待 Brief 确认";t.isDraft=true;configureStrategyTaskV83(t,s);var out=ensureOutput(t);out.briefConfirmed=false;out.briefStatus="ready"}c.mergedTo=t.uid;c.v24TaskDraftUid=t.uid;c.scanState="done";c.mergeDecision="independent";c.mergeCandidateUid=null;c.orchestrationMode="independent";saveTaskOutputs();saveTasks();saveCollab();renderStrategyQueue();renderOptimization();showToast("已创建独立任务与 Brief");
+  };
+  function cleanMergeUiV83(root){
+    if(!root?.querySelectorAll)return;root.querySelectorAll("#mergeHub,.trace-merge,.proposal-tag.merge").forEach(function(x){x.remove()});root.querySelectorAll(".subline,.queue-progress,.trace-meta").forEach(function(x){if(/合并/.test(x.textContent||""))x.remove()});
+    var title=document.querySelector(".diagnosis-title-help-tip");if(title)title.textContent="网站基础问题分别生成独立任务；内容与认知问题进入候选策略，每个问题拥有独立 Brief 和执行状态。";
+    var lead=document.querySelector("#optimizationPage .lead");if(lead)lead.textContent="每个问题分别创建独立 Task；Brief 是 Task 的第一个确认阶段，确认后进入正式执行。";
+    var exec=document.querySelector(".exec-progress-copy span");if(exec)exec.textContent="每个问题分别生成独立任务；这里只显示执行概况。";
+    var agent=document.querySelector(".diagnosis-legacy-summary .agent p");if(agent)agent.textContent="每个诊断问题分别关联独立任务，来源关系全程保留。";
+    var queueCopy=document.querySelector("#strategyQueueSection .strategy-queue-head>div>p");if(queueCopy)queueCopy.textContent="每个问题独立生成策略执行项和 Brief，不与其他问题共用任务。";
+  }
+  var optBase=window.renderOptimization||renderOptimization;renderOptimization=function(){splitExistingV83();optBase();cleanMergeUiV83(document)};window.renderOptimization=renderOptimization;
+  var auditBase=renderAuditFindingsV20;renderAuditFindingsV20=function(){splitExistingV83();auditBase();cleanMergeUiV83(document)};
+  var reviewBase=window.renderReviewWorkspace||renderReviewWorkspace;renderReviewWorkspace=function(uid){splitExistingV83();reviewBase(uid);cleanMergeUiV83(document)};window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;if(typeof openReviewWorkspace!=="undefined")openReviewWorkspace=renderReviewWorkspace;
+  splitExistingV83();cleanMergeUiV83(document);renderAuditFindingsV20();renderStrategyQueue();renderOptimization();
 })();
 </script>
 </body>
