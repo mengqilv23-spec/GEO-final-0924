@@ -14254,6 +14254,13 @@ table td>*{
   function isTechV88(f){return !!f&&auditRouteForV26(f)==="repair"}
   function isContentV88(f){return !!f&&!isTechV88(f)}
   function existingTaskV88(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
+  function displayStatusV88(f){
+    if(isTechV88(f))return websiteAuditStatusV26(f);
+    var t=existingTaskV88(f),decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
+    if(t)return{text:"已生成任务",cls:"approved"};
+    if(decision?.status==="deferred")return{text:"暂不修复",cls:"defer"};
+    return{text:modeV88()==="agent"?"待客户审核":"待运营审核",cls:"pending"};
+  }
   function canReviewContentV88(){return modeV88()==="agent"?roleV88()==="client":roleV88()==="ops"}
   function contentActionV88(){return modeV88()==="agent"?"生成任务":"审核通过并生成任务"}
   function createContentTasksV88(ids){
@@ -14286,26 +14293,20 @@ table td>*{
     return true;
   }
   auditStateHtmlV26=function(f){
-    var t=existingTaskV88(f),decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
-    if(isTechV88(f)){
-      var status=websiteAuditStatusV26(f);
-      return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(status.cls||"pending")+'">'+escHtml(status.text||"官网处理中")+'</span></div>';
-    }
-    if(t)return '<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成任务</span></div>';
-    if(decision?.status==="deferred")return '<div class="finding-state-stack-v26"><span class="finding-state-pill defer">暂不修复</span></div>';
-    return '<div class="finding-state-stack-v26"><span>'+(modeV88()==="agent"?"待客户审核":"待运营审核")+'</span></div>';
+    var status=displayStatusV88(f);
+    return '<div class="finding-state-stack-v26"><span class="finding-state-pill '+escHtml(status.cls||"pending")+'">'+escHtml(status.text||"待处理")+'</span></div>';
   };
   auditActionsHtmlV26=function(f){
-    var label=isTechV88(f)||!canReviewContentV88()?"查看详情":"审核";
+    var label=isTechV88(f)||existingTaskV88(f)||!canReviewContentV88()?"查看详情":"审核";
     return '<div class="finding-actions-v26"><button class="small-btn findingDetailV26" data-id="'+escHtml(f.id)+'">'+label+'</button></div>';
   };
   openFindingDetailV26=function(id){
     var f=(auditFindingsV20||[]).find(function(x){return x.id===id});if(!f)return;
-    var t=existingTaskV88(f),findingNo=auditFindingsV20.findIndex(function(x){return x.id===id})+1,status=isTechV88(f)?websiteAuditStatusV26(f):null;
+    var t=existingTaskV88(f),findingNo=auditFindingsV20.findIndex(function(x){return x.id===id})+1,status=displayStatusV88(f);
     drawerSub.textContent="异常"+findingNo;drawerTitle.textContent="异常处理 · "+f.title;
     drawerBody.innerHTML='<div class="detail-sec"><div class="detail-title"><b>问题性质与处理方式</b><span class="finding-route-v26 '+(isTechV88(f)?'repair':'strategy')+'">'+escHtml(findingProcessingMetaV37(f).label)+'</span></div><div class="detail-body"><div class="kv">'
       +'<div class="k">所属检查项</div><div class="v">'+escHtml(auditCheckLabelV25(f))+'</div>'
-      +(status?'<div class="k">当前状态</div><div class="v"><span class="finding-state-pill '+escHtml(status.cls||'pending')+'">'+escHtml(status.text||'官网处理中')+'</span></div>':'')
+      +'<div class="k">当前状态</div><div class="v"><span class="finding-state-pill '+escHtml(status.cls||'pending')+'">'+escHtml(status.text||'待处理')+'</span></div>'
       +'<div class="k">异常说明</div><div class="v">'+escHtml(f.desc)+'</div><div class="k">为什么这样处理</div><div class="v">'+escHtml(findingProcessingMetaV37(f).reason)+'</div></div></div></div>';
     var buttons='<button class="btn" id="closeFindingV88">关闭</button>';
     if(!isTechV88(f)){
@@ -14330,7 +14331,12 @@ table td>*{
       generate.textContent=selected.length?contentActionV88()+" · "+selected.length:contentActionV88();
       generate.onclick=function(){createContentTasksV88(selected.map(function(f){return f.id}))};
     }
-    document.querySelectorAll("#geoAlertListV20 .finding-check").forEach(function(cb){var f=auditFindingsV20.find(function(x){return x.id===cb.dataset.id});if(isTechV88(f)){cb.checked=false;cb.disabled=true}});
+    document.querySelectorAll("#geoAlertListV20 .finding-check").forEach(function(cb){
+      var f=auditFindingsV20.find(function(x){return x.id===cb.dataset.id});if(!f)return;
+      var locked=isTechV88(f)||!!existingTaskV88(f)||(modeV88()==="managed"&&roleV88()==="client");
+      if(locked)cb.checked=false;
+      cb.disabled=locked;
+    });
     var help=document.querySelector(".geo-audit-help-tip");if(help)help.textContent=modeV88()==="agent"?"技术修复由官网直接处理；官网内容和三方内容需客户审核后生成任务。":"技术修复由官网直接处理；官网内容和三方内容由运营审核，通过后自动生成任务。";
   };
   window.renderAuditFindingsV20=renderAuditFindingsV20;
@@ -14429,36 +14435,6 @@ table td>*{
   document.querySelectorAll(".serviceModeBtn").forEach(function(btn){btn.addEventListener("click",function(){setTimeout(function(){if(btn.dataset.mode==="agent"){resetAgentAuditDemoV90();renderAuditFindingsV20();renderOptimization()}},0)})});
   resetAgentAuditDemoV90();
   renderAuditFindingsV20();
-})();
-</script>
-<script id="geo1632-v91-script">
-(function(){
-  var reconcilingV91=false;
-  function reconcileRowsV91(root){
-    if(reconcilingV91)return;reconcilingV91=true;
-    try{
-      var rows=[];
-      if(root?.matches?.(".geo-finding-row"))rows.push(root);
-      if(root?.querySelectorAll)rows=rows.concat([].slice.call(root.querySelectorAll(".geo-finding-row")));
-      rows.forEach(function(row){
-        var f=auditFindingsV20.find(function(x){return x.id===row.dataset.finding});if(!f)return;
-        var tech=auditRouteForV26(f)==="repair",button=row.querySelector(".finding-actions-v26 button,.findingDetailV26,.tech-detail-v85,.finding-detail-btn"),check=row.querySelector(".finding-check");
-        if(button){button.textContent=tech?"查看详情":"审核";button.dataset.id=f.id;button.onclick=function(){openFindingDetailV26(f.id)}}
-        if(check&&tech){check.checked=false;check.disabled=true}
-      });
-    }finally{reconcilingV91=false}
-  }
-  var renderAuditBaseV91=renderAuditFindingsV20;
-  renderAuditFindingsV20=function(){renderAuditBaseV91();reconcileRowsV91(document.getElementById("geoAlertListV20"))};
-  window.renderAuditFindingsV20=renderAuditFindingsV20;
-  var listV91=document.getElementById("geoAlertListV20");
-  if(listV91){
-    new MutationObserver(function(records){
-      if(reconcilingV91)return;
-      records.forEach(function(record){record.addedNodes.forEach(function(node){if(node.nodeType===1)reconcileRowsV91(node)})});
-    }).observe(listV91,{childList:true,subtree:true});
-  }
-  reconcileRowsV91(listV91);
 })();
 </script>
 <style id="geo1632-v92-style">
@@ -14642,70 +14618,6 @@ table td>*{
   window.openReviewWorkspace=renderReviewWorkspace;
   openReviewWorkspace=renderReviewWorkspace;
   renderOptimization();
-})();
-</script>
-<script id="geo1632-v94-script">
-(function(){
-  var reconcilingV94=false;
-  function modeV94(){return document.querySelector(".serviceModeBtn.active")?.dataset.mode||window.serviceMode||serviceMode||"managed"}
-  function roleV94(){return window.currentRole||currentRole||"client"}
-  function isTechV94(f){return !!f&&auditRouteForV26(f)==="repair"}
-  function taskV94(f){return typeof taskByFindingV26==="function"?taskByFindingV26(f.id):tasks.find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})}
-  function contentStateV94(f){return taskV94(f)?"已生成任务":"待运营审核"}
-  function reconcileManagedAuditV94(root){
-    if(reconcilingV94||modeV94()!=="managed")return;
-    reconcilingV94=true;
-    try{
-      var rows=[];
-      if(root?.matches?.(".geo-finding-row"))rows.push(root);
-      if(root?.querySelectorAll)rows=rows.concat([].slice.call(root.querySelectorAll(".geo-finding-row")));
-      rows.forEach(function(row){
-        var f=auditFindingsV20.find(function(x){return x.id===row.dataset.finding});if(!f)return;
-        var t=taskV94(f),tech=isTechV94(f),state=row.querySelector(".finding-strategy-state"),button=row.querySelector(".finding-actions-v26 button,.findingDetailV26,.tech-detail-v85,.finding-detail-btn"),check=row.querySelector(".finding-check");
-        if(!tech&&state)state.innerHTML='<div class="finding-state-stack-v26"><span class="finding-state-pill '+(t?'approved':'pending')+'">'+contentStateV94(f)+'</span></div>';
-        if(button){
-          button.textContent=tech||roleV94()==="client"||t?"查看详情":"审核";
-          button.dataset.id=f.id;
-          button.onclick=function(){openFindingDetailV26(f.id)};
-        }
-        if(check){
-          var locked=tech||roleV94()==="client"||!!t;
-          if(locked)check.checked=false;
-          check.disabled=locked;
-        }
-      });
-      var bulk=document.getElementById("generateCandidateV20");
-      if(bulk&&roleV94()==="client")bulk.hidden=true;
-    }finally{reconcilingV94=false}
-  }
-  var openFindingDetailBaseV94=openFindingDetailV26;
-  openFindingDetailV26=function(id){
-    openFindingDetailBaseV94(id);
-    if(modeV94()!=="managed")return;
-    var f=auditFindingsV20.find(function(x){return x.id===id});if(!f||isTechV94(f))return;
-    var t=taskV94(f),body=drawerBody?.querySelector(".detail-body .kv");
-    if(body&&!Array.from(body.querySelectorAll(".k")).some(function(x){return x.textContent.trim()==="当前状态"})){
-      var item=document.createElement("div");item.className="k";item.textContent="当前状态";
-      var value=document.createElement("div");value.className="v";value.innerHTML='<span class="finding-state-pill '+(t?'approved':'pending')+'">'+contentStateV94(f)+'</span>';
-      var firstValue=body.querySelector(".v");
-      if(firstValue){firstValue.insertAdjacentElement("afterend",item);item.insertAdjacentElement("afterend",value)}else body.prepend(item,value);
-    }
-    if(roleV94()==="client"){
-      drawerFoot?.querySelectorAll("#approveFindingV88,#deferFindingV88").forEach(function(button){button.remove()});
-    }
-  };
-  window.openFindingDetailV26=openFindingDetailV26;
-  var renderAuditBaseV94=renderAuditFindingsV20;
-  renderAuditFindingsV20=function(){renderAuditBaseV94();reconcileManagedAuditV94(document.getElementById("geoAlertListV20"))};
-  window.renderAuditFindingsV20=renderAuditFindingsV20;
-  var list=document.getElementById("geoAlertListV20");
-  if(list){
-    new MutationObserver(function(records){
-      if(reconcilingV94||modeV94()!=="managed")return;
-      records.forEach(function(record){record.addedNodes.forEach(function(node){if(node.nodeType===1)reconcileManagedAuditV94(node)})});
-    }).observe(list,{childList:true,subtree:true});
-  }
-  reconcileManagedAuditV94(list);
 })();
 </script>
 <script id="geo1632-v95-script">
