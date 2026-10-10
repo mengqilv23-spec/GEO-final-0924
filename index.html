@@ -10647,7 +10647,7 @@ function auditStateHtmlV26(f){
   if(s.status==="strategy_created")return `<div class="finding-state-stack-v26"><span class="finding-state-pill" style="background:#f5efff;color:#7950c7">已生成候选策略</span></div>`;
   const decision=typeof findingDecisionV21==="function"?findingDecisionV21(f.id):null;
   if(decision?.status==="deferred")return `<div class="finding-state-stack-v26"><span class="finding-state-pill defer">忽略</span></div>`;
-  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户确认":"待运营审核"}</span></div>`;
+  return `<div class="finding-state-stack-v26"><span>${f.id==="AF-06"&&route==="repair"?"待确认地址口径":route==="repair"?"官网处理中":serviceMode==="agent"?"待客户审核":"待运营审核"}</span></div>`;
 }
 
 function auditActionsHtmlV26(f){
@@ -11272,7 +11272,7 @@ function pendingStatusLabelV29(item){
     const task=tasks.find(t=>t.uid===item.object_id);
     if(task)return workspaceStatus(task,ensureOutput(task))[0];
   }
-  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核':'待客户确认';
+  if(item.object_type==='Finding'&&item.status==='finding_review')return item.assignee_role==='ops'?'待运营审核':'待客户审核';
   const map={finding_review:"待审核诊断",strategy_review:"运营审核",strategy_confirm:"待用户审核",brief:"Brief 待确认",site_submit:"待提交 AI 建站",site_failed:"验证未通过",site_publish:"待发布确认",human:"待用户审核",pending:"待处理"};
   return map[item.status]||"待处理";
 }
@@ -14464,6 +14464,7 @@ table td>*{
 <style id="geo1632-v92-style">
 #gapList{max-height:286px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px;scrollbar-gutter:stable}
 #gapList::-webkit-scrollbar{width:7px}#gapList::-webkit-scrollbar-thumb{background:#cfd5df;border-radius:8px}#gapList::-webkit-scrollbar-track{background:transparent}
+.strategy-queue-head .queue-summary,.strategy-queue .queue-legend{display:none!important}
 .strategy-table-head,#queueList .queue-row{grid-template-columns:76px 68px 112px minmax(300px,2fr) minmax(190px,1.15fr) minmax(170px,1fr) minmax(116px,.75fr)!important;min-width:1040px!important}
 #queueList .queue-row{padding-left:20px!important;padding-right:20px!important}
 #queueList .queue-persona-v92{color:var(--text-2);font-size:12px;line-height:1.55;text-align:center}
