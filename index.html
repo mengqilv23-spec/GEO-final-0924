@@ -4595,10 +4595,10 @@ button[disabled]{
       <section class="strategy-queue" id="strategyQueueSection">
         <div class="strategy-queue-head">
           <div>
-            <h2>③ 候选策略</h2>
+            <h2>③ 认知缺口策略</h2>
             <p>全量策略只维护一套；上方买家人设与 Gap 只影响当前查看时的优先级排序，不重复生成策略。</p>
             <div class="candidate-guide-row-v55">
-              <p><strong>候选策略由官网检测结果和 GEO 优化规则生成。</strong> 每条策略都关联具体的检测发现，并说明判断依据和建议处理方向。候选策略无需逐条审核；如需确认业务信息或执行范围，请在后续 Brief 中处理。</p>
+              <p><strong>认知缺口策略由买家人设、决策因子与认知 Gap 生成。</strong> 每条策略都关联具体的认知缺口，并说明建议处理方向；如需确认业务信息或执行范围，请在后续 Brief 中处理。</p>
               <button type="button" class="candidate-task-link-v55" id="viewCandidateTasksV55">查看任务 <span aria-hidden="true">→</span></button>
             </div>
             <div class="queue-persona-context" id="queuePersonaContext"></div>
@@ -4625,7 +4625,7 @@ button[disabled]{
         </div>
         <div class="queue-filter" id="queueFilter"></div>
         <div class="strategy-table-shell">
-          <div class="strategy-table-head" role="row" aria-label="候选策略表头">
+          <div class="strategy-table-head" role="row" aria-label="认知缺口策略表头">
             <span role="columnheader">序号</span>
             <span role="columnheader">优先级</span>
             <span role="columnheader">策略类型</span>
@@ -4636,7 +4636,7 @@ button[disabled]{
           </div>
           <div class="queue-list" id="queueList"></div>
         </div>
-        <div class="queue-pagination" id="queuePagination" aria-label="候选策略分页"></div>
+        <div class="queue-pagination" id="queuePagination" aria-label="认知缺口策略分页"></div>
         <div class="queue-legend">
           同一条策略可以同时关联多个人设，但只生成一个执行任务；已进入优化中心的策略不会因后续监测波动自动覆盖。
         </div>
@@ -4647,7 +4647,7 @@ button[disabled]{
   <section class="page" id="optimizationPage">
     <div class="content">
             <h1>优化中心 · 任务工作台</h1>
-<div class="lead">候选策略由 Agent 在后台自动去重与编排，直接创建 Task 草稿；Brief 是 Task 的第一个确认阶段，客户确认后任务才进入正式执行。</div>
+<div class="lead">认知缺口策略由 Agent 根据买家人设与认知 Gap 编排并创建 Task 草稿；Brief 是 Task 的第一个确认阶段，确认后任务才进入正式执行。</div>
 <div class="optimization-data-head-v60"><h2><span class="section-icon-v60 data">◔</span>数据总览</h2><button type="button" class="period-select-v60">近7天 <span>⌄</span></button></div>
 <div class="summary">
         <div class="stat"><b id="optTotal">0</b><span>项</span><small>全部任务</small></div>
@@ -14706,6 +14706,72 @@ table td>*{
     }).observe(list,{childList:true,subtree:true});
   }
   reconcileManagedAuditV94(list);
+})();
+</script>
+<script id="geo1632-v95-script">
+(function(){
+  function auditFindingForTaskV95(t){
+    var id=t?.findingId||(t?.findingIds||[])[0];
+    if(!id&&typeof auditRouteStateV26!=="undefined"){
+      var entry=Object.entries(auditRouteStateV26||{}).find(function(pair){return pair[1]?.taskId===t?.uid});
+      id=entry?.[0];
+    }
+    return (auditFindingsV20||[]).find(function(f){return f.id===id})||null;
+  }
+  function cognitiveStrategiesV95(){
+    return (typeof getAllQueueStrategies==="function"?getAllQueueStrategies():[]).filter(function(s){return s.type==="web"||s.type==="external"});
+  }
+  function sourceLabelV95(t){
+    var finding=auditFindingForTaskV95(t);
+    if(finding){
+      var findingIndex=(auditFindingsV20||[]).findIndex(function(f){return f.id===finding.id});
+      return "官网 GEO 体检."+(findingIndex+1);
+    }
+    var strategies=cognitiveStrategiesV95(),ids=[t?.strategy].concat(t?.relatedStrategies||[]).filter(Boolean);
+    var strategyIndex=strategies.findIndex(function(s){return ids.includes(s.id)});
+    if(strategyIndex>=0)return "认知缺口策略"+(strategyIndex+1);
+    var source=String(t?.source||"");
+    var sourceId=source.match(/(?:GS|S)[- ]?\d+/i)?.[0]?.replace(/\s/g,"");
+    if(sourceId){
+      strategyIndex=strategies.findIndex(function(s){return s.id===sourceId||s.displayId===sourceId});
+      if(strategyIndex>=0)return "认知缺口策略"+(strategyIndex+1);
+    }
+    return source||"—";
+  }
+  function normalizeStrategyTitleV95(){
+    var title=document.querySelector("#strategyQueueSection .strategy-queue-head h2");if(title)title.textContent="③ 认知缺口策略";
+    var head=document.querySelector("#strategyQueueSection .strategy-table-head");if(head)head.setAttribute("aria-label","认知缺口策略表头");
+    var page=document.getElementById("queuePagination");if(page)page.setAttribute("aria-label","认知缺口策略分页");
+  }
+  function applyTaskSourcesV95(){
+    document.querySelectorAll("#taskBody tr").forEach(function(row){
+      var uid=row.querySelector(".openTask,[data-id]")?.dataset.id,t=(tasks||[]).find(function(item){return item.uid===uid});
+      if(t&&row.cells?.[3])row.cells[3].textContent=sourceLabelV95(t);
+    });
+  }
+  var renderOptimizationBaseV95=renderOptimization;
+  renderOptimization=function(){renderOptimizationBaseV95();normalizeStrategyTitleV95();applyTaskSourcesV95()};
+  window.renderOptimization=renderOptimization;
+  var renderStrategyBaseV95=renderStrategyQueueV18;
+  renderStrategyQueueV18=function(){renderStrategyBaseV95();normalizeStrategyTitleV95()};
+  renderStrategyQueue=renderStrategyQueueV18;window.renderStrategyQueueV18=renderStrategyQueueV18;
+  var openStrategyBaseV95=openStrategyDetailV18;
+  openStrategyDetailV18=function(id){
+    openStrategyBaseV95(id);
+    if(drawerSub)drawerSub.textContent=drawerSub.textContent.replace("候选策略","认知缺口策略");
+    drawerBody?.querySelectorAll(".detail-title b").forEach(function(title){if(title.textContent.trim()==="候选策略")title.textContent="认知缺口策略"});
+  };
+  window.openStrategyDetailV18=openStrategyDetailV18;openCollabStrategyDetail=function(id){openStrategyDetailV18(id)};
+  var renderReviewBaseV95=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    renderReviewBaseV95(uid);
+    var t=(tasks||[]).find(function(item){return item.uid===uid}),root=document.getElementById("reviewWorkspaceRoot");if(!t||!root)return;
+    var label=sourceLabelV95(t),sub=root.querySelector(".review-sub");if(sub)sub.textContent=label;
+    root.querySelectorAll(".k").forEach(function(key){if(["来源","来源诊断"].includes(key.textContent.trim())&&key.nextElementSibling)key.nextElementSibling.textContent=label});
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  window.taskSourceLabelV95=sourceLabelV95;
+  normalizeStrategyTitleV95();applyTaskSourcesV95();
 })();
 </script>
 </body>
