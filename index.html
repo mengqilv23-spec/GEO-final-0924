@@ -14749,5 +14749,70 @@ table td>*{
   renderAuditFindingsV20();
 })();
 </script>
+<script id="geo1632-v97-script">
+(function(){
+  function activeModeV97(){
+    return window.serviceMode||(typeof serviceMode!=="undefined"?serviceMode:"managed");
+  }
+  function findingV97(id){return (auditFindingsV20||[]).find(function(f){return f.id===id})}
+  function taskV97(f){
+    var linked=typeof taskByFindingV26==="function"?taskByFindingV26(f.id):null;
+    return linked||(tasks||[]).find(function(t){return t.findingId===f.id||(t.findingIds||[]).includes(f.id)})||null;
+  }
+  function technicalV97(f){return typeof auditRouteForV26==="function"&&auditRouteForV26(f)==="repair"}
+  function stateHtmlV97(text){return '<div class="finding-state-stack-v26"><span class="finding-state-pill pending">'+text+'</span></div>'}
+  function createContentTaskV97(id){
+    var f=findingV97(id),existing=f&&taskV97(f);if(!f||existing)return existing;
+    var strategy=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
+    var uid="T"+Date.now();
+    var task={uid:uid,type:"web",name:f.title,source:f.id,strategy:f.strategy,persona:strategy?.persona||"不适用",factor:f.check_item_name,methods:(auditRouteMetaV26?.[f.id]?.methods||strategy?.methods||[]).slice(),evidence:f.desc,dest:"官网内容",status:"draft",statusLabel:"待用户去优化中心审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,findingId:f.id,findingIds:[f.id],relatedStrategies:[]};
+    tasks.unshift(task);
+    var out=ensureOutput(task);out.briefConfirmed=false;out.briefStatus="ready";out.briefFactConfirmed=true;
+    auditRouteStateV26[f.id]={route:"strategy",status:"task_created",taskId:uid};
+    if(typeof saveTaskOutputs==="function")saveTaskOutputs();if(typeof saveTasks==="function")saveTasks();if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
+    return task;
+  }
+  var openFindingBaseV97=openFindingDetailV26;
+  function openContentV97(id){
+    openFindingBaseV97(id);
+    var f=findingV97(id);if(!f||taskV97(f)||activeModeV97()!=="agent")return;
+    var generate=document.getElementById("approveFindingV88")||document.getElementById("detailRouteV26")||document.getElementById("detailStrategyV44");
+    if(!generate){
+      drawerFoot.insertAdjacentHTML("beforeend",'<button class="btn primary" id="generateFindingTaskV97">生成任务</button>');
+      generate=document.getElementById("generateFindingTaskV97");
+    }else{
+      var replacement=generate.cloneNode(true);replacement.id="generateFindingTaskV97";replacement.textContent="生成任务";generate.replaceWith(replacement);generate=replacement;
+    }
+    generate.onclick=function(){createContentTaskV97(id);drawer.classList.remove("open");renderAuditFindingsV20();};
+  }
+  function syncAuditListV97(){
+    if(activeModeV97()!=="agent")return;
+    var list=document.getElementById("geoAlertListV20");if(!list)return;
+    list.querySelectorAll(".geo-finding-row").forEach(function(row){
+      var f=findingV97(row.dataset.finding);if(!f)return;
+      var task=taskV97(f),state=row.querySelector(".finding-strategy-state"),button=row.querySelector(".finding-actions-v26 button");
+      if(!state||!button)return;
+      if(technicalV97(f)){
+        state.innerHTML=stateHtmlV97("已提交官网");button.textContent="查看详情";return;
+      }
+      if(task){
+        var out=typeof ensureOutput==="function"?ensureOutput(task):{};
+        if(!out.briefConfirmed)state.innerHTML=stateHtmlV97("待用户去优化中心审核");
+        button.textContent="查看详情";return;
+      }
+      state.innerHTML=stateHtmlV97("待用户审核");
+      if(button.dataset.v97Bound!=="1"){
+        var findingId=f.id;
+        var replacement=button.cloneNode(true);replacement.dataset.v97Bound="1";replacement.textContent="处理";button.replaceWith(replacement);
+        replacement.onclick=function(){openContentV97(findingId)};
+      }else button.textContent="处理";
+    });
+  }
+  var renderAuditV97=renderAuditFindingsV20;
+  renderAuditFindingsV20=function(){renderAuditV97();syncAuditListV97()};
+  document.querySelectorAll(".serviceModeBtn").forEach(function(button){button.addEventListener("click",function(){setTimeout(syncAuditListV97,0)})});
+  syncAuditListV97();
+})();
+</script>
 </body>
 </html>
