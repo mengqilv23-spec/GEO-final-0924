@@ -14752,7 +14752,7 @@ table td>*{
 <script id="geo1632-v97-script">
 (function(){
   function activeModeV97(){
-    return window.serviceMode||(typeof serviceMode!=="undefined"?serviceMode:"managed");
+    return document.querySelector(".serviceModeBtn.active")?.dataset.mode||(typeof serviceMode!=="undefined"?serviceMode:(window.serviceMode||"managed"));
   }
   function findingV97(id){return (auditFindingsV20||[]).find(function(f){return f.id===id})}
   function taskV97(f){
@@ -14762,7 +14762,17 @@ table td>*{
   function technicalV97(f){return typeof auditRouteForV26==="function"&&auditRouteForV26(f)==="repair"}
   function stateHtmlV97(text){return '<div class="finding-state-stack-v26"><span class="finding-state-pill pending">'+text+'</span></div>'}
   function createContentTaskV97(id){
-    var f=findingV97(id),existing=f&&taskV97(f);if(!f||existing)return existing;
+    var f=findingV97(id),existing=f&&taskV97(f);if(!f)return null;
+    if(existing){
+      auditRouteStateV26[f.id]={...(auditRouteStateV26[f.id]||{}),route:"strategy",status:"task_created",taskId:existing.uid};
+      if(existing.type==="web"){
+        existing.progressStage=existing.progressStage||"brief";existing.isDraft=true;
+        existing.statusLabel="待用户去优化中心审核";
+        var existingOutput=ensureOutput(existing);existingOutput.briefConfirmed=false;existingOutput.briefStatus="ready";
+      }
+      if(typeof saveTaskOutputs==="function")saveTaskOutputs();if(typeof saveTasks==="function")saveTasks();if(typeof saveAuditRouteV26==="function")saveAuditRouteV26();
+      return existing;
+    }
     var strategy=typeof findStrategyV18==="function"?findStrategyV18(f.strategy):null;
     var uid="T"+Date.now();
     var task={uid:uid,type:"web",name:f.title,source:f.id,strategy:f.strategy,persona:strategy?.persona||"不适用",factor:f.check_item_name,methods:(auditRouteMetaV26?.[f.id]?.methods||strategy?.methods||[]).slice(),evidence:f.desc,dest:"官网内容",status:"draft",statusLabel:"待用户去优化中心审核",baselineVersion:currentConfigVersion,strategyWindow:currentStrategyWindow,dataCutoff:currentDataCutoff,createdAt:nowLabel(),progressStage:"brief",isDraft:true,findingId:f.id,findingIds:[f.id],relatedStrategies:[]};
@@ -14783,7 +14793,13 @@ table td>*{
     }else{
       var replacement=generate.cloneNode(true);replacement.id="generateFindingTaskV97";replacement.textContent="生成任务";generate.replaceWith(replacement);generate=replacement;
     }
-    generate.onclick=function(){createContentTaskV97(id);drawer.classList.remove("open");renderAuditFindingsV20();};
+    generate.onclick=function(){
+      var task=createContentTaskV97(id);if(!task)return;
+      drawer.classList.remove("open");
+      renderAuditFindingsV20();
+      syncAuditListV97();
+      if(typeof showToast==="function")showToast("任务已生成，等待你前往优化中心审核");
+    };
   }
   function syncAuditListV97(){
     if(activeModeV97()!=="agent")return;
