@@ -14830,5 +14830,97 @@ table td>*{
   syncAuditListV97();
 })();
 </script>
+<style id="geo1632-v98-style">
+.repair-workspace-v98 .repair-return-copy-v98{margin:0;color:var(--text-2);line-height:1.7}
+.repair-workspace-v98 .repair-description-v98{white-space:pre-line;line-height:1.75;color:var(--text-2)}
+.repair-workspace-v98 .repair-return-card-v98{padding:16px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.repair-workspace-v98 .repair-return-card-v98.is-waiting{background:#f8faff}
+.repair-workspace-v98 .repair-fix-list-v98{display:grid;gap:10px}
+.repair-workspace-v98 .repair-fix-v98{padding:12px;border:1px solid var(--border);border-radius:9px;background:#fff}
+.repair-workspace-v98 .repair-fix-v98 b{display:block;margin-bottom:5px}
+.repair-workspace-v98 .repair-fix-v98 p{margin:0;color:var(--text-2);line-height:1.65}
+.repair-workspace-v98 .exec-stepper{grid-template-columns:repeat(3,minmax(0,1fr))}
+</style>
+<script id="geo1632-v98-script">
+(function(){
+  function isRepairTaskV98(task){return !!task&&task.type==="repair"}
+  function stageStatusV98(task){
+    if(["site_failed","site_rejected"].includes(task.progressStage))return {text:"官网已返回处理结果",cls:"reject",index:2};
+    var returned=["site_returned","site_verifying","site_failed","site_publish","recheck","done"].includes(task.progressStage);
+    return returned?{text:"官网已返回处理结果",cls:"done",index:2}:{text:"等待官网处理结果",cls:"running",index:1};
+  }
+  function workflowV98(){return [["提交官网","已提交"],["官网处理中","等待处理结果"],["返回结果","技术处理结果"]]}
+  function syncReturnedDataV98(task){
+    var out=ensureOutput(task),site=ensureSiteCollabV27(task);
+    site.returnedAt=site.returnedAt||nowLabel();site.previewPath=site.previewPath||"官网处理结果";
+    site.resultSummary=site.resultSummary||(task.progressStage==="site_failed"||task.progressStage==="site_rejected"?"官网已返回处理结果，当前技术修复未通过，请查看回传说明。":(task.evidence||task.name||"技术修复")+"；官网已返回处理结果。");
+    site.status=task.progressStage==="site_failed"||task.progressStage==="site_rejected"?task.progressStage:"site_returned";
+    if(!["site_failed","site_rejected"].includes(task.progressStage)){task.progressStage="site_returned";task.status="running";task.statusLabel="官网已返回处理结果"}
+    (out.fixes||[]).forEach(function(f){if(!f.status||f.status==="待执行")f.status="官网已返回处理结果"});
+    saveTaskOutputs();saveTasks();
+  }
+  function advanceRepairDemoV98(task){
+    if(!["site_submitted","site_accepted","site_running"].includes(task.progressStage))return;
+    var target=task.progressStage==="site_submitted"?"site_accepted":task.progressStage==="site_accepted"?"site_running":"site_returned";
+    setTimeout(function(){
+      if(!tasks.some(function(item){return item.uid===task.uid})||task.progressStage!==({site_accepted:"site_submitted",site_running:"site_accepted",site_returned:"site_running"})[target])return;
+      if(target==="site_returned")syncReturnedDataV98(task);
+      else{
+        task.progressStage=target;task.statusLabel=target==="site_accepted"?"官网已接单":"官网处理中";
+        var output=ensureOutput(task),site=ensureSiteCollabV27(task);site.status=target;
+        if(target==="site_accepted")site.acceptedAt=site.acceptedAt||nowLabel();
+        saveTaskOutputs();saveTasks();
+      }
+      renderReviewWorkspace(task.uid);renderOptimization();
+    },900);
+  }
+  function stepperHtmlV98(status){
+    return '<div class="exec-stepper">'+workflowV98().map(function(step,index){
+      var cls=index<status.index?"done":index===status.index?"current":"";
+      return '<div class="exec-step '+cls+'"><div class="exec-step-dot">'+(index<status.index?"✓":index+1)+'</div><b>'+step[0]+'</b><small>'+step[1]+'</small></div>';
+    }).join("")+'</div>';
+  }
+  var workspaceBaseV98=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    var task=tasks.find(function(item){return item.uid===uid});
+    if(!isRepairTaskV98(task))return workspaceBaseV98(uid);
+    var output=ensureOutput(task),site=ensureSiteCollabV27(task);
+    if(["brief","todo","running","human","publish_wait","site_submit"].includes(task.progressStage)){
+      task.progressStage="site_running";task.status="running";task.statusLabel="官网处理中";
+      output.briefConfirmed=true;site.status="site_running";site.submittedAt=site.submittedAt||task.createdAt||nowLabel();site.acceptedAt=site.acceptedAt||nowLabel();
+      saveTaskOutputs();saveTasks();
+    }
+    if(["site_returned","site_verifying","site_publish","recheck","done","site_failed","site_rejected"].includes(task.progressStage)&&!site.resultSummary)syncReturnedDataV98(task);
+    var status=stageStatusV98(task),returned=status.index===2;
+    var description=task.evidence||task.name||"根据官网 GEO 体检结果完成技术修复。";
+    var methodText=(task.methods||[]).filter(Boolean).join("、");
+    var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
+    document.querySelectorAll(".page").forEach(function(page){page.classList.remove("active")});
+    document.getElementById("reviewWorkspacePage")?.classList.add("active");
+    document.querySelectorAll(".moduleNav").forEach(function(nav){nav.classList.toggle("sel",nav.dataset.page==="optimization")});
+    root.className="repair-workspace-v98";
+    root.innerHTML='<div class="review-topbar"><div class="review-title-wrap"><button class="review-back" id="backToOptimization">← 返回优化中心</button><div class="review-title"><h1>'+escHtml(task.name||"技术修复")+'</h1><span class="progress-status '+status.cls+'">'+status.text+'</span></div><div class="review-sub">'+escHtml(task.uid)+' · 官网技术修复</div></div></div>'
+      +stepperHtmlV98(status)
+      +'<section class="detail-sec"><div class="detail-title"><b>技术修复描述</b></div><div class="detail-body"><p class="repair-description-v98">'+escHtml(description)+(methodText?'<br>修复方式：'+escHtml(methodText):"")+'</p></div></section>'
+      +'<section class="detail-sec"><div class="detail-title"><b>官网处理结果</b><span>'+ (returned?"已返回":"等待返回") +'</span></div><div class="detail-body"><div class="repair-return-card-v98 '+(returned?"":"is-waiting")+'"><p class="repair-return-copy-v98">'+escHtml(returned?(site.resultSummary||"官网已返回技术处理结果。") :"技术修复已提交官网，正在等待官网返回处理结果。")+'</p></div></div></section>';
+    document.getElementById("backToOptimization").onclick=function(){goOptimization()};
+    advanceRepairDemoV98(task);
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  var optimizationBaseV98=renderOptimization;
+  renderOptimization=function(){
+    optimizationBaseV98();
+    document.querySelectorAll("#taskBody tr").forEach(function(row){
+      var uid=row.querySelector(".openTask,.directTaskAction")?.dataset.id,task=(tasks||[]).find(function(item){return item.uid===uid});
+      if(!isRepairTaskV98(task))return;
+      var status=stageStatusV98(task),pill=row.querySelector(".progress-status"),flow=row.querySelector(".task-flow-note-v26"),next=row.querySelector(".task-next");
+      if(pill){pill.textContent=status.text;pill.className="progress-status "+status.cls}
+      if(flow)flow.textContent="提交官网 → 等待官网处理结果 → 官网返回技术处理结果";
+      if(next)next.textContent=status.index===2?"官网已返回技术处理结果":"下一步：等待官网返回处理结果";
+    });
+  };
+  window.renderOptimization=renderOptimization;
+})();
+</script>
 </body>
 </html>
