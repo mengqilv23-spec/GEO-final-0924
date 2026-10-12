@@ -15173,5 +15173,43 @@ table td>*{
 })();
 </script>
 
+<script id="geo1632-v106-remove-content-recheck-script">
+(function(){
+  function contentStepsV106(t){
+    if(t&&t.type==="external")return [["Brief","任务上下文"],["内容生成","Agent执行"],["自动质检","7项 QA"],["文章审核","客户 / 运营审核"],["最终稿确认","确认可交付内容"],["完成","外部内容交付"]];
+    if(t&&t.type==="web")return [["Brief","任务上下文"],["内容生成","Agent执行"],["自动质检","7项 QA"],["文章审核","客户 / 运营审核"],["最终稿确认","确认官网内容"],["官网核验","官网返回处理结果"],["完成","流程完成"]];
+    return null;
+  }
+  var oldWorkflowSteps=workflowSteps;
+  workflowSteps=function(t,out){return contentStepsV106(t)||oldWorkflowSteps(t,out)};
+  if(typeof flowDetailsV28==="function"){
+    var oldFlowDetails=flowDetailsV28;
+    flowDetailsV28=function(type){
+      if(type==="external")return [["Brief确认","确认目标、受众、范围与事实边界。"],["内容生成","Agent生成文章并运行自动质检。"],["文章审核","客户或运营审核文章内容。"],["最终稿确认","确认最终可交付版本。"],["完成","外部内容交付完成，可复制正文。"]];
+      if(type==="website")return [["Brief确认","确认目标、范围与关键业务事实。"],["内容生成","Agent生成文章并运行自动质检。"],["文章审核","客户或运营审核文章内容。"],["最终稿确认","确认官网内容版本。"],["官网核验","官网返回处理结果。"],["完成","流程完成。"]];
+      return oldFlowDetails(type);
+    };
+  }
+  function cleanContentLabelsV106(){
+    var root=document.getElementById("reviewWorkspaceRoot");if(!root)return;
+    root.querySelectorAll("*").forEach(function(node){
+      if(node.children.length===0&&node.textContent&&["web","external"].some(function(type){return root.dataset.taskType===type})){
+        node.textContent=node.textContent.replaceAll("Re-check","官网核验");
+      }
+    });
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    var t=(tasks||[]).find(function(x){return x.uid===uid}),root=document.getElementById("reviewWorkspaceRoot");
+    if(root&&t)root.dataset.taskType=t.type;
+    base(uid);
+    root=document.getElementById("reviewWorkspaceRoot");
+    if(root&&t)root.dataset.taskType=t.type;
+    cleanContentLabelsV106();
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+})();
+</script>
+
 </body>
 </html>
