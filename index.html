@@ -15039,5 +15039,69 @@ table td>*{
 })();
 </script>
 
+<style id="geo1632-v103-content-review-demo-style">
+.content-review-reject-v103{margin:0 0 14px;padding:12px 14px;border:1px solid #ffd6d6;border-radius:10px;background:#fff7f7}
+.content-review-reject-v103 strong{display:block;color:#d43838;font-size:13px;margin-bottom:5px}
+.content-review-reject-v103 p{margin:0;color:var(--text-2);font-size:12px;line-height:20px}
+.content-review-reject-v103 .reject-source-v103{margin-top:5px;color:var(--text-3)}
+</style>
+<script id="geo1632-v103-content-review-demo-script">
+(function(){
+  var demoTasksV103=[
+    {uid:"DEMO-CONTENT-001",name:"产品精度参数缺少确认",reason:"文案出现“精度可达 ±0.01mm”，但知识库和官网没有可追溯依据。",source:"官网 GEO 体检.1",factor:"④ 结构化数据",evidence:"关键产品参数未经业务确认",persona:"车间主管"},
+    {uid:"DEMO-CONTENT-002",name:"认证信息不完整",reason:"内容写明“符合国际认证标准”，但没有认证名称、证书编号和有效期。",source:"官网 GEO 体检.2",factor:"⑤ 品牌实体",evidence:"认证信息无法追溯",persona:"复材技术负责人"},
+    {uid:"DEMO-CONTENT-003",name:"价格承诺未经确认",reason:"文案出现“行业最低价”和固定报价承诺，当前没有有效价格依据。",source:"官网 GEO 体检.3",factor:"⑤ 品牌实体",evidence:"价格和商业承诺需要人工确认",persona:"采购负责人"},
+    {uid:"DEMO-CONTENT-004",name:"交期信息缺少适用条件",reason:"内容写明“7天内交付”，但没有明确适用产品、地区和交付范围。",source:"官网 GEO 体检.4",factor:"⑦ 跨平台一致性",evidence:"交期属于待确认业务事实",persona:"采购负责人"},
+    {uid:"DEMO-CONTENT-005",name:"效果描述过于绝对",reason:"文案使用“100%提升效率”“完全避免误差”等无法验证的绝对表述。",source:"官网 GEO 体检.5",factor:"③ 索引与 AI 指引",evidence:"存在夸大或不可验证承诺",persona:"车间主管"},
+    {uid:"DEMO-CONTENT-006",name:"官网与知识库信息不一致",reason:"产品型号、服务范围或联系方式与官网现有信息不一致，来源存在冲突。",source:"官网 GEO 体检.6",factor:"⑥ 信任信号",evidence:"官网与知识库事实冲突",persona:"复材技术负责人"}
+  ];
+  function seedV103(){
+    var changed=false;
+    demoTasksV103.forEach(function(d){
+      if((tasks||[]).some(function(t){return t.uid===d.uid}))return;
+      var t={uid:d.uid,type:"web",name:d.name,source:d.source,strategy:"DEMO-CONTENT",persona:d.persona,factor:d.factor,methods:["官网内容审核","事实核验","人工确认"],evidence:d.evidence,dest:"官网内容",status:"review",statusLabel:"文章审核不通过",baselineVersion:currentConfigVersion||"V1",strategyWindow:"演示审核失败",dataCutoff:currentDataCutoff||"当前",createdAt:nowLabel(),progressStage:"human",isDraft:false,reviewRejected:true,reviewRejectReason:d.reason,reviewRetryCount:0};
+      tasks.push(t);
+      var out=ensureOutput(t);
+      out.clientApproved=false;out.opsApproved=false;out.reviewRejected=true;out.reviewRejectReason=d.reason;out.reviewRetryCount=0;
+      out.brief=out.brief||{};out.brief.goal="确认产品事实后生成可发布的官网内容";out.brief.persona=d.persona;out.brief.factor=d.factor;out.brief.acceptance="关键业务事实确认，文章审核通过后进入官网处理";
+      out.qa=[
+        ["来源与事实核验",d.evidence,"warn"],
+        ["品牌声音一致性","整体表达符合品牌语气","pass"],
+        ["AI语言清理","已完成模板化表达清理","pass"],
+        ["原创性 / 信息增益","包含可执行的信息组织","pass"],
+        ["链接有效性","引用链接待人工确认","warn"],
+        ["夸张表述",d.reason,"warn"],
+        ["可读性与节奏","段落结构清晰","pass"]
+      ];
+      out.body="<h2>"+escHtml(d.name)+"</h2><p>这是用于演示官网内容审核的文章草稿。</p><p><b>审核问题：</b>"+escHtml(d.reason)+"</p><h3>审核结论</h3><p>该内容暂不能直接进入官网执行，需要补充事实依据或修改表述后重新审核。</p>";
+      out.versions=out.versions||[];out.versions.push({v:"V"+(out.version||1),time:nowLabel(),note:"演示：官网内容审核不通过"});
+      changed=true;
+    });
+    if(changed){saveTaskOutputs();saveTasks()}
+  }
+  function addRejectPanelV103(t,out,root){
+    if(!t||!t.reviewRejected||t.type!=="web")return;
+    var result=root.querySelector('.review-pane[data-pane="result"]'),doc=root.querySelector("#generatedDoc");if(!result||!doc)return;
+    result.querySelectorAll(".content-review-reject-v103").forEach(function(n){n.remove()});
+    var panel=document.createElement("section");panel.className="content-review-reject-v103";
+    panel.innerHTML="<strong>文章审核不通过</strong><p>"+escHtml(t.reviewRejectReason||out.reviewRejectReason||"请补充事实依据后重新审核。")+"</p><p class=\"reject-source-v103\">修改后点击“重新审核”，内容将回到文章待审核状态。</p>";
+    doc.parentNode.insertBefore(panel,doc);
+    var box=root.querySelector("#reviewActionButtons");if(!box)return;
+    var old=root.querySelector("#retryContentReviewV103");if(old)old.remove();
+    var btn=document.createElement("button");btn.id="retryContentReviewV103";btn.className="btn primary";btn.textContent="修改后重新审核";
+    btn.onclick=function(){t.reviewRejected=false;out.reviewRejected=false;t.status="review";t.statusLabel="文章待审核";out.reviewRetryCount=(out.reviewRetryCount||0)+1;out.versions=out.versions||[];out.versions.push({v:"V"+((out.version||1)+1),time:nowLabel(),note:"已修改，重新提交文章审核"});saveTaskOutputs();saveTasks();showToast("已提交重新审核");renderReviewWorkspace(t.uid);renderOptimization()};
+    box.appendChild(btn);
+  }
+  seedV103();
+  var reviewBaseV103=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){reviewBaseV103(uid);var t=(tasks||[]).find(function(x){return x.uid===uid}),out=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(t&&out&&root)addRejectPanelV103(t,out,root)};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  var optBaseV103=renderOptimization;
+  renderOptimization=function(){optBaseV103();document.querySelectorAll("#taskBody tr").forEach(function(row){var uid=row.querySelector(".openTask")?.dataset.id,t=(tasks||[]).find(function(x){return x.uid===uid});if(!t||!t.reviewRejected)return;var status=row.querySelector(".status");if(status){status.textContent="文章审核不通过";status.className="status review"}var name=row.querySelector(".task-name b");if(name)name.title=t.reviewRejectReason||""})};
+  window.renderOptimization=renderOptimization;
+  renderOptimization();
+})();
+</script>
+
 </body>
 </html>
