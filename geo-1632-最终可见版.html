@@ -15103,5 +15103,55 @@ table td>*{
 })();
 </script>
 
+<script id="geo1632-v104-content-editor-script">
+(function(){
+  function longBodyV104(t){
+    var title=escHtml(t.name||"产品介绍"),reason=escHtml(t.reviewRejectReason||"关键业务事实仍需人工确认");
+    return "<h2>"+title+"</h2>"+
+      "<p>面向复合材料加工、航空制造和汽车零部件等应用场景，企业在选择解决方案时，通常需要同时评估加工精度、材料适配、生产效率、交付能力和售后服务，而不能只比较单一设备参数。</p>"+
+      "<p>本文用于说明该产品在目标业务场景中的应用价值。最终发布前，所有产品参数、认证信息、价格、交期和服务承诺都应以企业确认的资料为准。</p>"+
+      "<h3>一、先确认产品和应用场景</h3>"+
+      "<p>不同材料、厚度和加工工艺会直接影响最终结果。建议在正式采购前提供实际样件、材料规格和工艺要求，由技术团队共同确认适用范围，并保留试切记录或项目验收资料。</p>"+
+      "<p>对于碳纤维、玻璃纤维及夹芯材料，应重点关注切割边缘质量、分层风险、热影响区域、切缝一致性和材料利用率。这些信息能够帮助采购团队建立可比较的评估标准，也便于 AI 系统准确理解产品能力。</p>"+
+      "<h3>二、用可验证的信息说明产品能力</h3>"+
+      "<p>产品页面应优先呈现可以被追溯和复核的事实，例如已确认的加工范围、适用材料、测试条件、样件结果以及技术资料来源。对于尚未完成确认的信息，不应使用绝对化语言直接写入页面。</p>"+
+      "<ul><li>说明参数对应的测试条件和适用范围；</li><li>区分实验结果、项目经验和标准配置；</li><li>对认证名称、证书编号和有效期进行核验；</li><li>避免使用无法证明的“最好”“最低价”或“100%有效”等承诺。</li></ul>"+
+      "<h3>三、交付和服务信息需要业务确认</h3>"+
+      "<p>交期、培训、安装、维护和售后响应等信息，通常会受到地区、产品配置、订单规模和项目排期影响。页面可以说明服务范围和确认方式，但具体承诺必须由业务负责人确认后再发布。</p>"+
+      "<p>如果不同资料中存在产品型号、联系方式、服务范围或交付周期不一致，应先完成信息核对，再决定采用哪一版内容。未经确认的内容会降低客户信任，也可能导致后续销售和交付风险。</p>"+
+      "<h3>四、审核结论</h3>"+
+      "<p>本稿当前暂未通过官网内容审核，原因是："+reason+"。请补充事实依据、调整相关表述，并在修改完成后重新提交文章审核。</p>"+
+      "<blockquote>提示：内容生成可以帮助整理结构和表达，但不能替代对产品事实、商业承诺和官网最终内容的人工确认。</blockquote>";
+  }
+  function seedLongTextV104(){
+    var changed=false;
+    (tasks||[]).forEach(function(t){
+      if(!t||t.type!=="web"||!/^DEMO-CONTENT-/.test(t.uid))return;
+      var out=ensureOutput(t);
+      if(!out.longBodyV104){out.body=longBodyV104(t);out.longBodyV104=true;changed=true}
+    });
+    if(changed)saveTaskOutputs();
+  }
+  function addEditorV104(t,out,root){
+    if(!t||t.type!=="web"||!/^DEMO-CONTENT-/.test(t.uid))return;
+    var doc=root.querySelector("#generatedDoc"),box=root.querySelector("#reviewActionButtons");if(!doc||!box)return;
+    doc.contentEditable="true";doc.classList.add("client-editing-v75");doc.title="点击正文直接编辑";
+    var old=root.querySelector("#editContentV104");if(old)old.remove();
+    var editing=false;
+    var btn=document.createElement("button");btn.id="editContentV104";btn.className="btn";btn.textContent="编辑正文";
+    btn.onclick=function(){
+      if(!editing){editing=true;doc.contentEditable="true";btn.textContent="保存正文";doc.focus();showToast("正文已进入编辑状态")}
+      else{out.body=doc.innerHTML;out.version=(out.version||1)+1;out.versions=out.versions||[];out.versions.push({v:"V"+out.version,time:nowLabel(),note:"修改官网审核失败内容并保存"});out.editing=false;editing=false;doc.contentEditable="true";btn.textContent="编辑正文";saveTaskOutputs();showToast("正文修改已保存")}
+    };
+    box.insertBefore(btn,box.firstChild);
+  }
+  seedLongTextV104();
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){base(uid);var t=(tasks||[]).find(function(x){return x.uid===uid}),out=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(t&&out&&root)addEditorV104(t,out,root)};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  renderOptimization();
+})();
+</script>
+
 </body>
 </html>
