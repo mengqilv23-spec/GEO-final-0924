@@ -14961,5 +14961,83 @@ table td>*{
   removeRedundantDetailBlocksV101();
 })();
 </script>
+<style id="geo1632-v102-style">
+#reviewWorkspaceRoot .external-copy-bar-v102{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:10px 0 0}
+#reviewWorkspaceRoot .external-copy-bar-v102 small{margin-right:auto;color:var(--text-3);font-size:12px}
+#reviewWorkspaceRoot .external-copy-btn-v102{min-height:32px;padding:0 13px}
+</style>
+<script id="geo1632-v102-script">
+(function(){
+  function copyTextV96(text){
+    text=String(text||'').trim();
+    if(!text)return Promise.reject(new Error('empty'));
+    if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text);
+    return new Promise(function(resolve,reject){
+      var area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');area.style.position='fixed';area.style.opacity='0';
+      document.body.appendChild(area);area.select();
+      try{document.execCommand('copy');resolve()}catch(e){reject(e)}
+      area.remove();
+    });
+  }
+  function normalizeExternalV96(t,o){
+    if(t.type!=='external')return false;
+    var changed=false;
+    // 旧版本曾把外部内容确认后的状态写成 publish_wait；外部内容不应进入官网发布链路。
+    if(o.clientApproved&&['publish_wait','site_submit','site_submitted','site_accepted','site_running','site_returned','site_verifying','site_publish'].includes(t.progressStage)){
+      t.progressStage='done';t.statusLabel='已完成';changed=true;
+    }
+    if(t.progressStage==='done'&&t.statusLabel!=='已完成'){t.statusLabel='已完成';changed=true}
+    if(changed){saveTaskOutputs();saveTasks()}
+    return changed;
+  }
+  function addExternalCopyV96(t,o,root){
+    if(t.type!=='external'||!['human','done'].includes(t.progressStage))return;
+    var doc=root.querySelector('#generatedDoc');if(!doc)return;
+    var old=root.querySelector('.external-copy-bar-v102');if(old)old.remove();
+    var bar=document.createElement('div');bar.className='external-copy-bar-v102';
+    var note=document.createElement('small');note.textContent=t.progressStage==='done'?'最终稿已确认，可复制交付内容':'确认最终稿后，可复制交付内容';
+    var btn=document.createElement('button');btn.type='button';btn.className='btn external-copy-btn-v102';btn.textContent='复制内容';btn.setAttribute('aria-label','复制外部内容最终稿');
+    btn.onclick=function(){
+      var text=(doc.innerText||doc.textContent||'').trim();
+      copyTextV96(text).then(function(){showToast('内容已复制')}).catch(function(){showToast('复制失败，请手动选择正文复制')});
+    };
+    bar.appendChild(note);bar.appendChild(btn);doc.parentNode.insertBefore(bar,doc.nextSibling);
+  }
+  function simplifyExternalLabelsV96(root,t){
+    if(t.type!=='external')return;
+    root.querySelectorAll('*').forEach(function(node){
+      if(node.children.length===0&&node.textContent){
+        node.textContent=node.textContent.replaceAll('三方内容','外部内容').replaceAll('待官网发布授权','待最终稿确认');
+      }
+    });
+  }
+  function geoOwnRecheckV96(t,o,root){
+    // 官网内容首次提交仍走 AI 建站；复检不通过后的修正由 GEO 自己完成，再重新核验。
+    if(t.type!=='web'||t.progressStage!=='site_failed')return;
+    var btn=root.querySelector('#retrySiteV27');if(!btn)return;
+    btn.textContent='GEO 修复并重新核验';
+    btn.onclick=function(){
+      o.geoRecheckAt=nowLabel();o.geoRecheckNote='GEO 已完成复检修正，不再重新提交 AI 建站';
+      setSiteStageV27(t,'site_verifying','GEO 已完成复检修正，重新进行官网核验');
+    };
+    var note=root.querySelector('#reviewActionNote');if(note)note.textContent='官网核验未通过；由 GEO 修正复检问题后重新核验，不再回传 AI 建站。';
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){
+    var t=(tasks||[]).find(function(x){return x.uid===uid});
+    if(t){var o=ensureOutput(t);normalizeExternalV96(t,o)}
+    base(uid);
+    t=(tasks||[]).find(function(x){return x.uid===uid});var out=t&&ensureOutput(t),root=document.getElementById('reviewWorkspaceRoot');
+    if(!t||!out||!root)return;
+    simplifyExternalLabelsV96(root,t);
+    addExternalCopyV96(t,out,root);
+    geoOwnRecheckV96(t,out,root);
+  };
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  // 处理已经在列表中的历史数据，避免刷新后又显示旧状态。
+  (tasks||[]).forEach(function(t){if(t.type==='external')normalizeExternalV96(t,ensureOutput(t))});
+})();
+</script>
+
 </body>
 </html>
