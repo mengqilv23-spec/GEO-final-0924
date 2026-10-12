@@ -15153,5 +15153,25 @@ table td>*{
 })();
 </script>
 
+<script id="geo1632-v105-global-content-editor-script">
+(function(){
+  function addEditorV105(t,out,root){
+    if(!t||!["web","external"].includes(t.type)||t.progressStage!=="human")return;
+    var doc=root.querySelector("#generatedDoc"),box=root.querySelector("#reviewActionButtons");if(!doc||!box)return;
+    doc.contentEditable="true";doc.title="点击正文直接编辑";
+    var old=root.querySelector("#editContentV105");if(old)old.remove();
+    var editing=false,btn=document.createElement("button");btn.id="editContentV105";btn.className="btn";btn.textContent="编辑正文";
+    btn.onclick=function(){
+      if(!editing){editing=true;doc.contentEditable="true";btn.textContent="保存正文";doc.focus();showToast("正文已进入编辑状态");return}
+      out.body=doc.innerHTML;out.version=(out.version||1)+1;out.versions=out.versions||[];out.versions.push({v:"V"+out.version,time:nowLabel(),note:"人工修改并保存文章正文"});out.editing=false;editing=false;saveTaskOutputs();btn.textContent="编辑正文";showToast("正文修改已保存");
+    };
+    box.insertBefore(btn,box.firstChild);
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){base(uid);var t=(tasks||[]).find(function(x){return x.uid===uid}),out=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(t&&out&&root)addEditorV105(t,out,root)};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+})();
+</script>
+
 </body>
 </html>
