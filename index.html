@@ -15226,5 +15226,72 @@ table td>*{
 })();
 </script>
 
+<style id="geo1632-v108-ignore-recovered-style">
+.finding-state-pill.ignored-v108{background:#f2f3f5;color:#4e5969}
+.finding-state-pill.recovered-v108{background:#e8ffea;color:#16803c}
+.ignore-state-card-v108{margin-bottom:14px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#fafbfc}
+.ignore-state-card-v108 strong{display:block;margin-bottom:4px}
+.ignore-state-card-v108 p{margin:0;color:var(--text-2);font-size:12px;line-height:20px}
+</style>
+<script id="geo1632-v108-ignore-recovered-script">
+(function(){
+  var KEY="geoIgnoredFindingStatesV108";
+  function storeV108(){try{localStorage.setItem(KEY,JSON.stringify(Object.fromEntries((auditFindingsV20||[]).filter(function(f){return f.geoStateV108}).map(function(f){return [f.id,{state:f.geoStateV108,time:f.geoStateTimeV108,note:f.geoStateNoteV108}] }))))}catch(e){}}
+  function restoreV108(){try{var saved=JSON.parse(localStorage.getItem(KEY)||"{}");(auditFindingsV20||[]).forEach(function(f){var x=saved[f.id];if(x){f.geoStateV108=x.state;f.geoStateTimeV108=x.time;f.geoStateNoteV108=x.note}})}catch(e){}}
+  function stateV108(f){return f&&f.geoStateV108||""}
+  function labelV108(f){return stateV108(f)==="ignored"?"已忽略":stateV108(f)==="recovered"?"已恢复":""}
+  function clsV108(f){return stateV108(f)==="ignored"?"ignored-v108":stateV108(f)==="recovered"?"recovered-v108":"pending"}
+  function setStateV108(f,state,note){if(!f)return;f.geoStateV108=state;f.geoStateTimeV108=nowLabel();f.geoStateNoteV108=note||"";storeV108();if(typeof renderAuditFindingsV20==="function")renderAuditFindingsV20();showToast(state==="ignored"?"已标记为已忽略":"已标记为已恢复")}
+  function clearStateV108(f){if(!f)return;delete f.geoStateV108;delete f.geoStateTimeV108;delete f.geoStateNoteV108;storeV108();if(typeof renderAuditFindingsV20==="function")renderAuditFindingsV20();showToast("已恢复为待处理")}
+  var oldPresentationV108=window.geoAuditPresentationV96;
+  window.geoAuditPresentationV96=function(f){
+    var state=stateV108(f);
+    if(state==="ignored")return {status:{text:"已忽略",cls:"ignored-v108"},action:"查看详情"};
+    if(state==="recovered")return {status:{text:"已恢复",cls:"recovered-v108"},action:"查看详情"};
+    return oldPresentationV108?oldPresentationV108(f):{status:{text:"待处理",cls:"pending"},action:"查看详情"};
+  };
+  function syncRowsV108(){
+    document.querySelectorAll(".geo-finding-row").forEach(function(row){
+      var f=(auditFindingsV20||[]).find(function(x){return x.id===row.dataset.finding}),state=stateV108(f);if(!f||!state)return;
+      row.classList.toggle("deferred",state==="ignored");row.classList.toggle("recovered-v108",state==="recovered");
+      var pill=row.querySelector(".finding-strategy-state .finding-state-pill");if(pill){pill.textContent=labelV108(f);pill.className="finding-state-pill "+clsV108(f)}
+      var button=row.querySelector(".finding-actions-v26 button");if(button){button.textContent="查看详情";button.onclick=function(){openFindingDetailV26(f.id)}}
+    });
+  }
+  function stateCardV108(f){
+    var label=labelV108(f),note=f.geoStateNoteV108||"本轮不生成任务，后续 GEO 监测继续记录结果。";
+    if(!label)return "";
+    return '<div class="ignore-state-card-v108" id="ignoreStateCardV108"><strong>当前状态：'+label+'</strong><p>'+escHtml(note)+'</p><p>记录时间：'+escHtml(f.geoStateTimeV108||"—")+'</p></div>';
+  }
+  function addDetailActionsV108(f){
+    if(!f||!drawerBody||!drawerFoot)return;
+    drawerBody.querySelectorAll("#ignoreStateCardV108").forEach(function(n){n.remove()});
+    if(stateV108(f))drawerBody.insertAdjacentHTML("afterbegin",stateCardV108(f));
+    drawerFoot.querySelectorAll("#ignoreFindingV108,#recoverFindingV108,#reopenFindingV108").forEach(function(n){n.remove()});
+    var button=document.createElement("button");button.className="btn";
+    if(stateV108(f)==="ignored"){
+      button.id="recoverFindingV108";button.textContent="标记已恢复";button.onclick=function(){setStateV108(f,"recovered","后续 GEO 监测未再发现该问题。");addDetailActionsV108(f)};
+      var reopen=document.createElement("button");reopen.id="reopenFindingV108";reopen.className="btn primary";reopen.textContent="重新处理";reopen.onclick=function(){clearStateV108(f);drawer.classList.remove("open")};drawerFoot.appendChild(button);drawerFoot.appendChild(reopen);
+    }else if(stateV108(f)==="recovered"){
+      button.id="reopenFindingV108";button.className="btn primary";button.textContent="重新处理";button.onclick=function(){clearStateV108(f);drawer.classList.remove("open")};drawerFoot.appendChild(button);
+    }else{
+      button.id="ignoreFindingV108";button.textContent="标记已忽略";button.onclick=function(){setStateV108(f,"ignored","运营确认本轮不处理该问题。");drawer.classList.remove("open")};drawerFoot.appendChild(button);
+    }
+  }
+  restoreV108();
+  if(typeof openFindingDetailV26==="function"){
+    var oldOpenV108=openFindingDetailV26;
+    openFindingDetailV26=function(id){oldOpenV108(id);var f=(auditFindingsV20||[]).find(function(x){return x.id===id});addDetailActionsV108(f)};
+    window.openFindingDetailV26=openFindingDetailV26;
+  }
+  if(typeof renderAuditFindingsV20==="function"){
+    var oldRenderV108=renderAuditFindingsV20;
+    renderAuditFindingsV20=function(){oldRenderV108();syncRowsV108()};
+    window.renderAuditFindingsV20=renderAuditFindingsV20;
+  }
+  syncRowsV108();
+})();
+</script>
+
 </body>
 </html>
