@@ -15211,5 +15211,20 @@ table td>*{
 })();
 </script>
 
+<script id="geo1632-v107-remove-change-opinion-script">
+(function(){
+  function removeChangeOpinionV107(root){
+    if(!root)return;
+    root.querySelectorAll("#requestChangeClientV75,#submitChangeOpinionV75,[id*='ChangeOpinion'],button").forEach(function(node){
+      if(node.id==="requestChangeClientV75"||node.id==="submitChangeOpinionV75"||/提交修改意见/.test(node.textContent||""))node.remove();
+    });
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){base(uid);removeChangeOpinionV107(document.getElementById("reviewWorkspaceRoot"))};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+  removeChangeOpinionV107(document.getElementById("reviewWorkspaceRoot"));
+})();
+</script>
+
 </body>
 </html>
