@@ -15309,5 +15309,21 @@ table td>*{
 })();
 </script>
 
+<script id="geo1632-v111-restore-direct-edit-script">
+(function(){
+  function restoreV111(t,out,root){
+    if(!t||!["web","external"].includes(t.type)||!["human","done"].includes(t.progressStage))return;
+    var doc=root.querySelector("#generatedDoc"),bar=root.querySelector(".direct-edit-actions-v110");if(!doc||!bar)return;
+    var old=root.querySelector("#directEditV111");if(old)old.remove();
+    var edit=document.createElement("button");edit.id="directEditV111";edit.type="button";edit.className="btn";edit.textContent="直接编辑";
+    edit.onclick=function(){doc.contentEditable="true";doc.focus();showToast("正文已进入编辑状态")};
+    bar.insertBefore(edit,bar.querySelector("button"));
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){base(uid);var t=(tasks||[]).find(function(x){return x.uid===uid}),out=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(t&&out&&root)restoreV111(t,out,root)};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+})();
+</script>
+
 </body>
 </html>
