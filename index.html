@@ -15277,5 +15277,37 @@ table td>*{
 })();
 </script>
 
+<style id="geo1632-v110-direct-edit-style">
+.direct-edit-hint-v110{margin-right:auto;color:var(--text-3);font-size:12px}
+.direct-edit-actions-v110{display:flex;align-items:center;gap:8px;margin:10px 0 0}
+.direct-edit-actions-v110 .btn{white-space:nowrap}
+</style>
+<script id="geo1632-v110-direct-edit-script">
+(function(){
+  function copyV110(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text);
+    var area=document.createElement("textarea");area.value=text;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();
+    try{document.execCommand("copy");area.remove();return Promise.resolve()}catch(e){area.remove();return Promise.reject(e)}
+  }
+  function setupV110(t,out,root){
+    if(!t||!["web","external"].includes(t.type)||!["human","done"].includes(t.progressStage))return;
+    var doc=root.querySelector("#generatedDoc");if(!doc)return;
+    root.querySelectorAll("#toggleEditDoc,#saveDocBtn,#editContentV104,#editContentV105,.rich-editor-v74,.rich-editor-tools-v74").forEach(function(n){n.remove()});
+    doc.contentEditable="true";doc.title="可直接在正文上修改";
+    root.querySelectorAll(".external-copy-bar-v102,.direct-edit-actions-v110").forEach(function(n){n.remove()});
+    var bar=document.createElement("div");bar.className="direct-edit-actions-v110";
+    var hint=document.createElement("span");hint.className="direct-edit-hint-v110";hint.textContent="可直接在正文上修改，完成后点击保存修改";
+    var save=document.createElement("button");save.type="button";save.className="btn";save.textContent="保存修改";
+    save.onclick=function(){out.body=doc.innerHTML;out.version=(out.version||1)+1;out.versions=out.versions||[];out.versions.push({v:"V"+out.version,time:nowLabel(),note:"直接修改正文并保存"});saveTaskOutputs();showToast("修改已保存")};
+    var copy=document.createElement("button");copy.type="button";copy.className="btn";copy.textContent="复制内容";
+    copy.onclick=function(){copyV110((doc.innerText||doc.textContent||"").trim()).then(function(){showToast("内容已复制")}).catch(function(){showToast("复制失败，请手动复制正文")})};
+    bar.appendChild(hint);bar.appendChild(save);bar.appendChild(copy);doc.parentNode.insertBefore(bar,doc.nextSibling);
+  }
+  var base=renderReviewWorkspace;
+  renderReviewWorkspace=function(uid){base(uid);var t=(tasks||[]).find(function(x){return x.uid===uid}),out=t&&ensureOutput(t),root=document.getElementById("reviewWorkspaceRoot");if(t&&out&&root)setupV110(t,out,root)};
+  window.renderReviewWorkspace=renderReviewWorkspace;window.openReviewWorkspace=renderReviewWorkspace;openReviewWorkspace=renderReviewWorkspace;
+})();
+</script>
+
 </body>
 </html>
