@@ -1,11 +1,22 @@
 import {
+  initialTaskAssignee,
+  initialTaskStatus,
   primaryAction,
-  reviewerFor,
   workflowLabels,
   type ServiceMode,
-  type Task
+  type Task,
+  type TaskStatus
 } from "@geo/domain";
 import { useMemo, useState } from "react";
+
+function reviewStatus(
+  mode: ServiceMode,
+  type: "website_content" | "external_content"
+): TaskStatus {
+  return mode === "managed"
+    ? "pending_ops_content_review"
+    : "pending_client_content_review";
+}
 
 const seed = (mode: ServiceMode): Task[] => [
   {
@@ -15,8 +26,8 @@ const seed = (mode: ServiceMode): Task[] => [
     title: "Product Schema 缺失",
     type: "technical_repair",
     serviceMode: mode,
-    status: "submitted_to_website",
-    assigneeRole: "website"
+    status: initialTaskStatus(mode, "technical_repair"),
+    assigneeRole: initialTaskAssignee(mode, "technical_repair")
   },
   {
     id: "task-2",
@@ -25,8 +36,8 @@ const seed = (mode: ServiceMode): Task[] => [
     title: "补充汽车工艺停机风险与服务问答",
     type: "website_content",
     serviceMode: mode,
-    status: "brief_pending",
-    assigneeRole: reviewerFor(mode, "website_content")
+    status: initialTaskStatus(mode, "website_content"),
+    assigneeRole: initialTaskAssignee(mode, "website_content")
   },
   {
     id: "task-3",
@@ -35,8 +46,8 @@ const seed = (mode: ServiceMode): Task[] => [
     title: "第三方行业媒体产品介绍",
     type: "external_content",
     serviceMode: mode,
-    status: "article_review",
-    assigneeRole: reviewerFor(mode, "external_content")
+    status: reviewStatus(mode, "external_content"),
+    assigneeRole: mode === "managed" ? "ops" : "client"
   }
 ];
 
@@ -57,7 +68,7 @@ export function App() {
         <div>
           <span className="eyebrow">GEO Platform V2 · Clean Architecture</span>
           <h1>统一任务与状态流转</h1>
-          <p>当前页面是新项目骨架，用来验证统一数据模型和业务流程，不读取旧版页面缓存。</p>
+          <p>当前页面用于验证统一数据模型和业务流程，不读取旧版页面缓存。</p>
         </div>
         <div className="mode" aria-label="服务模式">
           <button className={mode === "agent" ? "active" : ""} onClick={() => setMode("agent")}>Agent 自主</button>

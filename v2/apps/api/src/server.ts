@@ -1,8 +1,10 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import {
+  initialStrategyStatus,
+  initialTaskAssignee,
   initialTaskStatus,
-  reviewerFor,
+  strategyStatusLabels,
   workflowLabels,
   type ServiceMode,
   type TaskType
@@ -15,18 +17,33 @@ async function start() {
   app.get("/health", async () => ({ ok: true, service: "geo-v2-api" }));
 
   app.get("/api/v2/workflows", async () => {
-    const types: TaskType[] = ["technical_repair", "website_content", "external_content"];
+    const types: TaskType[] = [
+      "technical_repair",
+      "website_content",
+      "external_content"
+    ];
     const modes: ServiceMode[] = ["agent", "managed"];
 
     return {
-      taskTypes: types.map(type => ({
-        type,
-        initialStatus: initialTaskStatus(type),
-        reviewers: Object.fromEntries(
-          modes.map(mode => [mode, reviewerFor(mode, type)])
-        )
-      })),
-      labels: workflowLabels
+      modes: Object.fromEntries(
+        modes.map(mode => [
+          mode,
+          {
+            initialStrategyStatus: initialStrategyStatus(mode),
+            tasks: Object.fromEntries(
+              types.map(type => [
+                type,
+                {
+                  initialStatus: initialTaskStatus(mode, type),
+                  initialAssignee: initialTaskAssignee(mode, type)
+                }
+              ])
+            )
+          }
+        ])
+      ),
+      strategyLabels: strategyStatusLabels,
+      taskLabels: workflowLabels
     };
   });
 
