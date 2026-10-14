@@ -128,6 +128,22 @@ export const strategies = pgTable("strategies", {
   index("strategies_project_status_idx").on(table.projectId, table.status)
 ]);
 
+export const strategyEvents = pgTable("strategy_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  strategyId: uuid("strategy_id").notNull().references(() => strategies.id, { onDelete: "cascade" }),
+  actorUserId: uuid("actor_user_id").references(() => users.id),
+  actorRole: actorRoleEnum("actor_role").notNull(),
+  event: text("event").notNull(),
+  fromStatus: strategyStatusEnum("from_status").notNull(),
+  toStatus: strategyStatusEnum("to_status").notNull(),
+  comment: text("comment"),
+  idempotencyKey: text("idempotency_key").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+}, table => [
+  uniqueIndex("strategy_events_idempotency_unique").on(table.idempotencyKey),
+  index("strategy_events_strategy_created_idx").on(table.strategyId, table.createdAt)
+]);
+
 export const findings = pgTable("findings", {
   id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
