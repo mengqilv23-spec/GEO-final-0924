@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { ContentWorkflowPage } from "./pages/ContentWorkflowPage";
 import { OptimizationBriefPage } from "./pages/OptimizationBriefPage";
 import { StrategyConfirmationPage } from "./pages/StrategyConfirmationPage";
 
-type Page = "strategy" | "optimization";
+type Page = "strategy" | "optimization" | "execution";
 
 export function App() {
-  const [page, setPage] = useState<Page>("optimization");
+  const [page, setPage] = useState<Page>("execution");
 
   return (
     <div className="app-shell">
@@ -21,12 +22,17 @@ export function App() {
           <button className={page === "optimization" ? "active" : ""} onClick={() => setPage("optimization")}>
             第 5 步 · 优化中心与 Brief
           </button>
+          <button className={page === "execution" ? "active" : ""} onClick={() => setPage("execution")}>
+            完整执行闭环
+          </button>
         </div>
       </nav>
       {page === "strategy" ? (
         <StrategyConfirmationPage onOpenOptimization={() => setPage("optimization")} />
-      ) : (
+      ) : page === "optimization" ? (
         <OptimizationBriefPage />
+      ) : (
+        <ContentWorkflowPage />
       )}
     </div>
   );
