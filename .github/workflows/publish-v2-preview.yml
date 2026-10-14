@@ -1,3 +1,4 @@
+# Publishes V2 to a fixed subpath while preserving the legacy homepage.
 name: Publish V2 preview
 
 on:
