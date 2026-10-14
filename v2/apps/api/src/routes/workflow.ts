@@ -60,6 +60,10 @@ const taskActionSchema = z.object({
   attempt: z.number().int().positive().optional()
 });
 const briefSchema = z.object({
+  goal: z.string().max(5000).default(""),
+  audience: z.string().max(1000).default(""),
+  buyerStage: z.enum(["需求评估", "方案寻找"]),
+  outputType: z.string().max(1000).default(""),
   instruction: z.string().max(10000).default(""),
   useWebSearch: z.boolean().default(false),
   knowledgeItemIds: z.array(z.string().uuid()).default([])
@@ -157,6 +161,51 @@ export async function workflowRoutes(app: FastifyInstance) {
       .from(strategies)
       .where(eq(strategies.projectId, projectId))
       .orderBy(asc(strategies.sequence));
+  });
+
+  app.get("/api/v2/projects/:projectId/tasks", async request => {
+    const { projectId } = projectIdSchema.parse(request.params);
+    const actor = getActor(request);
+
+    await assertProjectAccess(projectId, actor);
+
+    return db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.projectId, projectId))
+      .orderBy(asc(tasks.sequence));
+  });
+
+  app.get("/api/v2/tasks/:taskId/brief", async request => {
+    const { taskId } = taskIdSchema.parse(request.params);
+    const actor = getActor(request);
+
+    const [task] = await db.select().from(tasks)
+      .where(eq(tasks.id, taskId)).limit(1);
+    if (!task) throw new Error("Task not found");
+    await assertProjectAccess(task.projectId, actor);
+
+    const [brief] = await db.select().from(briefs)
+      .where(eq(briefs.taskId, taskId)).limit(1);
+
+    const selectedKnowledgeItems = brief
+      ? await db
+          .select({ id: briefKnowledgeItems.knowledgeItemId })
+          .from(briefKnowledgeItems)
+          .where(eq(briefKnowledgeItems.briefId, brief.id))
+      : [];
+
+    const availableKnowledgeItems = await db
+      .select()
+      .from(knowledgeItems)
+      .where(eq(knowledgeItems.projectId, task.projectId))
+      .orderBy(desc(knowledgeItems.updatedAt));
+
+    return {
+      brief: brief ?? null,
+      knowledgeItemIds: selectedKnowledgeItems.map(item => item.id),
+      availableKnowledgeItems
+    };
   });
 
   app.post("/api/v2/strategies/:strategyId/actions", async request => {
@@ -269,6 +318,10 @@ export async function workflowRoutes(app: FastifyInstance) {
         .insert(briefs)
         .values({
           taskId,
+          goal: body.goal,
+          audience: body.audience,
+          buyerStage: body.buyerStage,
+          outputType: body.outputType,
           instruction: body.instruction,
           useWebSearch: body.useWebSearch,
           savedByUserId: actor.userId
@@ -276,6 +329,10 @@ export async function workflowRoutes(app: FastifyInstance) {
         .onConflictDoUpdate({
           target: briefs.taskId,
           set: {
+            goal: body.goal,
+            audience: body.audience,
+            buyerStage: body.buyerStage,
+            outputType: body.outputType,
             instruction: body.instruction,
             useWebSearch: body.useWebSearch,
             savedByUserId: actor.userId,

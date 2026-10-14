@@ -192,6 +192,10 @@ export const tasks = pgTable("tasks", {
 export const briefs = pgTable("briefs", {
   id: uuid("id").defaultRandom().primaryKey(),
   taskId: uuid("task_id").notNull().references(() => tasks.id, { onDelete: "cascade" }),
+  goal: text("goal").notNull().default(""),
+  audience: text("audience").notNull().default(""),
+  buyerStage: text("buyer_stage").notNull().default("需求评估"),
+  outputType: text("output_type").notNull().default(""),
   instruction: text("instruction").notNull().default(""),
   useWebSearch: boolean("use_web_search").notNull().default(false),
   version: integer("version").notNull().default(1),
