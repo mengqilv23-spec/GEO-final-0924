@@ -27,12 +27,13 @@ import {
   type TaskStatus,
   type TaskType
 } from "@geo/domain";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getActor, type ActorContext } from "../context.js";
 import { db } from "../db.js";
 
 const idSchema = z.object({ strategyId: z.string().uuid() });
+const projectIdSchema = z.object({ projectId: z.string().uuid() });
 const taskIdSchema = z.object({ taskId: z.string().uuid() });
 const strategyActionSchema = z.object({
   event: z.enum(["ops_confirmed", "client_confirmed", "ignore"]),
@@ -135,6 +136,29 @@ function reviewDecision(event: TaskEvent) {
 }
 
 export async function workflowRoutes(app: FastifyInstance) {
+  app.get("/api/v2/projects/:projectId/strategies", async request => {
+    const { projectId } = projectIdSchema.parse(request.params);
+    const actor = getActor(request);
+
+    await assertProjectAccess(projectId, actor);
+
+    return db
+      .select({
+        id: strategies.id,
+        sequence: strategies.sequence,
+        type: strategies.type,
+        title: strategies.title,
+        description: strategies.description,
+        status: strategies.status,
+        assigneeRole: strategies.assigneeRole,
+        ignoredReason: strategies.ignoredReason,
+        updatedAt: strategies.updatedAt
+      })
+      .from(strategies)
+      .where(eq(strategies.projectId, projectId))
+      .orderBy(asc(strategies.sequence));
+  });
+
   app.post("/api/v2/strategies/:strategyId/actions", async request => {
     const { strategyId } = idSchema.parse(request.params);
     const body = strategyActionSchema.parse(request.body);
