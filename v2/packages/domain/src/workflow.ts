@@ -13,8 +13,7 @@ export type StrategyStatus =
 
 export type StrategyEvent =
   | "ops_confirmed"
-  | "client_confirmed"
-  | "ignore";
+  | "client_confirmed";
 
 export interface Strategy {
   id: string;
@@ -148,15 +147,13 @@ export function availableStrategyTransitions(
 
   if (strategy.status === "pending_ops_confirmation" && strategy.serviceMode === "managed") {
     transitions.push(
-      { event: "ops_confirmed", to: "pending_client_confirmation", actor: "ops", nextAssignee: "client" },
-      { event: "ignore", to: "ignored", actor: "ops", nextAssignee: "ops" }
+      { event: "ops_confirmed", to: "pending_client_confirmation", actor: "ops", nextAssignee: "client" }
     );
   }
 
   if (strategy.status === "pending_client_confirmation") {
     transitions.push(
-      { event: "client_confirmed", to: "confirmed", actor: "client", nextAssignee: "client" },
-      { event: "ignore", to: "ignored", actor: "client", nextAssignee: "client" }
+      { event: "client_confirmed", to: "confirmed", actor: "client", nextAssignee: "client" }
     );
   }
 
