@@ -42,6 +42,8 @@ jobs:
       - name: Build V2 for GitHub Pages
         working-directory: source/v2
         run: |
+          pnpm --filter @geo/domain build
+          pnpm --filter @geo/db build
           pnpm --filter @geo/web exec tsc -b
           pnpm --filter @geo/web exec vite build --base /GEO-final-0924/v2-preview/
 
