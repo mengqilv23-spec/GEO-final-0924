@@ -140,6 +140,10 @@ export async function workflowRoutes(app: FastifyInstance) {
     const body = strategyActionSchema.parse(request.body);
     const actor = getActor(request);
 
+    if (body.event === "ignore" && !body.comment?.trim()) {
+      throw new Error("Ignore requires a reason");
+    }
+
     return db.transaction(async tx => {
       const [existing] = await tx
         .select({ id: strategyEvents.id })
@@ -351,7 +355,10 @@ export async function workflowRoutes(app: FastifyInstance) {
     const body = taskActionSchema.parse(request.body);
     const actor = getActor(request);
 
-    if (body.event === "website_rejected" && !body.comment) {
+    if (body.event === "ignore" && !body.comment?.trim()) {
+      throw new Error("Ignore requires a reason");
+    }
+    if (body.event === "website_rejected" && !body.comment?.trim()) {
       throw new Error("Website rejection requires a modification comment");
     }
 

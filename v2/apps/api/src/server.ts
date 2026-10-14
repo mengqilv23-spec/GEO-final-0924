@@ -18,7 +18,7 @@ async function start() {
 
   app.setErrorHandler((error, _request, reply) => {
     const statusCode =
-      error instanceof ZodError ? 400 :
+      error instanceof ZodError || /requires/i.test(error.message) ? 400 :
       /not found/i.test(error.message) ? 404 :
       /changed|current state|current assignee|does not belong/i.test(error.message) ? 409 :
       500;
