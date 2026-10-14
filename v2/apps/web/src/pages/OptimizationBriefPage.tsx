@@ -105,6 +105,7 @@ export function OptimizationBriefPage() {
             ? {
                 ...task,
                 ...next,
+                type: task.type,
                 brief: { ...task.brief, ignoreReason: reason }
               }
             : task

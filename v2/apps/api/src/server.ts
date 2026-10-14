@@ -17,15 +17,17 @@ async function start() {
   await app.register(cors, { origin: true });
 
   app.setErrorHandler((error, _request, reply) => {
+    const resolvedError =
+      error instanceof Error ? error : new Error("Unknown server error");
     const statusCode =
-      error instanceof ZodError || /requires/i.test(error.message) ? 400 :
-      /not found/i.test(error.message) ? 404 :
-      /changed|current state|current assignee|does not belong/i.test(error.message) ? 409 :
+      resolvedError instanceof ZodError || /requires/i.test(resolvedError.message) ? 400 :
+      /not found/i.test(resolvedError.message) ? 404 :
+      /changed|current state|current assignee|does not belong/i.test(resolvedError.message) ? 409 :
       500;
 
     reply.status(statusCode).send({
-      error: error.name,
-      message: error.message
+      error: resolvedError.name,
+      message: resolvedError.message
     });
   });
 
