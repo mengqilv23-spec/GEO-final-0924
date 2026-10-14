@@ -4,8 +4,8 @@
   "packageManager": "pnpm@9.15.0",
   "engines": { "node": ">=20" },
   "scripts": {
-    "dev": "pnpm --filter @geo/domain build && pnpm --parallel --filter @geo/web --filter @geo/api dev",
-    "build": "pnpm --filter @geo/domain build && pnpm --filter @geo/api build && pnpm --filter @geo/web build",
-    "typecheck": "pnpm --filter @geo/domain typecheck && pnpm --filter @geo/domain build && pnpm --filter @geo/api typecheck && pnpm --filter @geo/web typecheck"
+    "dev": "pnpm --filter @geo/domain build && pnpm --filter @geo/db build && pnpm --parallel --filter @geo/web --filter @geo/api dev",
+    "build": "pnpm --filter @geo/domain build && pnpm --filter @geo/db build && pnpm --filter @geo/api build && pnpm --filter @geo/web build",
+    "typecheck": "pnpm --filter @geo/domain typecheck && pnpm --filter @geo/db typecheck && pnpm --filter @geo/domain build && pnpm --filter @geo/api typecheck && pnpm --filter @geo/web typecheck"
   }
 }
