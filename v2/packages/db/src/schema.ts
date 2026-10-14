@@ -90,6 +90,8 @@ export const projects = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   serviceMode: serviceModeEnum("service_mode").notNull(),
+  endedAt: timestamp("ended_at", { withTimezone: true }),
+  archiveAfter: timestamp("archive_after", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });
@@ -220,6 +222,7 @@ export const contentVersions = pgTable("content_versions", {
   savedByUserId: uuid("saved_by_user_id").references(() => users.id),
   savedByRole: actorRoleEnum("saved_by_role").notNull(),
   changeSummary: text("change_summary"),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 }, table => [
   uniqueIndex("content_versions_task_version_unique").on(table.taskId, table.version),
@@ -270,6 +273,8 @@ export const websiteReturns = pgTable("website_returns", {
   attempt: integer("attempt").notNull(),
   result: websiteResultEnum("result").notNull(),
   summary: text("summary").notNull(),
+  handledByType: text("handled_by_type").notNull(),
+  handledByName: text("handled_by_name").notNull(),
   rawPayload: jsonb("raw_payload").$type<Record<string, unknown>>(),
   handledAt: timestamp("handled_at", { withTimezone: true }).defaultNow().notNull()
 }, table => [
